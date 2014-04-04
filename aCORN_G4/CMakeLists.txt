@@ -8,7 +8,7 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(ucnG4_prod)
 
-# build libUCNA.a dependency
+# build libaCORN_MPM.a dependency
 add_custom_target(
 	extern_lib
 	COMMAND make

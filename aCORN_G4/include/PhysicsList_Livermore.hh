@@ -3,7 +3,7 @@
 
 #include "G4VUserPhysicsList.hh"
 
-/// UCNA electromagnetic physics list based on Livermore low-energy routines
+/// electromagnetic physics list based on Geant4 "Livermore" low-energy routines
 class PhysicsList_Livermore: public G4VUserPhysicsList {
 public:
 	/// constructor

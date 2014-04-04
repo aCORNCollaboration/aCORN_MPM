@@ -1,5 +1,5 @@
 #ifndef CONSTRUCTIONUTILS_HH
-#define CONSTRUCTIONUTILS_HH 1
+#define CONSTRUCTIONUTILS_HH
 
 #include "globals.hh"
 #include "Enums.hh"

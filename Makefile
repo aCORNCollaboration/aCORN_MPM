@@ -20,7 +20,7 @@ CXX = g++
 
 CXXFLAGS = -O3 -Wall -fPIC `root-config --cflags` -I. \
 	-IIOUtils -IRootUtils -IBaseTypes -IMathUtils -ICalibration -IAnalysis -IStudies -IPhysics
-LDFLAGS =  -L. -lUCNA -lSpectrum -lMLP `root-config --libs` -lMathMore
+LDFLAGS =  -L. -laCORN_MPM -lSpectrum -lMLP `root-config --libs` -lMathMore
 
 ifdef PROFILER_COMPILE
 	CXXFLAGS += -pg
@@ -56,18 +56,15 @@ objects = $(IOUtils) $(Physics) $(ROOTUtils)
 
 all: libaCORN_MPM.a
 
-#UCNAnalyzer: Analyzer.cpp libUCNA.a
-#	$(CXX) $(CXXFLAGS) Analyzer.cpp $(LDFLAGS) -o UCNAnalyzer
-
 libaCORN_MPM.a: $(objects)
 	ar rs libaCORN_MPM.a $(objects)
 
-# generic rule for everything else .cc linked against libUCNA
-% : %.cc libUCNA.a
+# generic rule for everything else .cc linked against libaCORN_MPM
+% : %.cc libaCORN_MPM.a
 	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) -o $@
 
 
-#ucnG4:
+#aCORN Geant4:
 #	mkdir -p g4build/
 #	cd g4build; cmake -DGeant4_DIR=~/geant4.9.5/geant4.9.5-install/lib/Geant4-9.5.0/ ../ucnG4_dev/; make
 

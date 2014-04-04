@@ -1,6 +1,3 @@
-//2-19-02 J. Yuan: magnet field for UCNA experiment
-////////////////////////////////////////////////////
-
 #include "Field.hh"
 #include <cmath>
 #include <fstream>
@@ -48,19 +45,6 @@ void Field::LoadFieldMap(const TString filename) {
 	}
 }
 
-void addAFPFringeField(const G4double Point[3], G4double *Bfield) {
-	double z0 = 100.-Point[0]/cm;								// z distance from dipole center
-	double l = sqrt(Point[1]*Point[1]+Point[2]*Point[2])/cm;	// perpendicular distance from dipole center
-	double r = sqrt(z0*z0+l*l);									// total distance from dipole center
-	const double m = 1.2e3*tesla;								// dipole strength
-	
-	double r3 = r*r*r;
-	double b0 = 3*m*(z0/r)/r3;
-	Bfield[0] += b0*(z0/r)-m/r3;
-	Bfield[1] += b0*(Point[1]/cm/r);
-	Bfield[2] += b0*(Point[2]/cm/r);
-}
-
 void Field::GetFieldValue(const G4double Point[3], G4double *Bfield) const {
 	
 	G4double z=Point[2];	// point z
@@ -88,6 +72,4 @@ void Field::GetFieldValue(const G4double Point[3], G4double *Bfield) const {
 	} else {
 		Bfield[0]=Bfield[1]=0.0;
 	}
-	
-	if(addAFP) addAFPFringeField(Point,Bfield);
 }

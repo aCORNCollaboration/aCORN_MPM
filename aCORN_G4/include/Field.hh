@@ -1,5 +1,5 @@
 #ifndef FIELD_HH
-#define FIELD_HH 1
+#define FIELD_HH
 
 #include "globals.hh"
 #include "G4MagneticField.hh"

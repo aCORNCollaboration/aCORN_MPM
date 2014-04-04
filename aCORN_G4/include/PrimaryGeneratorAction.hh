@@ -50,10 +50,7 @@ public:
 	void SetParticleType(G4String val) { particleType = val; }
 	/// set positioner type
 	void SetPositioner(G4String val) { positioner = val; }
-	/// set radius for "source drop" positioner
-	void SetSourceRadius(double r) { sourceRadius = r; }
-	/// set positioning relative to holder
-	void SetPosRelHolder(bool b) { relToSourceHolder = b; }
+
 	/// set input events tree
 	void SetEventFile(G4String val);
 	
@@ -68,9 +65,7 @@ private:
 	EventTreeScanner* ETS;						//< Reader for saved input events
 	
 	// positioning related variables
-	G4ThreeVector posOffset;	//< base positioning offset
-	double sourceRadius;		//< spread radius for source droplets
-	bool relToSourceHolder;		//< make positions relative to source holder, instead of geometry origin
+	G4ThreeVector posOffset;							//< base positioning offset
 	void setVertices(std::vector<NucDecayEvent>& evts);	//< set vertex positions for each primary
 	
 	/// throw a cluster of events
@@ -82,15 +77,6 @@ private:
 	long myseed;	//< random seed for event
 	/// initialize random seed for event
 	void initEventRandomSeed(G4Event* anEvent);
-	
-	/// throw a gamma towards some point on specified surface, recording weight relative to 4pi uniform
-	//void throwGammaAt(SurfaceSeg* S, double eGamma, G4Event* anEvent);
-	/// approximation for neutron capture on Cu gammas, based on probabilities in Robby's eLog 134
-	//void nCaptureCuGammas(G4Event* anEvent, SurfaceAssembly* S);
-	/// approximation for neutron capture on Fe gammas
-	//void nCaptureFeGammas(G4Event* anEvent, SurfaceAssembly* S);
-	
-	
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

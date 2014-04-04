@@ -1,5 +1,5 @@
-#ifndef AnalysisManager_h
-#define AnalysisManager_h
+#ifndef ANALYSISMANAGER_HH
+#define ANALYSISMANAGER_HH
 
 class G4VPhysicalVolume;
 class G4Event;

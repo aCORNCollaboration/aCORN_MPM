@@ -1,3 +1,6 @@
+#ifndef ANALYZERBASE_HH
+#define ANALYZERBASE_HH
+
 #include <vector>
 #include <stdlib.h>
 #include <math.h>
@@ -17,7 +20,7 @@
 
 using namespace std;
 
-/// base class for analyzing UCNA Geant4 MC simulations
+/// base class for analyzing aCORN Geant4 MC simulations
 class aCORN_G4_Analyzer {
 public:
 	/// constructor
@@ -62,3 +65,5 @@ protected:
 	/// determine whether an event should be saved to output file
 	virtual bool saveEvent() { return true; }
 };
+
+#endif
