@@ -1,12 +1,12 @@
 #----------------------------------------------------------------------------
-# Usage:
-# cmake -DGeant4_DIR=~/geant4.9.6/geant4.9.6-install/lib/Geant4-9.6.2/ ../aCORN_G4/
-# make -j6
+# Compile command, from inside build directory:
+# cmake -DGeant4_DIR=~/Applications/geant4.10/lib/ ../aCORN_G4/
+# make -j8
 
 #----------------------------------------------------------------------------
 # Setup the project
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-project(ucnG4_prod)
+project(aCORN_G4_prod)
 
 # build libaCORN_MPM.a dependency
 add_custom_target(
@@ -72,14 +72,14 @@ LIST(APPEND sources ${aCORN_G4_DICTIONARY})
 add_library(aCORN_G4 SHARED ${sources} ${headers})
 add_dependencies(aCORN_G4 extern_lib)
 target_link_libraries(aCORN_G4 ${ROOT_LIBRARIES} ${Geant4_LIBRARIES} aCORN_MPM)
-SET(ucnG4_LIBRARY_PROPERTIES
+SET(aCORN_G4_LIBRARY_PROPERTIES
 		${aCORN_G4_LIBRARY_PROPERTIES}
 		VERSION "0"
 		SOVERSION "0"
 		SUFFIX ".so"
 )
-set_target_properties(ucnG4 PROPERTIES ${ucnG4_LIBRARY_PROPERTIES})
-install(TARGETS ucnG4 DESTINATION ${LIBRARY_OUTPUT_PATH})
+set_target_properties(aCORN_G4 PROPERTIES ${aCORN_G4_LIBRARY_PROPERTIES})
+install(TARGETS aCORN_G4 DESTINATION ${LIBRARY_OUTPUT_PATH})
 link_directories(${LIBRARY_OUTPUT_PATH})
 
 
@@ -89,7 +89,7 @@ link_directories(${LIBRARY_OUTPUT_PATH})
 
 add_executable(aCORN_G4_prod aCORN_G4_prod.cc)
 target_link_libraries(aCORN_G4_prod aCORN_G4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} libaCORN_MPM.a)
-add_dependencies(ucnG4_prod extern_lib aCORN_G4)
+add_dependencies(aCORN_G4_prod extern_lib aCORN_G4)
 
 add_executable(aCORN_MC_Analyzer aCORN_MC_Analyzer.cc)
 target_link_libraries(aCORN_MC_Analyzer aCORN_G4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} libaCORN_MPM.a)

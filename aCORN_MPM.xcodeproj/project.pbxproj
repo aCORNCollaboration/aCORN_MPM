@@ -37,7 +37,6 @@
 		4C0C6DCC18EF21CF00157BFB /* Field.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Field.hh; sourceTree = "<group>"; };
 		4C0C6DCD18EF21CF00157BFB /* MCEvent.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MCEvent.hh; sourceTree = "<group>"; };
 		4C0C6DCF18EF21CF00157BFB /* PhysicsList_495.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PhysicsList_495.hh; sourceTree = "<group>"; };
-		4C0C6DD018EF21CF00157BFB /* PhysicsList_Livermore.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PhysicsList_Livermore.hh; sourceTree = "<group>"; };
 		4C0C6DD218EF21CF00157BFB /* PrimaryGeneratorAction.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PrimaryGeneratorAction.hh; sourceTree = "<group>"; };
 		4C0C6DD318EF21CF00157BFB /* PrimaryGeneratorMessenger.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PrimaryGeneratorMessenger.hh; sourceTree = "<group>"; };
 		4C0C6DD418EF21CF00157BFB /* PrimaryInfo.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PrimaryInfo.hh; sourceTree = "<group>"; };
@@ -56,7 +55,6 @@
 		4C0C6DE218EF21CF00157BFB /* Field.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Field.cc; sourceTree = "<group>"; };
 		4C0C6DE318EF21CF00157BFB /* MCEvent.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCEvent.cc; sourceTree = "<group>"; };
 		4C0C6DE518EF21CF00157BFB /* PhysicsList_495.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicsList_495.cc; sourceTree = "<group>"; };
-		4C0C6DE618EF21CF00157BFB /* PhysicsList_Livermore.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicsList_Livermore.cc; sourceTree = "<group>"; };
 		4C0C6DE818EF21CF00157BFB /* PrimaryGeneratorAction.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PrimaryGeneratorAction.cc; sourceTree = "<group>"; };
 		4C0C6DE918EF21CF00157BFB /* PrimaryGeneratorMessenger.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PrimaryGeneratorMessenger.cc; sourceTree = "<group>"; };
 		4C0C6DEA18EF21CF00157BFB /* PrimaryInfo.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PrimaryInfo.cc; sourceTree = "<group>"; };
@@ -97,6 +95,11 @@
 		4C4409A818EF2BDD001E72E6 /* Xe135_11-2-.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Xe135_11-2-.txt"; sourceTree = "<group>"; };
 		4C4409A918EF2BDD001E72E6 /* Xe135_3-2+.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Xe135_3-2+.txt"; sourceTree = "<group>"; };
 		4C4409AA18EF2BDD001E72E6 /* Xe137_7-2-.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "Xe137_7-2-.txt"; sourceTree = "<group>"; };
+		4C4409AD18EF41CD001E72E6 /* GeantGenMacroTemplate.mac */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = GeantGenMacroTemplate.mac; sourceTree = "<group>"; };
+		4C4409AE18EF41CD001E72E6 /* GeantSimManager.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = GeantSimManager.py; sourceTree = "<group>"; };
+		4C4409AF18EF5204001E72E6 /* Enums.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Enums.hh; sourceTree = "<group>"; };
+		4C4409B018EF5BC3001E72E6 /* TChainScanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TChainScanner.cpp; path = ROOTUtils/TChainScanner.cpp; sourceTree = "<group>"; };
+		4C4409B118EF5BC3001E72E6 /* TChainScanner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TChainScanner.hh; path = ROOTUtils/TChainScanner.hh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -109,6 +112,7 @@
 				4C44099218EF27A3001E72E6 /* ROOTUtils */,
 				4C0C6DBE18EF21CF00157BFB /* aCORN_G4 */,
 				4C0C6DBD18EF207100157BFB /* Makefile */,
+				4C4409AB18EF41CD001E72E6 /* Scripts */,
 			);
 			sourceTree = "<group>";
 		};
@@ -160,7 +164,6 @@
 				4C0C6DCC18EF21CF00157BFB /* Field.hh */,
 				4C0C6DCD18EF21CF00157BFB /* MCEvent.hh */,
 				4C0C6DCF18EF21CF00157BFB /* PhysicsList_495.hh */,
-				4C0C6DD018EF21CF00157BFB /* PhysicsList_Livermore.hh */,
 				4C0C6DD218EF21CF00157BFB /* PrimaryGeneratorAction.hh */,
 				4C0C6DD318EF21CF00157BFB /* PrimaryGeneratorMessenger.hh */,
 				4C0C6DD418EF21CF00157BFB /* PrimaryInfo.hh */,
@@ -186,7 +189,6 @@
 				4C0C6DE218EF21CF00157BFB /* Field.cc */,
 				4C0C6DE318EF21CF00157BFB /* MCEvent.cc */,
 				4C0C6DE518EF21CF00157BFB /* PhysicsList_495.cc */,
-				4C0C6DE618EF21CF00157BFB /* PhysicsList_Livermore.cc */,
 				4C0C6DE818EF21CF00157BFB /* PrimaryGeneratorAction.cc */,
 				4C0C6DE918EF21CF00157BFB /* PrimaryGeneratorMessenger.cc */,
 				4C0C6DEA18EF21CF00157BFB /* PrimaryInfo.cc */,
@@ -211,6 +213,7 @@
 				4C0C6E0818EF248400157BFB /* FloatErr.hh */,
 				4C0C6E0518EF233300157BFB /* NuclEvtGen.cc */,
 				4C0C6E0618EF233300157BFB /* NuclEvtGen.hh */,
+				4C4409AF18EF5204001E72E6 /* Enums.hh */,
 			);
 			path = Physics;
 			sourceTree = "<group>";
@@ -218,6 +221,8 @@
 		4C44099218EF27A3001E72E6 /* ROOTUtils */ = {
 			isa = PBXGroup;
 			children = (
+				4C4409B018EF5BC3001E72E6 /* TChainScanner.cpp */,
+				4C4409B118EF5BC3001E72E6 /* TChainScanner.hh */,
 				4C44099018EF279B001E72E6 /* GraphUtils.cc */,
 				4C44099118EF279B001E72E6 /* GraphUtils.hh */,
 			);
@@ -266,6 +271,23 @@
 				4C44099E18EF2BDD001E72E6 /* nCapt_Al27.txt */,
 			);
 			path = Gammas;
+			sourceTree = "<group>";
+		};
+		4C4409AB18EF41CD001E72E6 /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				4C4409AC18EF41CD001E72E6 /* launchers */,
+			);
+			path = Scripts;
+			sourceTree = "<group>";
+		};
+		4C4409AC18EF41CD001E72E6 /* launchers */ = {
+			isa = PBXGroup;
+			children = (
+				4C4409AD18EF41CD001E72E6 /* GeantGenMacroTemplate.mac */,
+				4C4409AE18EF41CD001E72E6 /* GeantSimManager.py */,
+			);
+			path = launchers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

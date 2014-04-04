@@ -2,6 +2,7 @@
 #define GRAPHUTILS_HH
 
 #include "QFile.hh"
+#include "Enums.hh"
 #include <TF1.h>
 #include <TH1.h>
 #include <TH1D.h>
@@ -12,16 +13,6 @@
 #include <TGraphErrors.h>
 #include <TCanvas.h>
 #include <vector>
-
-/// axis directions
-enum AxisDirection {
-	X_DIRECTION = 0,
-	Y_DIRECTION = 1,
-	Z_DIRECTION = 2,
-	T_DIRECTION = 3
-};
-/// iteration to next axis
-inline AxisDirection& operator++(AxisDirection& d) { return d = AxisDirection(d+1); }
 
 /// convert TH1* to Stringmap
 Stringmap histoToStringmap(const TH1* h);

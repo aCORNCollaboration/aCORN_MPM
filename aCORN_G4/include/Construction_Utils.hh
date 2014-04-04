@@ -2,7 +2,6 @@
 #define CONSTRUCTIONUTILS_HH
 
 #include "globals.hh"
-#include "Enums.hh"
 #include "G4Material.hh"
 #include "G4Element.hh"
 #include "G4Box.hh"
@@ -14,9 +13,6 @@
 #include "G4PVReplica.hh"
 #include "G4RotationMatrix.hh"
 #include "G4VisAttributes.hh"
-
-const G4double inch = 2.54*cm;
-const G4double torr = atmosphere/760.;
 
 /// class for building with common materials
 class MaterialUser {

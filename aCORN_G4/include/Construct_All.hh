@@ -10,7 +10,6 @@
 #include "G4UIcmdWithAString.hh"
 
 #include "Rtypes.h"
-#include <TString.h>
 
 #include "Construction_Utils.hh"
 #include "Construct_Scintillator.hh"
@@ -39,7 +38,7 @@ private:
 	ScintillatorConstruction scint;
 	
 	/// construct detector (Electro-)Magnetic Field
-	void ConstructField(const TString filename);  
+	void ConstructField(const G4String& filename);
 	Field* fpMagField;
 		
 	// sensitive volumes
@@ -50,7 +49,7 @@ private:
 	G4UIdirectory* fDetectorDir;					//< UI Directory for detector-related commands
 	
 	G4UIcmdWithAString* fFieldMapFileCmd;			//< which field map to use
-	TString sFieldMapFile;	
+	G4String sFieldMapFile;
 	
 	G4UIcmdWith3VectorAndUnit* fSourceHolderPosCmd;	//< source holder position
 	G4ThreeVector fSourceHolderPos;

@@ -39,6 +39,7 @@
 #include "G4Trajectory.hh"
 #include "G4ios.hh"
 #include "SteppingAction.hh"
+#include "SMExcept.hh"
 #include <cassert>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

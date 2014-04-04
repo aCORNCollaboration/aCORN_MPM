@@ -1,6 +1,5 @@
 #include "AnalyzerBase.hh"
 #include "Enums.hh"
-#include "WirechamberCalibrator.hh"
 
 /// number of sensitive detector regions
 #define N_SD 1

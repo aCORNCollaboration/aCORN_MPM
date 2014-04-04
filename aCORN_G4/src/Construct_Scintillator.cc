@@ -1,6 +1,9 @@
-#include "ScintillatorConstruction.hh"
+#include "Construct_Scintillator.hh"
+#include "G4SystemOfUnits.hh"
 #include <G4Polycone.hh>
 #include <cassert>
+
+ScintillatorConstruction::ScintillatorConstruction(): scint_Radius(7.5*cm), scint_thick(8.0*mm) { }
 
 void ScintillatorConstruction::Construct() {
 	

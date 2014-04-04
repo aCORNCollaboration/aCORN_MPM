@@ -7,6 +7,7 @@
 ///Updated MPM 10/2011
 
 #include "G4ios.hh"
+#include "G4SystemOfUnits.hh"
 #include "G4Run.hh"
 #include "G4Event.hh"
 #include "G4Track.hh"
@@ -19,6 +20,7 @@
 #include "G4PrimaryParticle.hh"
 #include "G4SDManager.hh"
 #include "G4EventManager.hh"
+
 #include "Randomize.hh"
 #include "SMExcept.hh"
 
@@ -29,7 +31,6 @@
 #include <string>
 #include <cassert>
 
-using namespace CLHEP;
 using namespace std;
 
 //a global analysis manager

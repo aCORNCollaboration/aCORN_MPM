@@ -49,7 +49,7 @@ IOUtils = ControlMenu.o OutputManager.o PathUtils.o QFile.o SMExcept.o strutils.
 
 Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o
 
-ROOTUtils = GraphUtils.o
+ROOTUtils = GraphUtils.o TChainScanner.o
 
 objects = $(IOUtils) $(Physics) $(ROOTUtils)
 
@@ -65,8 +65,8 @@ libaCORN_MPM.a: $(objects)
 
 
 #aCORN Geant4:
-#	mkdir -p g4build/
-#	cd g4build; cmake -DGeant4_DIR=~/geant4.9.5/geant4.9.5-install/lib/Geant4-9.5.0/ ../ucnG4_dev/; make
+#	mkdir -p aCORN_G4_build/
+#	cd aCORN_G4_build; cmake -DGeant4_DIR=~/geant4.9.5/geant4.9.5-install/lib/Geant4-9.5.0/ ../aCORN_G4/; make
 
 
 

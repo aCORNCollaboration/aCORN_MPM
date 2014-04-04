@@ -14,7 +14,6 @@ class G4PrimaryParticle;
 #include <TTree.h>
 #include <TFile.h>
 #include <TStopwatch.h>
-#include <TString.h>
 
 #include "EventAction.hh"
 #include "SteppingAction.hh"

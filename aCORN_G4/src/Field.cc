@@ -1,12 +1,15 @@
 #include "Field.hh"
+#include "G4SystemOfUnits.hh"
 #include <cmath>
 #include <fstream>
+#include <string>
+#include <cassert>
 
-Field::Field(const TString filename): addAFP(false), rmax2(20*20*cm2), fieldScale(1.0) {
+Field::Field(const G4String& filename): addAFP(false), rmax2(20*20*cm2), fieldScale(1.0) {
 	LoadFieldMap(filename);
 }
 
-void Field::LoadFieldMap(const TString filename) {
+void Field::LoadFieldMap(const G4String& filename) {
 	
 	Bpoints.clear();
 	Zpoints.clear();
@@ -22,24 +25,26 @@ void Field::LoadFieldMap(const TString filename) {
 	} else {
 		// load profile from file
 		ifstream fin;
-		fin.open(filename.Data());
+		fin.open(filename.data());
 		if(!fin) {
-			G4cout<<"Can not open "<<filename.Data()<<G4endl;
+			G4cout << "Can not open " << filename << G4endl;
 			exit(1);
 		} 
-		TString stmp;
-		stmp.ReadLine(fin);  //skip the first title line
+		G4String stmp;
+		assert(false); // TODO new string classes
+		//stmp.ReadLine(fin);  //skip the first title line
 		
-		TString stmp1, stmp2;
+		std::string stmp1, stmp2;
 		while(fin){
-			fin>>stmp1>>stmp2;
-			if(stmp1.IsNull()) break;
-			else {
-				G4double z = atof(stmp1.Data())*m;
-				G4double B = atof(stmp2.Data())*tesla;
+			fin >> stmp1 >> stmp2;
+			//if(stmp1.IsNull()) break;
+			assert(false); // TODO new string classes
+			//else {
+				G4double z = atof(stmp1.c_str())*m;
+				G4double B = atof(stmp2.c_str())*tesla;
 				addPoint(z,B);
-				cout<<z/m<<" "<<B/tesla<<endl;
-			}
+				cout << z/m << " " << B/tesla << endl;
+			//}
 		}
 		fin.close();
 	}

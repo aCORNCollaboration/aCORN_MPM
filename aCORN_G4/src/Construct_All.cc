@@ -1,4 +1,6 @@
-#include "DetectorConstruction.hh"
+#include "Construct_All.hh"
+#include "G4SystemOfUnits.hh"
+
 #include "AnalysisManager.hh"
 
 #include "G4SDManager.hh"
@@ -18,7 +20,7 @@
 
 #include <cassert>
 
-DetectorConstruction::DetectorConstruction(): experimentalHall_log(NULL), experimentalHall_phys(NULL) fpMagField(NULL) {
+DetectorConstruction::DetectorConstruction(): experimentalHall_log(NULL), experimentalHall_phys(NULL), fpMagField(NULL) {
 	
 	fDetectorDir = new G4UIdirectory("/detector/");
 	fDetectorDir->SetGuidance("/detector control");
@@ -39,7 +41,7 @@ DetectorConstruction::DetectorConstruction(): experimentalHall_log(NULL), experi
 
 void DetectorConstruction::SetNewValue(G4UIcommand * command, G4String newValue) {
 	if (command == fFieldMapFileCmd) {
-		sFieldMapFile = TString(newValue);
+		sFieldMapFile = newValue;
 	} else if (command == fVacuumLevelCmd) {
 		fVacuumPressure = fVacuumLevelCmd->GetNewDoubleValue(newValue);
 	} else if (command == fScintStepLimitCmd) {
@@ -82,20 +84,20 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
 	experimentalHall_log = new G4LogicalVolume(experimentalHall_box,Vacuum,"World_Log");  
 	experimentalHall_log->SetVisAttributes(G4VisAttributes::Invisible);
 	experimentalHall_log->SetUserLimits(myCoarseLimits);
-	experimentalHall_phys = new G4PVPlacement(NULL,G4ThreeVector(),"World_Phys", experimentalHall_log,0,false,0);  
+	experimentalHall_phys = new G4PVPlacement(NULL, G4ThreeVector(), "World_Phys", experimentalHall_log, NULL, false, 0);
 	
 	
 	////////////////////////////////////////
 	// detector components
 	////////////////////////////////////////
 	scint.Construct();
-	scint_phys = new G4PVPlacement(NULL, G4ThreeVector(0,0,-0.3*m), "scint_phys", scint.scint_log, false, 0);
+	scint_phys = new G4PVPlacement(NULL, G4ThreeVector(0,0,-0.3*m), "scint_phys", scint.scint_log, experimentalHall_phys, false, 0);
 		
 	////////////////////////////////////////
 	// sensitive volumes
 	////////////////////////////////////////
 	scint_SD = registerSD("scint_SD");
-	scint.scint_log->SetSensitiveDetector(scint_SD[s]);
+	scint.scint_log->SetSensitiveDetector(scint_SD);
 			
 	
 	// construct magnetic field
@@ -115,7 +117,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
 #include "G4HelixSimpleRunge.hh"
 #include "G4HelixMixedStepper.hh"
 
-void DetectorConstruction::ConstructField(const TString filename) {
+void DetectorConstruction::ConstructField(const G4String& filename) {
 	
 	static G4bool fieldIsInitialized = false;
 	
@@ -153,10 +155,5 @@ void DetectorConstruction::ConstructField(const TString filename) {
 		G4TransportationManager::GetTransportationManager()->GetPropagatorInField()->SetMaxLoopCount(INT_MAX);
 		
 		fieldIsInitialized = true;
-		
-		for(Side s = EAST; s <= WEST; ++s) {
-			dets[s].mwpc.myBField = fpMagField;
-			dets[s].mwpc.ConstructField();
-		}
 	}
 }

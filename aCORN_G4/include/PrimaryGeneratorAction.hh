@@ -7,9 +7,8 @@
 #include "G4ParticleGun.hh"
 #include "G4Event.hh"
 #include "G4VUserEventInformation.hh"
-#include "DetectorConstruction.hh"
+#include "Construct_All.hh"
 #include "PrimaryGeneratorMessenger.hh"
-#include "SurfaceGenerator.hh"
 #include "ElectronBindingEnergy.hh"
 #include "NuclEvtGen.hh"
 #include <vector>

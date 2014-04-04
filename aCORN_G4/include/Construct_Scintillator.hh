@@ -7,7 +7,7 @@
 class ScintillatorConstruction: public MaterialUser {
 public:
 	/// constructor
-	ScintillatorConstruction(): scint_Radius(7.5*cm), scint_thick(8.0*mm) { }
+	ScintillatorConstruction();
 	
 	G4double scint_Radius;			//< scintillator disc radius
 	G4double scint_thick;			//< scintillator disc thickness

@@ -79,7 +79,7 @@ void aCORN_MC_Analyzer::processTrack() {
 	}
 	
 	// scintillator deposited energy, position, hit time
-	if(detectorID==ID_scint[s]) {
+	if(detectorID==ID_scint) {
 		Edep += trackinfo->Edep;
 		EdepQ += trackinfo->EdepQuenched;
 		for(AxisDirection d=X_DIRECTION; d<=Z_DIRECTION; ++d) {

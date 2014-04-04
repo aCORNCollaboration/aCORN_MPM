@@ -2,7 +2,6 @@
 #define PRIMARYGENERATORMESSENGER_HH
 
 #include "G4UImessenger.hh"
-#include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4UIcmdWithAString.hh"
 #include "G4UIdirectory.hh"
 #include "PrimaryGeneratorAction.hh"
@@ -27,9 +26,7 @@ private:
     G4UIcmdWithAString*		gunTypeCmd;			//< control momentum generator (beam, random, file-specified)
 	G4UIcmdWithAString*		gunPtclCmd;			//< control default particle to throw
 	G4UIcmdWithAString*		positionerCmd;		//< control event positioner to use
-	G4UIcmdWithABool*		srcrelCmd;			//< control positions relative to source holder
 	G4UIcmdWithAString*		eventFileCmd;		//< control file to read events from
-	G4UIcmdWithADoubleAndUnit* sourceRadiusCmd;	//< control radius of "source drop" positioner
 };
 
 #endif

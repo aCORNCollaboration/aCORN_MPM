@@ -1,6 +1,7 @@
 #include "PrimaryGeneratorAction.hh"
 #include "G4ParticleTable.hh"
 #include "G4ParticleDefinition.hh"
+#include "G4SystemOfUnits.hh"
 #include "BetaSpectrum.hh"
 #include "Enums.hh"
 #include "globals.hh"
@@ -8,11 +9,9 @@
 #include "AnalysisManager.hh"
 #include "PathUtils.hh"
 #include "SMExcept.hh"
-#include "SurfaceGenerator.hh"
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <TString.h>
 #include <TRandom.h>
 #include <TF2.h>
 
@@ -22,9 +21,6 @@
 #include <cassert>
 #include <numeric>
 #include <bitset>
-
-namespace CLHEP {}
-using namespace CLHEP;
 
 /// generate a random position in a disk
 void diskRandom(G4double radius, G4double& x, G4double& y) {
@@ -74,7 +70,7 @@ void PrimaryGeneratorAction::SetEventFile(G4String val) {
 	ETS->addFile(val.data());
 }
 
-PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC): myDetector(myDC), ETS(NULL), sourceRadius(0), relToSourceHolder(false) {
+PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC): myDetector(myDC), ETS(NULL) {
 	particleGun = new G4ParticleGun();
 	gunMessenger = new PrimaryGeneratorMessenger(this);
 	
@@ -124,7 +120,7 @@ void PrimaryGeneratorAction::initEventRandomSeed(G4Event* anEvent) {
 	if ( seed.test(31) ) seed.reset(31) ;
 	
 	myseed = seed.to_ulong();
-	HepRandom::setTheSeed(myseed);	// random seed for Geant
+	CLHEP::HepRandom::setTheSeed(myseed);	// random seed for Geant
 	gRandom->SetSeed(myseed);		// random seed for ROOT
 	G4cout<<"run "<<gAnalysisManager->GetRunNumber()<<" evt "<<anEvent->GetEventID()<<" seed "<<myseed<<G4endl;
 }

@@ -5,6 +5,7 @@
 #include "G4Colour.hh"
 #include "G4VisAttributes.hh"
 #include "Enums.hh"
+#include "G4SystemOfUnits.hh"
 
 G4Allocator<TrackerHit> TrackerHitAllocator;
 

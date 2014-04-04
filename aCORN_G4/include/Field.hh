@@ -1,10 +1,10 @@
 #ifndef FIELD_HH
 #define FIELD_HH
 
-#include "globals.hh"
 #include "G4MagneticField.hh"
-#include <TString.h>
 #include "G4ThreeVector.hh"
+#include "G4String.hh"
+
 #include <vector>
 
 using namespace std;
@@ -15,7 +15,7 @@ public:
 	/// constructor
 	Field();
 	/// constructor with fieldmap
-	Field(const TString filename);
+	Field(const G4String& filename);
 	/// get field at given point
 	void GetFieldValue( const  G4double Point[3], G4double *Bfield ) const;
 	/// zero out the field (via scaling factor)
@@ -23,7 +23,7 @@ public:
 	/// set fieldmap scaling factor
 	void SetFieldScale(const G4double val) { fieldScale=val; }
 	/// load fieldmap from file
-	void LoadFieldMap(const TString filename);
+	void LoadFieldMap(const G4String& filename);
 	
 	bool addAFP;	//< whether to add the AFP fringe field
 	

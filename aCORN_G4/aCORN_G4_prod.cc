@@ -31,7 +31,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#include "DetectorConstruction.hh"
+#include "Construct_All.hh"
+#include "G4SystemOfUnits.hh"
 #include "PhysicsList_495.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "RunAction.hh"
@@ -54,10 +55,9 @@
 int main(int argc, char** argv) {
 	
 	if(argc < 2) {
-		G4cout << "Usage:" << G4endl << "\t" << argv[0] << " <macro filename> [physics list]" << G4endl;
+		G4cout << "Usage:" << G4endl << "\t" << argv[0] << " <macro filename>" << G4endl;
 		return 0;
 	}
-	std::string physlist = (argc >= 3)?argv[2]:"livermore";
 	
 	// User Verbose stepping output class
 	G4VSteppingVerbose::SetInstance(new SteppingAction_Verbose());
@@ -68,19 +68,9 @@ int main(int argc, char** argv) {
 	// User Initialization classes (mandatory)
 	DetectorConstruction* detector = new DetectorConstruction();
 	runManager->SetUserInitialization(detector);
-	
-	if(physlist=="livermore") {
-		//runManager->SetUserInitialization(new PhysicsList_Livermore());
-		runManager->SetUserInitialization(new PhysicsList_495(false));
-	} else {
-		G4cout << "***ERROR*** Unknown physics list: " << physlist << G4endl;
-		exit(-1);
-	}
-	G4cout << "Using physics list: " << physlist << G4endl;
+	runManager->SetUserInitialization(new PhysicsList_495(false));
 	
 	new G4UnitDefinition("torr","torr","Pressure",atmosphere/760.);
-	//G4UnitDefinition::PrintUnitsTable();
-	//G4ParticleTable::GetParticleTable()->DumpTable();
 	
 #ifdef G4VIS_USE
 	// Visualization, if you choose to have it!
