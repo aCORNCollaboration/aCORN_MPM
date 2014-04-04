@@ -1,0 +1,35 @@
+#ifndef PRIMARYGENERATORMESSENGER_HH
+#define PRIMARYGENERATORMESSENGER_HH
+
+#include "G4UImessenger.hh"
+#include "G4UIcmdWithADoubleAndUnit.hh"
+#include "G4UIcmdWithAString.hh"
+#include "G4UIdirectory.hh"
+#include "PrimaryGeneratorAction.hh"
+#include "globals.hh"
+
+class PrimaryGeneratorAction;
+
+/// messenger UI for primary event generator
+class PrimaryGeneratorMessenger: public G4UImessenger {
+public:
+	/// constructor
+    PrimaryGeneratorMessenger(PrimaryGeneratorAction*);
+	/// destructor
+	~PrimaryGeneratorMessenger();
+    
+	/// receive command
+    void SetNewValue(G4UIcommand*, G4String);
+    
+private:
+    PrimaryGeneratorAction* Action;				//< primary generator action being controlled
+    G4UIdirectory*			gunDir;				//< '/gun/' commands directory
+    G4UIcmdWithAString*		gunTypeCmd;			//< control momentum generator (beam, random, file-specified)
+	G4UIcmdWithAString*		gunPtclCmd;			//< control default particle to throw
+	G4UIcmdWithAString*		positionerCmd;		//< control event positioner to use
+	G4UIcmdWithABool*		srcrelCmd;			//< control positions relative to source holder
+	G4UIcmdWithAString*		eventFileCmd;		//< control file to read events from
+	G4UIcmdWithADoubleAndUnit* sourceRadiusCmd;	//< control radius of "source drop" positioner
+};
+
+#endif

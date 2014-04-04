@@ -36,10 +36,8 @@
 		4C0C6DCB18EF21CF00157BFB /* EventAction.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EventAction.hh; sourceTree = "<group>"; };
 		4C0C6DCC18EF21CF00157BFB /* Field.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Field.hh; sourceTree = "<group>"; };
 		4C0C6DCD18EF21CF00157BFB /* MCEvent.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = MCEvent.hh; sourceTree = "<group>"; };
-		4C0C6DCE18EF21CF00157BFB /* PhysicsList.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PhysicsList.hh; sourceTree = "<group>"; };
 		4C0C6DCF18EF21CF00157BFB /* PhysicsList_495.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PhysicsList_495.hh; sourceTree = "<group>"; };
 		4C0C6DD018EF21CF00157BFB /* PhysicsList_Livermore.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PhysicsList_Livermore.hh; sourceTree = "<group>"; };
-		4C0C6DD118EF21CF00157BFB /* PhysicsList_Penelope2008.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PhysicsList_Penelope2008.hh; sourceTree = "<group>"; };
 		4C0C6DD218EF21CF00157BFB /* PrimaryGeneratorAction.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PrimaryGeneratorAction.hh; sourceTree = "<group>"; };
 		4C0C6DD318EF21CF00157BFB /* PrimaryGeneratorMessenger.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PrimaryGeneratorMessenger.hh; sourceTree = "<group>"; };
 		4C0C6DD418EF21CF00157BFB /* PrimaryInfo.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = PrimaryInfo.hh; sourceTree = "<group>"; };
@@ -57,10 +55,8 @@
 		4C0C6DE118EF21CF00157BFB /* EventAction.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EventAction.cc; sourceTree = "<group>"; };
 		4C0C6DE218EF21CF00157BFB /* Field.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Field.cc; sourceTree = "<group>"; };
 		4C0C6DE318EF21CF00157BFB /* MCEvent.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCEvent.cc; sourceTree = "<group>"; };
-		4C0C6DE418EF21CF00157BFB /* PhysicsList.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicsList.cc; sourceTree = "<group>"; };
 		4C0C6DE518EF21CF00157BFB /* PhysicsList_495.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicsList_495.cc; sourceTree = "<group>"; };
 		4C0C6DE618EF21CF00157BFB /* PhysicsList_Livermore.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicsList_Livermore.cc; sourceTree = "<group>"; };
-		4C0C6DE718EF21CF00157BFB /* PhysicsList_Penelope2008.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhysicsList_Penelope2008.cc; sourceTree = "<group>"; };
 		4C0C6DE818EF21CF00157BFB /* PrimaryGeneratorAction.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PrimaryGeneratorAction.cc; sourceTree = "<group>"; };
 		4C0C6DE918EF21CF00157BFB /* PrimaryGeneratorMessenger.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PrimaryGeneratorMessenger.cc; sourceTree = "<group>"; };
 		4C0C6DEA18EF21CF00157BFB /* PrimaryInfo.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PrimaryInfo.cc; sourceTree = "<group>"; };
@@ -142,8 +138,8 @@
 			children = (
 				4C0C6DBF18EF21CF00157BFB /* aCORN_G4_LinkDef.h */,
 				4C0C6DC018EF21CF00157BFB /* aCORN_G4_prod.cc */,
-				4C0C6DC118EF21CF00157BFB /* aCORN_MC_Analyzer.cc */,
 				4C0C6DC218EF21CF00157BFB /* aCORN_MC_Analyzer.hh */,
+				4C0C6DC118EF21CF00157BFB /* aCORN_MC_Analyzer.cc */,
 				4C0C6DC318EF21CF00157BFB /* CMakeLists.txt */,
 				4C0C6DC418EF21CF00157BFB /* FindROOT.cmake */,
 				4C0C6DC518EF21CF00157BFB /* include */,
@@ -163,10 +159,8 @@
 				4C0C6DCB18EF21CF00157BFB /* EventAction.hh */,
 				4C0C6DCC18EF21CF00157BFB /* Field.hh */,
 				4C0C6DCD18EF21CF00157BFB /* MCEvent.hh */,
-				4C0C6DCE18EF21CF00157BFB /* PhysicsList.hh */,
 				4C0C6DCF18EF21CF00157BFB /* PhysicsList_495.hh */,
 				4C0C6DD018EF21CF00157BFB /* PhysicsList_Livermore.hh */,
-				4C0C6DD118EF21CF00157BFB /* PhysicsList_Penelope2008.hh */,
 				4C0C6DD218EF21CF00157BFB /* PrimaryGeneratorAction.hh */,
 				4C0C6DD318EF21CF00157BFB /* PrimaryGeneratorMessenger.hh */,
 				4C0C6DD418EF21CF00157BFB /* PrimaryInfo.hh */,
@@ -191,10 +185,8 @@
 				4C0C6DE118EF21CF00157BFB /* EventAction.cc */,
 				4C0C6DE218EF21CF00157BFB /* Field.cc */,
 				4C0C6DE318EF21CF00157BFB /* MCEvent.cc */,
-				4C0C6DE418EF21CF00157BFB /* PhysicsList.cc */,
 				4C0C6DE518EF21CF00157BFB /* PhysicsList_495.cc */,
 				4C0C6DE618EF21CF00157BFB /* PhysicsList_Livermore.cc */,
-				4C0C6DE718EF21CF00157BFB /* PhysicsList_Penelope2008.cc */,
 				4C0C6DE818EF21CF00157BFB /* PrimaryGeneratorAction.cc */,
 				4C0C6DE918EF21CF00157BFB /* PrimaryGeneratorMessenger.cc */,
 				4C0C6DEA18EF21CF00157BFB /* PrimaryInfo.cc */,

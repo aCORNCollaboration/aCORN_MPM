@@ -31,17 +31,14 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#include "bmDetectorConstruction.hh"
-#include "bmPhysicsList.hh"
-#include "bmPenelope2008_EMPhysList.hh"
-#include "bmLivermore_EMPhysList.hh"
-#include "bmPhysList495.hh"
-#include "bmPrimaryGeneratorAction.hh"
-#include "bmRunAction.hh"
-#include "bmEventAction.hh"
-#include "bmSteppingAction.hh"
-#include "bmSteppingVerbose.hh"
-#include "bmAnalysisManager.hh"
+#include "DetectorConstruction.hh"
+#include "PhysicsList_495.hh"
+#include "PrimaryGeneratorAction.hh"
+#include "RunAction.hh"
+#include "EventAction.hh"
+#include "SteppingAction.hh"
+#include "SteppingAction_Verbose.hh"
+#include "AnalysisManager.hh"
 #include "G4UnitsTable.hh"
 
 
@@ -63,23 +60,18 @@ int main(int argc, char** argv) {
 	std::string physlist = (argc >= 3)?argv[2]:"livermore";
 	
 	// User Verbose stepping output class
-	G4VSteppingVerbose::SetInstance(new bmSteppingVerbose());
+	G4VSteppingVerbose::SetInstance(new SteppingAction_Verbose());
 	
 	// Run manager
 	G4RunManager* runManager = new G4RunManager;
 	
 	// User Initialization classes (mandatory)
-	bmDetectorConstruction* detector = new bmDetectorConstruction();
+	DetectorConstruction* detector = new DetectorConstruction();
 	runManager->SetUserInitialization(detector);
 	
 	if(physlist=="livermore") {
-		//runManager->SetUserInitialization(new bmLivermore_EMPhysList());
-		runManager->SetUserInitialization(new bmPhysList495(false));
-		//else if(physlist=="g4default")
-		//	runManager->SetUserInitialization(new bmPhysicsList());
-	} else if(physlist=="penelope") {
-		runManager->SetUserInitialization(new bmPhysList495(true));
-		//runManager->SetUserInitialization(new bmPenelope2008_EMPhysList());
+		//runManager->SetUserInitialization(new PhysicsList_Livermore());
+		runManager->SetUserInitialization(new PhysicsList_495(false));
 	} else {
 		G4cout << "***ERROR*** Unknown physics list: " << physlist << G4endl;
 		exit(-1);
@@ -97,13 +89,13 @@ int main(int argc, char** argv) {
 #endif
 	
 	// User Action classes
-	runManager->SetUserAction(new bmPrimaryGeneratorAction(detector));
-	runManager->SetUserAction(new bmRunAction);
-	runManager->SetUserAction(new bmEventAction);
-	runManager->SetUserAction(new bmSteppingAction);  
+	runManager->SetUserAction(new PrimaryGeneratorAction(detector));
+	runManager->SetUserAction(new RunAction);
+	runManager->SetUserAction(new EventAction);
+	runManager->SetUserAction(new SteppingAction);  
 	
 	//create global analysis manager for histograms and trees
-	gbmAnalysisManager = new bmAnalysisManager();
+	gAnalysisManager = new AnalysisManager();
 	
 	// Execute input macro file
 	G4UImanager * UI = G4UImanager::GetUIpointer(); 

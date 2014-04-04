@@ -1,7 +1,6 @@
 #----------------------------------------------------------------------------
 # Usage:
-# cmake -DGeant4_DIR=~/geant4.9.5/geant4.9.5-install/lib/Geant4-9.5.0/ ../ucnG4_dev/
-# cmake -DGeant4_DIR=~/geant4.9.6/geant4.9.6-install/lib/Geant4-9.6.2/ ../ucnG4_dev/
+# cmake -DGeant4_DIR=~/geant4.9.6/geant4.9.6-install/lib/Geant4-9.6.2/ ../aCORN_G4/
 # make -j6
 
 #----------------------------------------------------------------------------
@@ -19,16 +18,12 @@ add_custom_target(
 
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
-# NB: headers are included so they will show up in IDEs
 #
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 include_directories(${PROJECT_SOURCE_DIR}/include
 					${PROJECT_SOURCE_DIR}/../Physics
 					${PROJECT_SOURCE_DIR}/../IOUtils
-					${PROJECT_SOURCE_DIR}/../BaseTypes
-					${PROJECT_SOURCE_DIR}/../Calibration
-					${PROJECT_SOURCE_DIR}/../MathUtils
 					${PROJECT_SOURCE_DIR}/../RootUtils)
 link_directories(${PROJECT_SOURCE_DIR}/..)
 
@@ -46,7 +41,7 @@ link_directories(${ROOT_LIBRARY_DIR})
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
 # to build a batch mode only executable
 #
-option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" ON)
+option(WITH_GEANT4_UIVIS "Build with Geant4 UI and Vis drivers" ON)
 if(WITH_GEANT4_UIVIS)
   find_package(Geant4 REQUIRED ui_all vis_all)
 else()
@@ -64,21 +59,21 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
 
 
 ###############
-# TObject subclasses dictionary & ucnG4 shared library
+# TObject subclasses dictionary & aCORN_G4 shared library
 ###############
 
-set(ucnG4_LINKDEF ${PROJECT_SOURCE_DIR}/ucnG4_LinkDef.h)
-set(ucnG4_DICTIONARY ${CMAKE_CURRENT_BINARY_DIR}/ucnG4_Dict.cxx) 
-MESSAGE("Generating dictionary ${ucnG4_DICTIONARY}")
-set(DICTFILES "${PROJECT_SOURCE_DIR}/include/bmMCEvent.hh;${PROJECT_SOURCE_DIR}/include/bmTrackInfo.hh;${PROJECT_SOURCE_DIR}/include/bmPrimaryInfo.hh")
-ROOT_GENERATE_DICTIONARY("${DICTFILES}" "${ucnG4_LINKDEF}" "${ucnG4_DICTIONARY}" "")
-LIST(APPEND sources ${ucnG4_DICTIONARY})
+set(aCORN_G4_LINKDEF ${PROJECT_SOURCE_DIR}/aCORN_G4_LinkDef.h)
+set(aCORN_G4_DICTIONARY ${CMAKE_CURRENT_BINARY_DIR}/aCORN_G4_Dict.cxx)
+MESSAGE("Generating dictionary ${aCORN_G4_DICTIONARY}")
+set(DICTFILES "${PROJECT_SOURCE_DIR}/include/MCEvent.hh;${PROJECT_SOURCE_DIR}/include/TrackInfo.hh;${PROJECT_SOURCE_DIR}/include/PrimaryInfo.hh")
+ROOT_GENERATE_DICTIONARY("${DICTFILES}" "${aCORN_G4_LINKDEF}" "${aCORN_G4_DICTIONARY}" "")
+LIST(APPEND sources ${aCORN_G4_DICTIONARY})
 
-add_library(ucnG4 SHARED ${sources} ${headers})
-add_dependencies(ucnG4 extern_lib)
-target_link_libraries(ucnG4 ${ROOT_LIBRARIES} ${Geant4_LIBRARIES} UCNA)
+add_library(aCORN_G4 SHARED ${sources} ${headers})
+add_dependencies(aCORN_G4 extern_lib)
+target_link_libraries(aCORN_G4 ${ROOT_LIBRARIES} ${Geant4_LIBRARIES} aCORN_MPM)
 SET(ucnG4_LIBRARY_PROPERTIES
-		${ucnG4_LIBRARY_PROPERTIES}
+		${aCORN_G4_LIBRARY_PROPERTIES}
 		VERSION "0"
 		SOVERSION "0"
 		SUFFIX ".so"
@@ -92,19 +87,15 @@ link_directories(${LIBRARY_OUTPUT_PATH})
 # Executables
 #################
 
-add_executable(ucnG4_prod ucnG4_prod.cc)
-target_link_libraries(ucnG4_prod ucnG4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} libUCNA.a)
-add_dependencies(ucnG4_prod extern_lib ucnG4)
+add_executable(aCORN_G4_prod aCORN_G4_prod.cc)
+target_link_libraries(aCORN_G4_prod aCORN_G4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} libaCORN_MPM.a)
+add_dependencies(ucnG4_prod extern_lib aCORN_G4)
 
-add_executable(UCNA_MC_Analyzer UCNA_MC_Analyzer.cc)
-target_link_libraries(UCNA_MC_Analyzer ucnG4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} libUCNA.a)
-add_dependencies(UCNA_MC_Analyzer extern_lib ucnG4)
+add_executable(aCORN_MC_Analyzer aCORN_MC_Analyzer.cc)
+target_link_libraries(aCORN_MC_Analyzer aCORN_G4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} libaCORN_MPM.a)
+add_dependencies(aCORN_MC_Analyzer extern_lib aCORN_G4)
 
-add_executable(SiDet_Analyzer SiDet_Analyzer.cc)
-target_link_libraries(SiDet_Analyzer ucnG4 ${Geant4_LIBRARIES} ${ROOT_LIBRARIES} libUCNA.a)
-add_dependencies(SiDet_Analyzer extern_lib ucnG4)
-
-install(TARGETS ucnG4_prod UCNA_MC_Analyzer SiDet_Analyzer DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+install(TARGETS aCORN_G4_prod aCORN_MC_Analyzer DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 
 
 #################
