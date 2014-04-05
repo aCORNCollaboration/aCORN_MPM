@@ -100,6 +100,8 @@
 		4C4409AF18EF5204001E72E6 /* Enums.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Enums.hh; sourceTree = "<group>"; };
 		4C4409B018EF5BC3001E72E6 /* TChainScanner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TChainScanner.cpp; path = ROOTUtils/TChainScanner.cpp; sourceTree = "<group>"; };
 		4C4409B118EF5BC3001E72E6 /* TChainScanner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TChainScanner.hh; path = ROOTUtils/TChainScanner.hh; sourceTree = "<group>"; };
+		4C4409B618F0671E001E72E6 /* Construct_e_Collimator.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Construct_e_Collimator.cc; sourceTree = "<group>"; };
+		4C4409B718F0679C001E72E6 /* Construct_e_Collimator.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Construct_e_Collimator.hh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -159,6 +161,7 @@
 				4C0C6DC718EF21CF00157BFB /* AnalyzerBase.hh */,
 				4C0C6DC818EF21CF00157BFB /* Construct_All.hh */,
 				4C0C6DC918EF21CF00157BFB /* Construct_Scintillator.hh */,
+				4C4409B718F0679C001E72E6 /* Construct_e_Collimator.hh */,
 				4C0C6DCA18EF21CF00157BFB /* Construction_Utils.hh */,
 				4C0C6DCB18EF21CF00157BFB /* EventAction.hh */,
 				4C0C6DCC18EF21CF00157BFB /* Field.hh */,
@@ -184,6 +187,7 @@
 				4C0C6DDD18EF21CF00157BFB /* AnalyzerBase.cc */,
 				4C0C6DDE18EF21CF00157BFB /* Construct_All.cc */,
 				4C0C6DDF18EF21CF00157BFB /* Construct_Scintillator.cc */,
+				4C4409B618F0671E001E72E6 /* Construct_e_Collimator.cc */,
 				4C0C6DE018EF21CF00157BFB /* Construction_Utils.cc */,
 				4C0C6DE118EF21CF00157BFB /* EventAction.cc */,
 				4C0C6DE218EF21CF00157BFB /* Field.cc */,

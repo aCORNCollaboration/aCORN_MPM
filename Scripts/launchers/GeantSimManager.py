@@ -22,33 +22,34 @@ class GeantSimManager:
 		self.settings["physlist"] = "livermore"
 		self.settings["ana_args"] = ""
 		self.settings["extra_cmds"] = ""
-		
+		self.settings["gen_cmds"] = ""
 		self.settings["vis_cmd"] = ""
+		
+		#self.settings["vis_cmd"] += "/tracking/verbose 2\n"
 		
 		self.g4_out_dir_base = None
 		
 		self.anagroup = 10 # number of files to group together for final analyzer result
 				
 	def enable_vis(self):
+		# open selected visualization driver
+		self.settings["vis_cmd"] = "/vis/open OGLIX\n"
+
+		# set viewpoint
+		self.settings["vis_cmd"] += "/vis/viewer/set/viewpointThetaPhi 105 0\n"
+		self.settings["vis_cmd"] += "/vis/viewer/panTo -0.1 0\n"
+		#self.settings["vis_cmd"] += "/vis/viewer/zoom 0.75\n"
 		
-		self.settings["vis_cmd"] = "/vis/open HepRepFile\n"
-		#self.settings["vis_cmd"] = "/vis/open OGLIX\n"
-		
-		#self.settings["vis_cmd"] = "/vis/open OGLIXm\n"
-		#self.settings["vis_cmd"] = "/vis/open OGLIQt\n"
-		
+		# enable drawing detector geometry
 		self.settings["vis_cmd"] += "/vis/drawVolume\n"
 		
-		self.settings["vis_cmd"] += "/vis/viewer/set/viewpointThetaPhi 90 0\n"
-		self.settings["vis_cmd"] += "/vis/viewer/panTo 2.2 0\n"
-		self.settings["vis_cmd"] += "/vis/viewer/zoom 10\n"
-		#self.settings["vis_cmd"] += "/vis/viewer/set/viewpointThetaPhi 10 20\n"
-		
-		self.settings["vis_cmd"] += "/vis/viewer/set/auxiliaryEdge true\n"
-		self.settings["vis_cmd"] += "/vis/viewer/set/style surface"
-		
+		# draw more complex wireframe
+		#self.settings["vis_cmd"] += "/vis/viewer/set/auxiliaryEdge true\n"
+		# solid surface drawing options
+		#self.settings["vis_cmd"] += "/vis/viewer/set/style surface\n"
 		#self.settings["vis_cmd"] += "/vis/viewer/set/hiddenEdge 1"
 		
+		# track visualization
 		if 1:
 			self.settings["vis_cmd"] += "/vis/modeling/trajectories/create/drawByCharge myTrackVis\n"
 			#self.settings["vis_cmd"] += "/vis/modeling/trajectories/myTrackVis/default/setDrawStepPts true\n"
@@ -58,8 +59,6 @@ class GeantSimManager:
 			self.settings["vis_cmd"] += "/vis/scene/add/trajectories rich\n"
 			self.settings["vis_cmd"] += "/vis/scene/add/hits\n"
 		
-		#self.settings["vis_cmd"] += "/tracking/verbose 2\n"
-		
 		self.settings["vis_cmd"] += "/vis/viewer/flush\n"
 	
 	def set_evtsrc(self,evtsrc):
@@ -68,11 +67,14 @@ class GeantSimManager:
 	def set_dirs(self):
 		self.g4_workdir = os.environ["G4WORKDIR"]
 		self.g4_bindir = os.environ["G4BINDIR"]
-		self.g4_evtsdir = os.environ["G4EVTDIR"]+"/"+self.settings["evtsrc"]
+		self.type_dir = self.settings["simName"]
+		if "evtsrc" in self.settings:
+			self.g4_evtsdir = os.environ["G4EVTDIR"]+"/"+self.settings["evtsrc"]
+			self.type_dir +="_"+self.settings["evtsrc"]
 		
-		self.type_dir = self.settings["simName"]+"_"+self.settings["evtsrc"]
 		if "gunenergy" in self.settings:
 			self.type_dir += "_%.1fkeV"%self.settings["gunenergy"]
+			self.settings["gen_cmds"] += "/gun/energy %f keV"%self.settings["gunenergy"]
 		
 		if not self.g4_out_dir_base:
 			self.g4_out_dir_base = self.g4_workdir+"/output/"
@@ -90,10 +92,12 @@ class GeantSimManager:
 		os.system("mkdir -p %s"%self.g4_out_dir)
 		os.system("mkdir -p %s"%self.g4_log_dir)
 		
-		inflist = [f for f in os.listdir(self.g4_evtsdir) if f[:5]=="Evts_"]
-		inflist.sort()
-		inflist = inflist[:maxIn]
-		nruns = len(inflist)
+		nruns = 1
+		if "evtsrc" in self.settings:
+			inflist = [f for f in os.listdir(self.g4_evtsdir) if f[:5]=="Evts_"]
+			inflist.sort()
+			inflist = inflist[:maxIn]
+			nruns = len(inflist)
 		
 		oldtime = time.time() - hours_old*3600
 		
@@ -108,8 +112,11 @@ class GeantSimManager:
 			self.settings["run_num"] += 1
 			self.settings["jobname"] = self.settings["simName"]+"_%i"%self.settings["run_num"]
 			self.settings["outfile"]=self.g4_out_name%str(self.settings["run_num"])
-			self.settings["evtfile"]=self.g4_evtsdir+"/"+inflist[rn]
-			self.settings["nevt"] = 10000 # assume this many events per input file... TODO something more elegant
+			if "evtsrc" in self.settings:
+				self.settings["evtfile"]="/benchmark/gun/evtfile "+self.g4_evtsdir+"/"+inflist[rn]
+			else:
+				self.settings["evtfile"]=""
+			self.settings["nevt"] = min(maxIn,10000) # assume this many events per input file... TODO something more elegant
 			self.settings["joblog"] = "%s/gen_macro_%i.txt"%(self.g4_log_dir,self.settings["run_num"])
 			g4_sub_file = "%s/geantjob_%i.sub"%(self.g4_macro_dir,self.settings["run_num"])
 			
@@ -204,7 +211,7 @@ if __name__ == "__main__":
 	####################				
 	# scintillator electron gun
 	####################
-	if 1:
+	if 0:
 		for l in [100, 200, 400, 600, 800]:
 			iline = GeantSimManager("eGun")
 			iline.set_generator("eGunRandMomentum")
@@ -218,16 +225,10 @@ if __name__ == "__main__":
 	##################
 	# visualization test
 	##################
-	if 0:
-		vtest = GeantSimManager("DetShift")
-		vtest.set_generator("eGunRandMomentum")
-		vtest.settings["positioner"] = "Fixed"
-		self.settings["gunpos_mm"] = [-30,0.,0.]
+	if 1:
+		vtest = GeantSimManager("Vis_Test")
 		vtest.settings["gunenergy"] = 500
-		vtest.settings["extra_cmds"] += "/detector/rotation 0.037\n"
-		vtest.settings["extra_cmds"] += "/detector/offset -3.98 0.44 0 mm\n"
-		#vtest.settings["extra_cmds"] += "/detector/afpfield y\n"
-		#vtest.enable_vis()
-		vtest.launch_sims(nEvents=1e4,nClusters=1,hours_old=0)
-		vtest.launch_postanalyzer()
+		vtest.enable_vis()
+		vtest.launch_sims(maxIn=100)
+
 

@@ -3,7 +3,7 @@
 #include <G4Polycone.hh>
 #include <cassert>
 
-ScintillatorConstruction::ScintillatorConstruction(): scint_Radius(7.5*cm), scint_thick(8.0*mm) { }
+ScintillatorConstruction::ScintillatorConstruction(): scint_Radius(15*cm), scint_thick(8.0*mm) { }
 
 void ScintillatorConstruction::Construct() {
 	

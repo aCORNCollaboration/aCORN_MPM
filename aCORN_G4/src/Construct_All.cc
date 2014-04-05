@@ -90,8 +90,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
 	////////////////////////////////////////
 	// detector components
 	////////////////////////////////////////
+	eCollim.Construct();
+	eCollim_phys = new G4PVPlacement(NULL, G4ThreeVector(0,0,-16.97*cm-eCollim.getLength()/2), "eCollim_phys", eCollim.eCollimator_log, experimentalHall_phys, false, 0);
+	
 	scint.Construct();
-	scint_phys = new G4PVPlacement(NULL, G4ThreeVector(0,0,-0.3*m), "scint_phys", scint.scint_log, experimentalHall_phys, false, 0);
+	scint_phys = new G4PVPlacement(NULL, G4ThreeVector(0,0,-0.750*m), "scint_phys", scint.scint_log, experimentalHall_phys, false, 0);
 		
 	////////////////////////////////////////
 	// sensitive volumes

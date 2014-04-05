@@ -13,6 +13,7 @@
 
 #include "Construction_Utils.hh"
 #include "Construct_Scintillator.hh"
+#include "Construct_e_Collimator.hh"
 #include "TrackerSD.hh"
 #include "Field.hh"
 
@@ -31,11 +32,13 @@ public:
 	G4VPhysicalVolume* experimentalHall_phys;
 	
 	// components
-	G4VPhysicalVolume* scint_phys;
-		
+	G4VPhysicalVolume* scint_phys;		//< electron scintillator
+	G4VPhysicalVolume* eCollim_phys;	//< electron collimator
+	
 private:
 
-	ScintillatorConstruction scint;
+	ScintillatorConstruction scint;		//< electron scintillator
+	eCollimatorConstruction eCollim;	//< electron collimator
 	
 	/// construct detector (Electro-)Magnetic Field
 	void ConstructField(const G4String& filename);

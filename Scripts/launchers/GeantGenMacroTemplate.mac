@@ -11,8 +11,6 @@
 # run number
 /bm/run/runNumber %(run_num)i
 
-# spectrometer magnetic field
-/detector/field %(magf)s
 # command for loading field map
 %(fieldmapcmd)s
 # detector vacuum pressure
@@ -26,15 +24,16 @@
 # generator initial position offset (0,0,0 = decay volume center)
 /gun/position %(gunpos)s
 # file for events input
-/benchmark/gun/evtfile %(evtfile)s
+%(evtfile)s
 
 # source generator: optional settings
 # /gun/energy <gunenergy> keV
 # /benchmark/gun/particle <particle_name>
 # /benchmark/gun/type <generator_name>
 # /benchmark/gun/positioner <positioner_name>
-
-/run/beamOn %(nevt)i
+%(gen_cmds)s
 
 # optional visualization commands
 %(vis_cmd)s
+
+/run/beamOn %(nevt)i

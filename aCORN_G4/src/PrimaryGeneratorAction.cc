@@ -70,7 +70,7 @@ void PrimaryGeneratorAction::SetEventFile(G4String val) {
 	ETS->addFile(val.data());
 }
 
-PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC): myDetector(myDC), ETS(NULL) {
+PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC): myDetector(myDC), ETS(NULL), posOffset(0,0,0) {
 	particleGun = new G4ParticleGun();
 	gunMessenger = new PrimaryGeneratorMessenger(this);
 	
@@ -136,7 +136,13 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
 		ETS->loadEvt(v);
 		setVertices(v);
 	} else {
-		assert(false);
+		NucDecayEvent e;
+		e.d = D_ELECTRON;
+		e.E = particleGun->GetParticleEnergy()/keV;
+		e.p[0] = e.p[1] = 0;
+		e.p[2] = -1;
+		v.push_back(e);
+		setVertices(v);
 	}
 	
 	throwEvents(v,anEvent);

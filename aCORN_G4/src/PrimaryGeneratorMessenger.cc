@@ -18,7 +18,7 @@ PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(PrimaryGeneratorAction* myG
 	
 	positionerCmd = new G4UIcmdWithAString("/benchmark/gun/positioner",this);
 	positionerCmd->SetGuidance("Set the generator gun positioner.");
-	positionerCmd->SetGuidance(" Choice : Fixed, SourceDrop, DecayTrapUniform, DecayTrapFiducial");
+	positionerCmd->SetGuidance(" Choice : Fixed");
 	positionerCmd->SetDefaultValue("Fixed");
 	positionerCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 	
