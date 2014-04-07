@@ -11,7 +11,7 @@ class G4Step;
 class G4PrimaryVertex;
 class G4PrimaryParticle;
 
-#include "globals.hh"
+#include <globals.hh>
 
 #include "EventAction.hh"
 #include "SteppingAction.hh"

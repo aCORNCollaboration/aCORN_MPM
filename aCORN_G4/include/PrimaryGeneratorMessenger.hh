@@ -3,7 +3,7 @@
 
 #include "PrimaryGeneratorAction.hh"
 
-#include "globals.hh"
+#include <globals.hh>
 #include <G4UImessenger.hh>
 #include <G4UIcmdWithAString.hh>
 #include <G4UIdirectory.hh>

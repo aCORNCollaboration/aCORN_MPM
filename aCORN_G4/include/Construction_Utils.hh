@@ -1,7 +1,7 @@
 #ifndef CONSTRUCTIONUTILS_HH
 #define CONSTRUCTIONUTILS_HH
 
-#include "globals.hh"
+#include <globals.hh>
 #include <G4Material.hh>
 #include <G4Element.hh>
 #include <G4Box.hh>

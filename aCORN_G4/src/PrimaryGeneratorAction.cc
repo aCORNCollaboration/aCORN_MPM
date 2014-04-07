@@ -16,7 +16,7 @@
 #include <numeric>
 #include <bitset>
 
-#include "globals.hh"
+#include <globals.hh>
 #include <G4ParticleTable.hh>
 #include <G4ParticleDefinition.hh>
 #include <G4SystemOfUnits.hh>
