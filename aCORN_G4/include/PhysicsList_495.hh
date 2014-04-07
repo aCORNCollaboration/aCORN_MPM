@@ -1,8 +1,8 @@
 #ifndef PHYSICSLIST_495
 #define PHYSICSLIST_495
 
-#include "G4VModularPhysicsList.hh"
-#include "G4VPhysicsConstructor.hh"
+#include <G4VModularPhysicsList.hh>
+#include <G4VPhysicsConstructor.hh>
 
 class PhysicsList_495: public G4VModularPhysicsList {
 public:

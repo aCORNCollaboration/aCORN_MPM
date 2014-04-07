@@ -1,11 +1,12 @@
 #ifndef PRIMARYGENERATORMESSENGER_HH
 #define PRIMARYGENERATORMESSENGER_HH
 
-#include "G4UImessenger.hh"
-#include "G4UIcmdWithAString.hh"
-#include "G4UIdirectory.hh"
 #include "PrimaryGeneratorAction.hh"
+
 #include "globals.hh"
+#include <G4UImessenger.hh>
+#include <G4UIcmdWithAString.hh>
+#include <G4UIdirectory.hh>
 
 class PrimaryGeneratorAction;
 

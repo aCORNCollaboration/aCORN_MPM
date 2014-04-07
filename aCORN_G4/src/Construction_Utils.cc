@@ -2,7 +2,6 @@
 
 #include <G4SystemOfUnits.hh>
 
-const G4double inch = 2.54*cm;
 const G4double torr = atmosphere/760.;
 
 G4Material* MaterialUser::Be = NULL;

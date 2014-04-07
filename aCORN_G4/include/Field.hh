@@ -3,9 +3,9 @@
 
 #include <vector>
 
-#include "G4MagneticField.hh"
-#include "G4ThreeVector.hh"
-#include "G4String.hh"
+#include <G4MagneticField.hh>
+#include <G4ThreeVector.hh>
+#include <G4String.hh>
 
 using namespace std;
 

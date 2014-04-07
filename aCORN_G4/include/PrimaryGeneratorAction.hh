@@ -9,12 +9,12 @@
 
 #include <vector>
 
-#include "G4VUserPrimaryGeneratorAction.hh"
-#include "G4String.hh"
-#include "G4ThreeVector.hh"
-#include "G4ParticleGun.hh"
-#include "G4Event.hh"
-#include "G4VUserEventInformation.hh"
+#include <G4VUserPrimaryGeneratorAction.hh>
+#include <G4String.hh>
+#include <G4ThreeVector.hh>
+#include <G4ParticleGun.hh>
+#include <G4Event.hh>
+#include <G4VUserEventInformation.hh>
 
 /// User event information for recording primary event weighting
 class PrimEvtWeighting: public G4VUserEventInformation {

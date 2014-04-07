@@ -17,9 +17,9 @@
 #include <bitset>
 
 #include "globals.hh"
-#include "G4ParticleTable.hh"
-#include "G4ParticleDefinition.hh"
-#include "G4SystemOfUnits.hh"
+#include <G4ParticleTable.hh>
+#include <G4ParticleDefinition.hh>
+#include <G4SystemOfUnits.hh>
 
 /// generate a random position in a disk
 void diskRandom(G4double radius, G4double& x, G4double& y) {

@@ -2,17 +2,17 @@
 #define CONSTRUCTIONUTILS_HH
 
 #include "globals.hh"
-#include "G4Material.hh"
-#include "G4Element.hh"
-#include "G4Box.hh"
-#include "G4Tubs.hh"
-#include "G4VPhysicalVolume.hh"
-#include "G4LogicalVolume.hh"
-#include "G4ThreeVector.hh"
-#include "G4PVPlacement.hh"
-#include "G4PVReplica.hh"
-#include "G4RotationMatrix.hh"
-#include "G4VisAttributes.hh"
+#include <G4Material.hh>
+#include <G4Element.hh>
+#include <G4Box.hh>
+#include <G4Tubs.hh>
+#include <G4VPhysicalVolume.hh>
+#include <G4LogicalVolume.hh>
+#include <G4ThreeVector.hh>
+#include <G4PVPlacement.hh>
+#include <G4PVReplica.hh>
+#include <G4RotationMatrix.hh>
+#include <G4VisAttributes.hh>
 
 /// class for building with common materials
 class MaterialUser {

@@ -2,10 +2,10 @@
 #include "AnalysisManager.hh"
 #include "ROOT_Headers.hh"
 
-#include "G4SteppingManager.hh"
-#include "G4String.hh"
-#include "G4EventManager.hh"
-#include "G4Event.hh"
+#include <G4SteppingManager.hh>
+#include <G4String.hh>
+#include <G4EventManager.hh>
+#include <G4Event.hh>
 
 SteppingAction::SteppingAction() { 
 	Reset();

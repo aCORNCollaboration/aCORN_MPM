@@ -1,7 +1,7 @@
 #include "SteppingAction_Verbose.hh"
 
-#include "G4SteppingManager.hh"
-#include "G4UnitsTable.hh"
+#include <G4SteppingManager.hh>
+#include <G4UnitsTable.hh>
 
 void SteppingAction_Verbose::StepInfo()
 {

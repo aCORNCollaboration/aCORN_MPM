@@ -1,7 +1,7 @@
 #ifndef STEPPINGACTION_VERBOSE
 #define STEPPINGACTION_VERBOSE
 
-#include "G4SteppingVerbose.hh"
+#include <G4SteppingVerbose.hh>
 
 /// class for printing out information at every step
 class SteppingAction_Verbose : public G4SteppingVerbose {

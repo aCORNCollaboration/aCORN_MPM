@@ -2,11 +2,11 @@
 #define RUNACTION_HH
 
 #include "globals.hh"
-#include "G4UserRunAction.hh"
-#include "G4UImessenger.hh"
-#include "G4UIdirectory.hh"
-#include "G4Run.hh"
-#include "G4UIcommand.hh"
+#include <G4UserRunAction.hh>
+#include <G4UImessenger.hh>
+#include <G4UIdirectory.hh>
+#include <G4Run.hh>
+#include <G4UIcommand.hh>
 
 /// user actions for whole run
 class RunAction : public G4UserRunAction, public G4UImessenger {

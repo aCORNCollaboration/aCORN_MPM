@@ -3,11 +3,11 @@
 
 #include "TrackInfo.hh"
 
-#include "G4VHit.hh"
-#include "G4THitsCollection.hh"
-#include "G4Allocator.hh"
-#include "G4ThreeVector.hh"
-#include "G4String.hh"
+#include <G4VHit.hh>
+#include <G4THitsCollection.hh>
+#include <G4Allocator.hh>
+#include <G4ThreeVector.hh>
+#include <G4String.hh>
 
 /// accumuates segment-by-segment information for a track in an SD
 class TrackerHit : public G4VHit {

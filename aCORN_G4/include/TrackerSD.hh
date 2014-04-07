@@ -5,9 +5,9 @@
 
 #include <map>
 
-#include "G4VSensitiveDetector.hh"
-#include "G4Step.hh"
-#include "G4HCofThisEvent.hh"
+#include <G4VSensitiveDetector.hh>
+#include <G4Step.hh>
+#include <G4HCofThisEvent.hh>
 
 /// stores/evaluates tracks passing through each SD
 class TrackerSD : public G4VSensitiveDetector {

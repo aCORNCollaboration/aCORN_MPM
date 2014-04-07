@@ -5,19 +5,19 @@
 
 #include <cassert>
 
-#include "G4SystemOfUnits.hh"
+#include <G4SystemOfUnits.hh>
 
-#include "G4SDManager.hh"
-#include "G4RunManager.hh"
+#include <G4SDManager.hh>
+#include <G4RunManager.hh>
 
-#include "G4MagneticField.hh"
-#include "G4FieldManager.hh"
-#include "G4ChordFinder.hh"
-#include "G4PropagatorInField.hh"
-#include "G4TransportationManager.hh"
+#include <G4MagneticField.hh>
+#include <G4FieldManager.hh>
+#include <G4ChordFinder.hh>
+#include <G4PropagatorInField.hh>
+#include <G4TransportationManager.hh>
 
-#include "G4UserLimits.hh"
-#include "G4PVParameterised.hh"
+#include <G4UserLimits.hh>
+#include <G4PVParameterised.hh>
 
 DetectorConstruction::DetectorConstruction(): experimentalHall_log(NULL), experimentalHall_phys(NULL), fpMagField(NULL) {
 	
@@ -109,15 +109,15 @@ G4VPhysicalVolume* DetectorConstruction::Construct() {
 	return experimentalHall_phys;
 }
 
-#include "G4MagIntegratorStepper.hh"
-#include "G4Mag_UsualEqRhs.hh"
-#include "G4ClassicalRK4.hh"
-#include "G4SimpleHeum.hh"
-#include "G4HelixHeum.hh"
-#include "G4HelixImplicitEuler.hh"
-#include "G4HelixExplicitEuler.hh"
-#include "G4HelixSimpleRunge.hh"
-#include "G4HelixMixedStepper.hh"
+#include <G4MagIntegratorStepper.hh>
+#include <G4Mag_UsualEqRhs.hh>
+#include <G4ClassicalRK4.hh>
+#include <G4SimpleHeum.hh>
+#include <G4HelixHeum.hh>
+#include <G4HelixImplicitEuler.hh>
+#include <G4HelixExplicitEuler.hh>
+#include <G4HelixSimpleRunge.hh>
+#include <G4HelixMixedStepper.hh>
 
 void DetectorConstruction::ConstructField(const G4String& filename) {
 	
