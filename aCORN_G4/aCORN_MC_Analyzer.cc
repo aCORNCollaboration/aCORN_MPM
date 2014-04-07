@@ -1,5 +1,4 @@
 #include "aCORN_MC_Analyzer.hh"
-#include <TMath.h>
 #include <cfloat>
 #include <string.h>
 

@@ -1,8 +1,8 @@
 #ifndef RUNACTION_HH
 #define RUNACTION_HH
 
-#include "G4UserRunAction.hh"
 #include "globals.hh"
+#include "G4UserRunAction.hh"
 #include "G4UImessenger.hh"
 #include "G4UIdirectory.hh"
 #include "G4Run.hh"

@@ -1,11 +1,13 @@
 #ifndef TRACKERSD
 #define TRACKERSD
 
+#include "TrackerHit.hh"
+
+#include <map>
+
 #include "G4VSensitiveDetector.hh"
 #include "G4Step.hh"
 #include "G4HCofThisEvent.hh"
-#include "TrackerHit.hh"
-#include <map>
 
 /// stores/evaluates tracks passing through each SD
 class TrackerSD : public G4VSensitiveDetector {

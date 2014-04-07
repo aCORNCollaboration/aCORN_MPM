@@ -1,8 +1,8 @@
 #ifndef EVENTACTION_HH
 #define EVENTACTION_HH
 
-#include "G4UserEventAction.hh"
 #include "TStopwatch.h"
+#include "G4UserEventAction.hh"
 
 class G4Event;
 

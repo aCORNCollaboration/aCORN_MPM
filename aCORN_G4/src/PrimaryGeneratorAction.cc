@@ -1,26 +1,25 @@
 #include "PrimaryGeneratorAction.hh"
-#include "G4ParticleTable.hh"
-#include "G4ParticleDefinition.hh"
-#include "G4SystemOfUnits.hh"
 #include "BetaSpectrum.hh"
 #include "Enums.hh"
-#include "globals.hh"
 #include "Randomize.hh"
 #include "AnalysisManager.hh"
 #include "PathUtils.hh"
 #include "SMExcept.hh"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <TRandom.h>
-#include <TF2.h>
-
 #include <unistd.h>
 #include <vector>
 #include <algorithm>
 #include <cassert>
 #include <numeric>
 #include <bitset>
+
+#include "globals.hh"
+#include "G4ParticleTable.hh"
+#include "G4ParticleDefinition.hh"
+#include "G4SystemOfUnits.hh"
 
 /// generate a random position in a disk
 void diskRandom(G4double radius, G4double& x, G4double& y) {
@@ -70,7 +69,7 @@ void PrimaryGeneratorAction::SetEventFile(G4String val) {
 	ETS->addFile(val.data());
 }
 
-PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC): myDetector(myDC), ETS(NULL), posOffset(0,0,0) {
+PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* myDC): myDetector(myDC), ETS(NULL), posOffset(0,0,-0.3) {
 	particleGun = new G4ParticleGun();
 	gunMessenger = new PrimaryGeneratorMessenger(this);
 	
@@ -139,8 +138,9 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent) {
 		NucDecayEvent e;
 		e.d = D_ELECTRON;
 		e.E = particleGun->GetParticleEnergy()/keV;
-		e.p[0] = e.p[1] = 0;
-		e.p[2] = -1;
+		e.p[0] = 0;
+		e.p[1] = 1./sqrt(2.);
+		e.p[2] = -1./sqrt(2.);
 		v.push_back(e);
 		setVertices(v);
 	}

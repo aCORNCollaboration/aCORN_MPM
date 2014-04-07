@@ -8,11 +8,7 @@
 #include <fstream>
 #include <cassert>
 
-#include <TFile.h>
-#include <TTree.h>
-#include <TClonesArray.h>
-#include <TVector3.h>
-#include <Rtypes.h>
+#include "ROOT_Headers.hh"
 
 #include "MCEvent.hh"
 #include "TrackInfo.hh"

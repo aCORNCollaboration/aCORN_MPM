@@ -36,21 +36,21 @@ std::string lower(std::string s);
 /// convert a string to uppercase
 std::string upper(std::string s);
 /// replace all of one character in a string with another
-std::string replace(std::string s, char o, char n);
+std::string replace(std::string str, char o, char n);
 /// check whether string a begins with string b
 bool startsWith(const std::string& a, const std::string& b);
 /// split a string into substrings on given split characters
-std::vector<std::string> split(const std::string& s, const std::string splitchars = " \t\r\n");
+std::vector<std::string> split(const std::string& str, const std::string splitchars = " \t\r\n");
 /// join a list of strings into a single string
 std::string join(const std::vector<std::string>& ss, const std::string& sep = " ");
 /// strip junk chars off start and end of string
-std::string strip(const std::string& s, const std::string stripchars = " \t\r\n");
+std::string strip(const std::string& str, const std::string stripchars = " \t\r\n");
 /// split a string into a vector of doubles
-std::vector<double> sToDoubles(const std::string& s, const std::string splitchars = ", \t\r\n");
+std::vector<double> sToDoubles(const std::string& str, const std::string splitchars = ", \t\r\n");
 /// split a string into a vector of floats
-std::vector<float> sToFloats(const std::string& s, const std::string splitchars = ", \t\r\n");
+std::vector<float> sToFloats(const std::string& str, const std::string splitchars = ", \t\r\n");
 /// split a string into a vector of ints
-std::vector<int> sToInts(const std::string& s, const std::string splitchars = ", \t\r\n");
+std::vector<int> sToInts(const std::string& str, const std::string splitchars = ", \t\r\n");
 /// read in an array from a file
 std::vector< std::vector<float> > readArray(std::ifstream& fin, unsigned int minitems = 1, const std::string splitchars = ", \t\r\n");
 

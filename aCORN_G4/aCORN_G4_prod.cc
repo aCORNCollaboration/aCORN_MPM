@@ -32,7 +32,6 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "Construct_All.hh"
-#include "G4SystemOfUnits.hh"
 #include "PhysicsList_495.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "RunAction.hh"
@@ -40,9 +39,9 @@
 #include "SteppingAction.hh"
 #include "SteppingAction_Verbose.hh"
 #include "AnalysisManager.hh"
+
+#include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
-
-
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
 #include "G4UIExecutive.hh"
@@ -82,7 +81,7 @@ int main(int argc, char** argv) {
 	runManager->SetUserAction(new PrimaryGeneratorAction(detector));
 	runManager->SetUserAction(new RunAction);
 	runManager->SetUserAction(new EventAction);
-	runManager->SetUserAction(new SteppingAction);  
+	runManager->SetUserAction(new SteppingAction);
 	
 	//create global analysis manager for histograms and trees
 	gAnalysisManager = new AnalysisManager();

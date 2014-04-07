@@ -1,8 +1,7 @@
 #ifndef MCEVENT_HH
 #define MCEVENT_HH
 
-#include "TObject.h"
-#include "TClonesArray.h"
+#include "ROOT_Headers.hh"
 #include "TrackInfo.hh"
 #include "PrimaryInfo.hh"
 

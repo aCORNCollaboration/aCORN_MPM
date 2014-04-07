@@ -1,19 +1,20 @@
 #ifndef PRIMARYGENERATORACTION_HH
 #define PRIMARYGENERATORACTION_HH
 
+#include "ROOT_Headers.hh"
+#include "Construct_All.hh"
+#include "PrimaryGeneratorMessenger.hh"
+#include "ElectronBindingEnergy.hh"
+#include "NuclEvtGen.hh"
+
+#include <vector>
+
 #include "G4VUserPrimaryGeneratorAction.hh"
 #include "G4String.hh"
 #include "G4ThreeVector.hh"
 #include "G4ParticleGun.hh"
 #include "G4Event.hh"
 #include "G4VUserEventInformation.hh"
-#include "Construct_All.hh"
-#include "PrimaryGeneratorMessenger.hh"
-#include "ElectronBindingEnergy.hh"
-#include "NuclEvtGen.hh"
-#include <vector>
-#include <Rtypes.h>
-#include <TF1.h>
 
 /// User event information for recording primary event weighting
 class PrimEvtWeighting: public G4VUserEventInformation {

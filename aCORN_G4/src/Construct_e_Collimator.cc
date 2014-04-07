@@ -1,8 +1,10 @@
 #include "Construct_e_Collimator.hh"
-#include "G4SystemOfUnits.hh"
-#include <G4Polycone.hh>
-#include <cassert>
 #include "strutils.hh"
+
+#include <cassert>
+
+#include <G4SystemOfUnits.hh>
+#include <G4Polycone.hh>
 
 ///////
 // see Noid thesis, p. 78...
@@ -43,7 +45,7 @@ void eCollimatorConstruction::Construct() {
 	
 	// overall volume
 	G4Tubs* e_collim_tube = new G4Tubs("e_collim_tube",	// name
-									   r_inner,			// rmin
+									   0,			// rmin
 									   r_outer,			// rmax
 									   length/2.,		// half z
 									   0.,				// start angle
@@ -56,5 +58,5 @@ void eCollimatorConstruction::Construct() {
 	aperture_log = new G4LogicalVolume(e_collim_aperture_tube, Wu, "e_collim_aperture_log");
 	for(unsigned int i=0; i<aperture_spacing.size(); i++)
 		apertures.push_back(new G4PVPlacement(NULL, G4ThreeVector(0,0,length/2-(aperture_spacing[i]+c_thick/2)),
-											  aperture_log, "e_collim_ring_phys_"+itos(i), eCollimator_log, false, i));
+											  aperture_log, "e_collim_ring_phys_"+itos(i), eCollimator_log, false, 0));
 }

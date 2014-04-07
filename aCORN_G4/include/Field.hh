@@ -1,11 +1,11 @@
 #ifndef FIELD_HH
 #define FIELD_HH
 
+#include <vector>
+
 #include "G4MagneticField.hh"
 #include "G4ThreeVector.hh"
 #include "G4String.hh"
-
-#include <vector>
 
 using namespace std;
 

@@ -1,9 +1,12 @@
 #include "Field.hh"
-#include "G4SystemOfUnits.hh"
+
 #include <cmath>
 #include <fstream>
 #include <string>
 #include <cassert>
+
+#include <G4SystemOfUnits.hh>
+
 
 Field::Field(const G4String& filename): addAFP(false), rmax2(20*20*cm2), fieldScale(1.0) {
 	LoadFieldMap(filename);
@@ -16,12 +19,12 @@ void Field::LoadFieldMap(const G4String& filename) {
 	
 	if(filename==""){
 		//default field profile
-		addPoint(-3.0*m,0.6*tesla);
-		addPoint(-2.2*m,0.6*tesla);
-		addPoint(-1.5*m,1.0*tesla);
-		addPoint(1.5*m,1.0*tesla);
-		addPoint(2.2*m,0.6*tesla);
-		addPoint(3.0*m,0.6*tesla);
+		G4cout << "Loading default simplified magnetic field." << G4endl;
+		addPoint(-1.000*m,0.005*tesla);
+		addPoint(-0.800*m,0.005*tesla);
+		addPoint(-0.525*m,0.040*tesla);
+		addPoint(0.000*m, 0.040*tesla);
+		addPoint(2.000*m, 0.040*tesla);
 	} else {
 		// load profile from file
 		ifstream fin;

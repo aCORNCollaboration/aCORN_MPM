@@ -1,8 +1,8 @@
 #ifndef STEPPINGACTION_HH
 #define STEPPINGACTION_HH
 
-#include "G4UserSteppingAction.hh"
 #include "globals.hh"
+#include "G4UserSteppingAction.hh"
 
 /// user stepping action to check for and abort "trapped" events
 class SteppingAction : public G4UserSteppingAction {

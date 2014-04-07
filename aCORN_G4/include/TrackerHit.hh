@@ -1,12 +1,13 @@
 #ifndef TRACKERHIT_HH
 #define TRACKERHIT_HH
 
+#include "TrackInfo.hh"
+
 #include "G4VHit.hh"
 #include "G4THitsCollection.hh"
 #include "G4Allocator.hh"
 #include "G4ThreeVector.hh"
 #include "G4String.hh"
-#include "TrackInfo.hh"
 
 /// accumuates segment-by-segment information for a track in an SD
 class TrackerHit : public G4VHit {

@@ -1,10 +1,12 @@
-///This is a simple class that will handle the MC-ROOT interface.
-///The main point is to create a global interface object which 
-///renders the flexibility for user "rooting" at various level 
-///in the MC, e.g. detector construction, tracking, etc.
-///Created based on IcaG4 from http://root.cern.ch/root/HowtoMC.html
-///Jianglai 05/26/2006
-///Updated MPM 10/2011
+#include "Randomize.hh"
+#include "SMExcept.hh"
+
+#include "AnalysisManager.hh"
+#include "PrimaryGeneratorAction.hh"
+
+#include <vector>
+#include <string>
+#include <cassert>
 
 #include "G4ios.hh"
 #include "G4SystemOfUnits.hh"
@@ -20,16 +22,6 @@
 #include "G4PrimaryParticle.hh"
 #include "G4SDManager.hh"
 #include "G4EventManager.hh"
-
-#include "Randomize.hh"
-#include "SMExcept.hh"
-
-#include "AnalysisManager.hh"
-#include "PrimaryGeneratorAction.hh"
-
-#include <vector>
-#include <string>
-#include <cassert>
 
 using namespace std;
 

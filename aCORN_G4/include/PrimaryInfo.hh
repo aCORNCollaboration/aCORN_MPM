@@ -1,9 +1,7 @@
 #ifndef PRIMARYINFO_HH
 #define PRIMARYINFO_HH
 
-#include "Rtypes.h"
-#include "TObject.h"
-#include "TObjString.h"
+#include "ROOT_Headers.hh"
 
 /// ROOT-friendly info on a primary particle
 /// we will save a list of these for each event

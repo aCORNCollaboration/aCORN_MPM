@@ -8,8 +8,8 @@
 #include "PathUtils.hh"
 #include "SMExcept.hh"
 
-Stringmap::Stringmap(const std::string& s) {
-	std::vector<std::string> pairs = split(s,"\t");
+Stringmap::Stringmap(const std::string& str) {
+	std::vector<std::string> pairs = split(str,"\t");
 	for(std::vector<std::string>::const_iterator it = pairs.begin(); it!=pairs.end(); it++) {
 		std::vector<std::string> keyval = split(*it,"=");
 		if(keyval.size() != 2)

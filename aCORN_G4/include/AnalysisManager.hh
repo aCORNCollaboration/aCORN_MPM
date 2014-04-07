@@ -1,6 +1,8 @@
 #ifndef ANALYSISMANAGER_HH
 #define ANALYSISMANAGER_HH
 
+#include "ROOT_Headers.hh"
+
 class G4VPhysicalVolume;
 class G4Event;
 class G4Run;
@@ -10,10 +12,6 @@ class G4PrimaryVertex;
 class G4PrimaryParticle;
 
 #include "globals.hh"
-#include <TH1.h>
-#include <TTree.h>
-#include <TFile.h>
-#include <TStopwatch.h>
 
 #include "EventAction.hh"
 #include "SteppingAction.hh"
@@ -72,7 +70,6 @@ private:
 	TFile *fROOTOutputFile;		//< ROOT output file
 	TTree *fEventTree;			//< ROOT output TTree
 	Int_t fRunNumber;  			//< MC run number
-	UInt_t fSeed;				//< MC random seed
 	vector<G4int> detectorIDs;	//< list of SD ID numbers
 	vector<G4String> fSDNames;	//< list of SD names corresponding to ID numbers
 };

@@ -1,7 +1,11 @@
 #include "Construct_All.hh"
-#include "G4SystemOfUnits.hh"
-
 #include "AnalysisManager.hh"
+#include "TrackerSD.hh"
+#include "Field.hh"
+
+#include <cassert>
+
+#include "G4SystemOfUnits.hh"
 
 #include "G4SDManager.hh"
 #include "G4RunManager.hh"
@@ -14,11 +18,6 @@
 
 #include "G4UserLimits.hh"
 #include "G4PVParameterised.hh"
-
-#include "TrackerSD.hh"
-#include "Field.hh"
-
-#include <cassert>
 
 DetectorConstruction::DetectorConstruction(): experimentalHall_log(NULL), experimentalHall_phys(NULL), fpMagField(NULL) {
 	
@@ -148,7 +147,7 @@ void DetectorConstruction::ConstructField(const G4String& filename) {
 		fieldMgr->GetChordFinder()->GetIntegrationDriver()->RenewStepperAndAdjust(pStepper);
 		
 		// set required accuracy for finding intersections
-		fieldMgr->GetChordFinder()->SetDeltaChord(100.0*um);
+		fieldMgr->GetChordFinder()->SetDeltaChord(10.0*um);
 		// set integration relative error limits for small and large steps
 		fieldMgr->SetMinimumEpsilonStep(1e-6);
 		fieldMgr->SetMaximumEpsilonStep(1e-5);

@@ -25,8 +25,6 @@ class GeantSimManager:
 		self.settings["gen_cmds"] = ""
 		self.settings["vis_cmd"] = ""
 		
-		#self.settings["vis_cmd"] += "/tracking/verbose 2\n"
-		
 		self.g4_out_dir_base = None
 		
 		self.anagroup = 10 # number of files to group together for final analyzer result
@@ -49,11 +47,15 @@ class GeantSimManager:
 		#self.settings["vis_cmd"] += "/vis/viewer/set/style surface\n"
 		#self.settings["vis_cmd"] += "/vis/viewer/set/hiddenEdge 1"
 		
+		self.settings["vis_cmd"] += "/tracking/verbose 2\n"
+		
 		# track visualization
 		if 1:
 			self.settings["vis_cmd"] += "/vis/modeling/trajectories/create/drawByCharge myTrackVis\n"
-			#self.settings["vis_cmd"] += "/vis/modeling/trajectories/myTrackVis/default/setDrawStepPts true\n"
-			#self.settings["vis_cmd"] += "/vis/modeling/trajectories/myTrackVis/default/setDrawAuxPts true\n"
+			# extra tracking points
+			self.settings["vis_cmd"] += "/vis/modeling/trajectories/myTrackVis/default/setDrawStepPts true\n"
+			self.settings["vis_cmd"] += "/vis/modeling/trajectories/myTrackVis/default/setDrawAuxPts true\n"
+			
 			self.settings["vis_cmd"] += "/vis/modeling/trajectories/select myTrackVis\n"
 			self.settings["vis_cmd"] += "/vis/scene/add/trajectories\n"
 			self.settings["vis_cmd"] += "/vis/scene/add/trajectories rich\n"

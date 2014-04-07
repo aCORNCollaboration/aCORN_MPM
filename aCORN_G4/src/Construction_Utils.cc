@@ -1,5 +1,6 @@
 #include "Construction_Utils.hh"
-#include "G4SystemOfUnits.hh"
+
+#include <G4SystemOfUnits.hh>
 
 const G4double inch = 2.54*cm;
 const G4double torr = atmosphere/760.;

@@ -1,20 +1,17 @@
 #include "TrackerHit.hh"
+#include "Enums.hh"
+
 #include "G4UnitsTable.hh"
 #include "G4VVisManager.hh"
 #include "G4Circle.hh"
 #include "G4Colour.hh"
 #include "G4VisAttributes.hh"
-#include "Enums.hh"
 #include "G4SystemOfUnits.hh"
 
 G4Allocator<TrackerHit> TrackerHitAllocator;
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 TrackerHit::TrackerHit(): eDepSoFar(0), eDepQuenchedSoFar(0), hitPosition(), edepWeightedPosition(),
 edepWeightedPosition2(), incidentMomentum(), exitMomentum(), vertex() {}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void TrackerHit::Print()
 {
@@ -31,8 +28,6 @@ void TrackerHit::Print()
 	 << "  exit momentum "<<G4BestUnit(exitMomentum,"Energy")
 	 << G4endl;
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void TrackerHit::fillTrackInfo(TrackInfo& h) const {
 	h.trackID = GetTrackID();

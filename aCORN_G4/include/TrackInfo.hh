@@ -1,9 +1,7 @@
 #ifndef TRACKINFO_HH
 #define TRACKINFO_HH
 
-#include "Rtypes.h"
-#include "TObject.h"
-#include "TObjString.h"
+#include "ROOT_Headers.hh"
 
 using namespace std;
 
