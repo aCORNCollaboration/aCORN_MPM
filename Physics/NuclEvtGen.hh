@@ -378,7 +378,7 @@ public:
 	
 protected:
 	/// set tree readpoints
-	virtual void setReadpoints();
+	virtual void setReadpoints(TTree* T);
 
 	NucDecayEvent evt;	//< event readpoint
 	unsigned int prevN;	//< previous event number

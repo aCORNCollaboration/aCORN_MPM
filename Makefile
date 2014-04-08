@@ -38,7 +38,9 @@ endif
 # things to build
 #
 
-VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/
+VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/:BaseTypes/
+
+BaseTypes = TagCounter.o
 
 IOUtils = ControlMenu.o OutputManager.o PathUtils.o QFile.o SMExcept.o strutils.o
 
@@ -46,7 +48,9 @@ Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o
 
 ROOTUtils = GraphUtils.o TChainScanner.o
 
-objects = $(IOUtils) $(Physics) $(ROOTUtils)
+Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o
+
+objects = $(BaseTypes) $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis)
 
 
 all: libaCORN_MPM.a
@@ -61,13 +65,6 @@ libaCORN_MPM.a: $(objects)
 StandaloneObjs = ReducedToROOT
 
 standalone: $(StandaloneObjs)
-
-
-#aCORN Geant4:
-#	mkdir -p aCORN_G4_build/
-#	cd aCORN_G4_build; cmake -DGeant4_DIR=~/geant4.9.5/geant4.9.5-install/lib/Geant4-9.5.0/ ../aCORN_G4/; make
-
-
 
 #
 # cleanup

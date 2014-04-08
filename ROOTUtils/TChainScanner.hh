@@ -39,12 +39,13 @@ public:
 		
 	UInt_t nEvents;						//< number of events in current TChain
 	
+	/// over-write this in subclass to automaticlly set readout points on first loaded file
+	virtual void setReadpoints(TTree* T) {}
+	
 protected:
 	
-	/// over-write this in subclass to automaticlly set readout points on first loaded file
-	virtual void setReadpoints() {}
 	/// "string friendly" SetBranchAddress
-	void SetBranchAddress(const std::string& bname, void* bdata);
+	void SetBranchAddress(TTree* T, const std::string& bname, void* bdata);
 	
 	std::vector<unsigned int> nnEvents;	//< number of events in each loaded TChain;
 	unsigned int nFiles;				//< get number of loaded files

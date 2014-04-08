@@ -103,16 +103,30 @@
 		4C4409B618F0671E001E72E6 /* Construct_e_Collimator.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Construct_e_Collimator.cc; sourceTree = "<group>"; };
 		4C4409B718F0679C001E72E6 /* Construct_e_Collimator.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Construct_e_Collimator.hh; sourceTree = "<group>"; };
 		4C4409B818F31A46001E72E6 /* ROOT_Headers.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ROOT_Headers.hh; sourceTree = "<group>"; };
+		4C4409BB18F37ECF001E72E6 /* ReducedToROOT.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ReducedToROOT.cc; path = Standalone/ReducedToROOT.cc; sourceTree = "<group>"; };
+		4C4409BC18F39F54001E72E6 /* ReducedToROOT.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ReducedToROOT.py; sourceTree = "<group>"; };
+		4C4409BE18F449C8001E72E6 /* RunSetScanner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = RunSetScanner.hh; path = Analysis/RunSetScanner.hh; sourceTree = "<group>"; };
+		4C4409BF18F44A7E001E72E6 /* RunSetScanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RunSetScanner.cc; sourceTree = "<group>"; };
+		4C4409C118F44BBA001E72E6 /* Enums.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Enums.hh; path = BaseTypes/Enums.hh; sourceTree = "<group>"; };
+		4C4409C218F44BEB001E72E6 /* TagCounter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TagCounter.cpp; path = BaseTypes/TagCounter.cpp; sourceTree = "<group>"; };
+		4C4409C318F44BEB001E72E6 /* TagCounter.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TagCounter.hh; path = BaseTypes/TagCounter.hh; sourceTree = "<group>"; };
+		4C4409C418F44CB5001E72E6 /* BaseDataScanner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseDataScanner.hh; sourceTree = "<group>"; };
+		4C4409C518F44DB0001E72E6 /* BaseDataScanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseDataScanner.cc; sourceTree = "<group>"; };
+		4C4409C618F44EA7001E72E6 /* ReducedDataScanner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ReducedDataScanner.hh; sourceTree = "<group>"; };
+		4C4409C718F44F40001E72E6 /* ReducedDataScanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReducedDataScanner.cc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		4C0C6DA318EF203300157BFB = {
 			isa = PBXGroup;
 			children = (
+				4C4409C018F44B92001E72E6 /* BaseTypes */,
+				4C4409BA18F37D81001E72E6 /* Standalone */,
 				4C44099318EF2BDD001E72E6 /* Aux */,
 				4C0C6DAE18EF207100157BFB /* IOUtils */,
 				4C0C6E0018EF233300157BFB /* Physics */,
 				4C44099218EF27A3001E72E6 /* ROOTUtils */,
+				4C4409BD18F449AF001E72E6 /* Analysis */,
 				4C0C6DBE18EF21CF00157BFB /* aCORN_G4 */,
 				4C0C6DBD18EF207100157BFB /* Makefile */,
 				4C4409AB18EF41CD001E72E6 /* Scripts */,
@@ -292,8 +306,40 @@
 			children = (
 				4C4409AD18EF41CD001E72E6 /* GeantGenMacroTemplate.mac */,
 				4C4409AE18EF41CD001E72E6 /* GeantSimManager.py */,
+				4C4409BC18F39F54001E72E6 /* ReducedToROOT.py */,
 			);
 			path = launchers;
+			sourceTree = "<group>";
+		};
+		4C4409BA18F37D81001E72E6 /* Standalone */ = {
+			isa = PBXGroup;
+			children = (
+				4C4409BB18F37ECF001E72E6 /* ReducedToROOT.cc */,
+			);
+			name = Standalone;
+			sourceTree = "<group>";
+		};
+		4C4409BD18F449AF001E72E6 /* Analysis */ = {
+			isa = PBXGroup;
+			children = (
+				4C4409BE18F449C8001E72E6 /* RunSetScanner.hh */,
+				4C4409BF18F44A7E001E72E6 /* RunSetScanner.cc */,
+				4C4409C418F44CB5001E72E6 /* BaseDataScanner.hh */,
+				4C4409C518F44DB0001E72E6 /* BaseDataScanner.cc */,
+				4C4409C618F44EA7001E72E6 /* ReducedDataScanner.hh */,
+				4C4409C718F44F40001E72E6 /* ReducedDataScanner.cc */,
+			);
+			name = Analysis;
+			sourceTree = "<group>";
+		};
+		4C4409C018F44B92001E72E6 /* BaseTypes */ = {
+			isa = PBXGroup;
+			children = (
+				4C4409C218F44BEB001E72E6 /* TagCounter.cpp */,
+				4C4409C318F44BEB001E72E6 /* TagCounter.hh */,
+				4C4409C118F44BBA001E72E6 /* Enums.hh */,
+			);
+			name = BaseTypes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

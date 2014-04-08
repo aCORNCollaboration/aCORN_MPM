@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <string>
 #include <cassert>
+#include <vector>
+#include <algorithm>
+#include "ReducedDataScanner.hh"
 
 // ./ReducedToROOT ~/Documents/aCORN_data/s1331pt1/s1331r0000_red.txt ~/Documents/aCORN_data/s1331r0000_red.root
 
@@ -18,7 +21,7 @@
 //		PEnergy=-1 flag for second and more electrons associated with a single proton.
 //		PEnergy=-2 no energy signal detected, event had only discriminator signals.
 //	1-digit number of proton signals
-//	5-digit time offset between electron and proton energy signal (eTIme = P_Time - EPTime)
+//	5-digit time offset between electron and proton energy signal (eTIme = T_p - EPTime)
 //	5-digit time offset between electron and proton discriminator signal (eTime = D_Time - EPTime)
 //	5-digit electron energy
 //	2 digit number of electron PMTs
@@ -58,44 +61,39 @@ int main(int argc, char** argv) {
 	outf->cd();
 
 	// data TTree
-	const unsigned int NCH_MAX = 32;
-	Long_t P_Time;			// proton time, 10ns
-	Int_t PEngy;			// proton energy
-	Int_t nP = 1;			// number of protons (always 1 in this format)
-	Int_t PmETime;			// P_Time - EPTime
-	Int_t E_Enrgy;			// Electron energy
-	UInt_t nE;				// number of electron PMTs
-	Int_t V;				// number of veto PMTs
-	UInt_t DetFired;		// detector firing bit map 0-30
-	UInt_t DetPiled;		// pileup flags [e- dead zone][det. 0-30]
-	Int_t Idx;				// proton index
-	UInt_t dtl[NCH_MAX];	// Electron PMT "detail" code
 	TTree* T  = new TTree("RedEvt","aCORN reduced event data");
-	T->Branch("P_Time", &P_Time, "P_Time/L");
-	T->Branch("PEngy", &PEngy, "PEngy/I");
-	T->Branch("nP", &nP, "nP/I");
-	T->Branch("PmETime", &PmETime, "PmETime/I");
-	T->Branch("E_Enrgy", &E_Enrgy, "E_Enrgy/I");
-	T->Branch("nE", &nE, "nE/I");
-	T->Branch("V", &V, "V/I");
-	T->Branch("DetFired", &DetFired, "DetFired/i");
-	T->Branch("DetPiles", &DetPiled, "DetPiled/i");
-	T->Branch("Idx", &Idx, "Idx/I");
-	T->Branch("dtl", dtl, "dtl[32]/i");
+	ReducedDataScanner R;
+	R.setReadpoints(T);
 	
 	while(!inf.fail()) {
-		inf >> std::dec >> std::skipws >>  P_Time >> PEngy >> PmETime >> E_Enrgy >> nE >> V
-			>> std::hex >> DetFired >> DetPiled >> Idx;
+		inf >> std::dec >> std::skipws >>  R.T_p >> R.E_p >> R.T_e2p >> R.E_e >> R.nE >> R.V
+			>> std::hex >> R.DetFired >> R.DetPiled >> R.Idx;
 		
 		if(inf.fail()) break;
 		
-		//std::cout << P_Time << "\t" << PEngy << "\t" << nE;
-		assert(nE+V < NCH_MAX);
-		for(unsigned int i=0; i<nE+V; i++) {
+		for(unsigned int i=0; i<NCH_MAX; i++) R.E_PMT[i] = R.T_PMT[i] = 0;
+		
+		//std::cout << T_p << "\t" << E_p << "\t" << nE;
+		assert(R.nE+R.V < NCH_MAX);
+		UInt_t dtl[NCH_MAX];	// Electron PMT "detail" code
+		
+		std::vector<Char_t> tps;
+		R.Max_PMT = -1;
+		R.E_Max_PMT = 0;
+		for(unsigned int i=0; i<R.nE+R.V; i++) {
 			inf >> std::hex >> dtl[i];
 			//std::cout << "\t" << dtl[i];
+			unsigned int chn = (dtl[i]>>19);
+			assert(chn < NCH_MAX);
+			R.E_PMT[chn] = (dtl[i]>>4) & ((1<<15)-1);
+			R.T_PMT[chn] = dtl[i] & ((1<<4)-1);
+			tps.push_back(R.T_PMT[chn]);
+			if(R.E_Max_PMT < R.E_PMT[chn]) { R.Max_PMT = chn; R.E_Max_PMT = R.E_PMT[chn]; }
 		}
 		//std::cout << "\n";
+		std::sort(tps.begin(),tps.end());
+		R.T_PMT_MED = tps.size()?tps[tps.size()/2]:0;
+		R.makeFlags();
 		
 		// make sure we're at the end of the line (note '\r' endings...)
 		inf.getline(lbuf,2,'\r');
@@ -112,33 +110,45 @@ int main(int argc, char** argv) {
 }
 
 /*
-#####  P_Time   PEngy E-PTm E_Enrgy nE V DetFired DetPiled --Index-  EPMT codes
+#####  T_p   E_p E-PTm E_e nE V DetFired DetPiled --Index-  EPMT codes
 000000000066474   320     0       0  0 0 28000000 00000000 00000000
 
 000000007529767 14137   600    5177 11 0 2FF1C800 00000000 00000004 700C90 780C42 D00B12 B03712 581613 B80C43 C81C04 C01854 A828A4 A03E14 802B55
+
+The top 5 bits are the detector number.
+The next 11 or15 bits are the individual PMT energy. The original PIXIE value was a 15-bit number but early versions of the reduced format used only the 11 most significant bits to save some space.
+The final 4 bits are the time offset (in 10nS units) of this individual PMT relative to the last PMT event in the electron. The actual firing time of this individual PMT can be found from
+PMT Time = Proton Time - E-P Delay (from field3) - time offset.
+
 */
 
 /*
 TChain T("RedEvt")
 T.Add("*.root") 
 # proton spectrum; main peak 500--2000; pulser at 7000--9000
-T->Draw("PEngy","PEngy<10000")
+T->Draw("E_p","E_p<10000")
 
 # electron energy? so badly uncalibrated?
-T->Draw("E_Enrgy","PEngy>500 && PEngy<2000 && V==0 && E_Enrgy > 10 && E_Enrgy < 2000")
-T->Draw("E_Enrgy","PEngy>500 && PEngy<2000 && V>0 && E_Enrgy > 10 && E_Enrgy < 2000","Same")
+T->Draw("E_e","E_p>500 && E_p<2000 && V==0 && E_e > 10 && E_e < 2000")
+T->Draw("E_e","E_p>500 && E_p<2000 && V>0 && E_e > 10 && E_e < 2000","Same")
 
 # proton event rate
-T->Draw("P_Time*(1e-9)","PEngy>500 && PEngy<2000 && V==0")
+T->Draw("T_p*(1e-9)","E_p>500 && E_p<2000 && V==0")
 
 # Wishbone!!
-T->Draw("PmETime*0.01:E_Enrgy","PEngy>500 && PEngy<2000 && V==0 && E_Enrgy > 4000 && E_Enrgy < 35000 && PmETime*0.01 > 2.5 && PmETime*0.01 < 4.5","Col")
+T->Draw("T_e2p*0.01:E_e","E_p>500 && E_p<2000 && V==0 && E_e > 4000 && E_e < 35000 && T_e2p*0.01 > 2.5 && T_e2p*0.01 < 4.5","Col")
 
 TH2F foo("foo","aCORN wishbone",50,4000,35000,50,2.5,4.5)
-T->Draw("PmETime*0.01:E_Enrgy >> foo","PEngy>500 && PEngy<2000 && V==0")
+T->Draw("T_e2p*0.01:E_e >> foo","E_p>500 && E_p<2000 && V==0")
 
 gStyle->SetOptStat("")
 foo.GetXaxis()->SetTitle("e^{-} energy [uncalibrated ADC]")
 foo.GetYaxis()->SetTitle("proton TOF [#mus]")
 foo.Draw("Col")
+
+# multiplicity
+T->Draw("nE:E_e","E_p>500 && E_p<2000 && V==0 && E_e > 1000 && E_e < 35000 && T_e2p*0.01 > 2.5 && T_e2p*0.01 < 4.5","Col")
+
+# sum is biased!
+T.Draw("E_e : (E_PMT[0]+E_PMT[1]+E_PMT[2]+E_PMT[3] + E_PMT[4]+E_PMT[5]+E_PMT[6]+E_PMT[7] + E_PMT[8]+E_PMT[9]+E_PMT[10]+E_PMT[11] + E_PMT[12]+E_PMT[13]+E_PMT[14]+E_PMT[15] + E_PMT[16]+E_PMT[17]+E_PMT[18] + E_PMT[19]+E_PMT[20]+E_PMT[21]+E_PMT[22] + E_PMT[23]+E_PMT[24]+E_PMT[25]+E_PMT[26])*1.0 - E_e","E_e>0 && V==0","Col")
 */

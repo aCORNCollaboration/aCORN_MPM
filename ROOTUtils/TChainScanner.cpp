@@ -27,7 +27,7 @@ int TChainScanner::addFile(const std::string& filename) {
 		throw e;
 	}
 	if(!nFiles)
-		setReadpoints();
+		setReadpoints(Tch);
 	nFiles+=nfAdded;
 	return nfAdded;
 }
@@ -61,9 +61,10 @@ void TChainScanner::startScan(bool startRandom) {
 	fflush(stdout);
 }
 
-void TChainScanner::SetBranchAddress(const std::string& bname, void* bdata) {
+void TChainScanner::SetBranchAddress(TTree* T, const std::string& bname, void* bdata) {
 	smassert(bdata);
-	Int_t err = Tch->SetBranchAddress(bname.c_str(),bdata);
+	smassert(T);
+	Int_t err = T->SetBranchAddress(bname.c_str(),bdata);
 	if(err && err != TTree::kNoCheck) {
 		SMExcept e("TTreeBranchError");
 		e.insert("branchName", bname);
