@@ -22,6 +22,7 @@ add_custom_target(
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 include_directories(${PROJECT_SOURCE_DIR}/include
+					${PROJECT_SOURCE_DIR}/../BaseTypes
 					${PROJECT_SOURCE_DIR}/../Physics
 					${PROJECT_SOURCE_DIR}/../IOUtils
 					${PROJECT_SOURCE_DIR}/../RootUtils)

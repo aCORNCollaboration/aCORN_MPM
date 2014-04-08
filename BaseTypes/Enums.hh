@@ -17,7 +17,7 @@ inline AxisDirection& operator++(AxisDirection& d) { return d = AxisDirection(d+
 enum TriggerCategory {
 	TCAT_PROTON = 1<<0,	//< normal proton signal range
 	TCAT_PULSER = 1<<1, //< proton pulser range
-	TCAT_TOF_WB = 1<<2,	//< proton TOF covers wishbone range
+	TCAT_TOF_WB = 1<<2	//< proton TOF covers wishbone range
 };
 
 #endif
