@@ -10,7 +10,7 @@ public:
 	ReducedDataScanner(): BaseDataScanner("RedEvt") {}
 	
 	/// find path to processed run .root file
-	virtual std::string locateRun(RunNum r) { return ""; }
+	virtual std::string locateRun(RunNum) { return ""; }
 		
 	/// set TChain branch data readpoints
 	virtual void setReadpoints(TTree* T);

@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 		}
 		//std::cout << "\n";
 		std::sort(tps.begin(),tps.end());
-		R.T_PMT_MED = tps.size()?tps[tps.size()/2]:0;
+		R.T_PMT_median = tps.size()?tps[tps.size()/2]:0;
 		R.makeFlags();
 		
 		// make sure we're at the end of the line (note '\r' endings...)

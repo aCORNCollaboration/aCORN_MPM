@@ -37,8 +37,6 @@ public:
 		
 	/// print info about this scanner
 	virtual void display();
-	/// write run calibrations info to QFile
-	void writeCalInfo(QFile& qout, std::string tag);
 	
 	RunNum evtRun;					//< run number for current event
 	double totalTime;				//< combined length of runs in seconds

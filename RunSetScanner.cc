@@ -24,9 +24,6 @@ void RunSetScanner::display() {
 	printf("RunSetScanner: %i runs, %i events\n",getnFiles(),nEvents);
 }
 
-void RunSetScanner::writeCalInfo(QFile& qout, std::string tag) {
-}
-
 void RunSetScanner::speedload(unsigned int e) {
 	if(e < noffset || e-noffset >= nLocalEvents) {
 		Tch->LoadTree(e);
