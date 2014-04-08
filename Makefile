@@ -38,7 +38,7 @@ endif
 # things to build
 #
 
-VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/:BaseTypes/
+VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/:BaseTypes/:Analysis/
 
 BaseTypes = TagCounter.o
 
@@ -48,7 +48,7 @@ Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o
 
 ROOTUtils = GraphUtils.o TChainScanner.o
 
-Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o
+Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o SegmentSaver.o
 
 objects = $(BaseTypes) $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis)
 

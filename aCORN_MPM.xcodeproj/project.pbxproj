@@ -105,15 +105,17 @@
 		4C4409BB18F37ECF001E72E6 /* ReducedToROOT.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ReducedToROOT.cc; path = Standalone/ReducedToROOT.cc; sourceTree = "<group>"; };
 		4C4409BC18F39F54001E72E6 /* ReducedToROOT.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = ReducedToROOT.py; sourceTree = "<group>"; };
 		4C4409BE18F449C8001E72E6 /* RunSetScanner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = RunSetScanner.hh; path = Analysis/RunSetScanner.hh; sourceTree = "<group>"; };
-		4C4409BF18F44A7E001E72E6 /* RunSetScanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RunSetScanner.cc; sourceTree = "<group>"; };
 		4C4409C118F44BBA001E72E6 /* Enums.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Enums.hh; path = BaseTypes/Enums.hh; sourceTree = "<group>"; };
 		4C4409C218F44BEB001E72E6 /* TagCounter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TagCounter.cpp; path = BaseTypes/TagCounter.cpp; sourceTree = "<group>"; };
 		4C4409C318F44BEB001E72E6 /* TagCounter.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = TagCounter.hh; path = BaseTypes/TagCounter.hh; sourceTree = "<group>"; };
-		4C4409C418F44CB5001E72E6 /* BaseDataScanner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BaseDataScanner.hh; sourceTree = "<group>"; };
-		4C4409C518F44DB0001E72E6 /* BaseDataScanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseDataScanner.cc; sourceTree = "<group>"; };
-		4C4409C618F44EA7001E72E6 /* ReducedDataScanner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ReducedDataScanner.hh; sourceTree = "<group>"; };
-		4C4409C718F44F40001E72E6 /* ReducedDataScanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReducedDataScanner.cc; sourceTree = "<group>"; };
-		4C4409C918F466E3001E72E6 /* DirectedGraph.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DirectedGraph.hh; sourceTree = "<group>"; };
+		4C4409CA18F47157001E72E6 /* DirectedGraph.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = DirectedGraph.hh; path = MathUtils/DirectedGraph.hh; sourceTree = "<group>"; };
+		4C4409CB18F4716B001E72E6 /* BaseDataScanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BaseDataScanner.cc; path = Analysis/BaseDataScanner.cc; sourceTree = "<group>"; };
+		4C4409CC18F4716B001E72E6 /* BaseDataScanner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = BaseDataScanner.hh; path = Analysis/BaseDataScanner.hh; sourceTree = "<group>"; };
+		4C4409CD18F4716B001E72E6 /* ReducedDataScanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ReducedDataScanner.cc; path = Analysis/ReducedDataScanner.cc; sourceTree = "<group>"; };
+		4C4409CE18F4716B001E72E6 /* ReducedDataScanner.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ReducedDataScanner.hh; path = Analysis/ReducedDataScanner.hh; sourceTree = "<group>"; };
+		4C4409CF18F4716B001E72E6 /* RunSetScanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RunSetScanner.cc; path = Analysis/RunSetScanner.cc; sourceTree = "<group>"; };
+		4C4409D018F4716B001E72E6 /* SegmentSaver.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SegmentSaver.cc; path = Analysis/SegmentSaver.cc; sourceTree = "<group>"; };
+		4C4409D118F4716B001E72E6 /* SegmentSaver.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SegmentSaver.hh; path = Analysis/SegmentSaver.hh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -322,12 +324,14 @@
 		4C4409BD18F449AF001E72E6 /* Analysis */ = {
 			isa = PBXGroup;
 			children = (
+				4C4409CB18F4716B001E72E6 /* BaseDataScanner.cc */,
+				4C4409CC18F4716B001E72E6 /* BaseDataScanner.hh */,
+				4C4409CD18F4716B001E72E6 /* ReducedDataScanner.cc */,
+				4C4409CE18F4716B001E72E6 /* ReducedDataScanner.hh */,
 				4C4409BE18F449C8001E72E6 /* RunSetScanner.hh */,
-				4C4409BF18F44A7E001E72E6 /* RunSetScanner.cc */,
-				4C4409C418F44CB5001E72E6 /* BaseDataScanner.hh */,
-				4C4409C518F44DB0001E72E6 /* BaseDataScanner.cc */,
-				4C4409C618F44EA7001E72E6 /* ReducedDataScanner.hh */,
-				4C4409C718F44F40001E72E6 /* ReducedDataScanner.cc */,
+				4C4409CF18F4716B001E72E6 /* RunSetScanner.cc */,
+				4C4409D118F4716B001E72E6 /* SegmentSaver.hh */,
+				4C4409D018F4716B001E72E6 /* SegmentSaver.cc */,
 			);
 			name = Analysis;
 			sourceTree = "<group>";
@@ -345,7 +349,7 @@
 		4C4409C818F466CF001E72E6 /* MathUtils */ = {
 			isa = PBXGroup;
 			children = (
-				4C4409C918F466E3001E72E6 /* DirectedGraph.hh */,
+				4C4409CA18F47157001E72E6 /* DirectedGraph.hh */,
 			);
 			name = MathUtils;
 			sourceTree = "<group>";
