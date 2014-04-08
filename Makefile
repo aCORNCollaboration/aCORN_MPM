@@ -1,10 +1,5 @@
 #####################################################################
-#
-#  Name:         Makefile
-#  Created by:   Michael Mendenhall
-#
-#  Contents:     Makefile for Michael's aCORN analysis code
-#
+# Makefile for Michael P. Mendenhall's aCORN analysis code
 #####################################################################
 
 
@@ -43,7 +38,7 @@ endif
 # things to build
 #
 
-VPATH = ./:IOUtils/:Physics/:ROOTUtils/
+VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/
 
 IOUtils = ControlMenu.o OutputManager.o PathUtils.o QFile.o SMExcept.o strutils.o
 
@@ -62,6 +57,10 @@ libaCORN_MPM.a: $(objects)
 # generic rule for everything else .cc linked against libaCORN_MPM
 % : %.cc libaCORN_MPM.a
 	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) -o $@
+
+StandaloneObjs = ReducedToROOT
+
+standalone: $(StandaloneObjs)
 
 
 #aCORN Geant4:
