@@ -1,6 +1,29 @@
 #include "ReducedDataScanner.hh"
+#include <stdio.h>
 
 void ReducedDataScanner::setReadpoints(TTree* T) {
+	SetBranchAddress(T, "nP", &nP);
+	SetBranchAddress(T, "nE", &nE);
+	SetBranchAddress(T, "V", &V);
+	
+	SetBranchAddress(T, "T_p", &T_p);
+	SetBranchAddress(T, "T_e2p", &T_e2p);
+	
+	SetBranchAddress(T, "E_p", &E_p);
+	SetBranchAddress(T, "E_e", &E_e);
+	
+	SetBranchAddress(T, "DetFired", &DetFired);
+	SetBranchAddress(T, "DetPiled", &DetPiled);
+	SetBranchAddress(T, "flags", &flags);
+	SetBranchAddress(T, "Idx", &Idx);
+	
+	SetBranchAddress(T, "E_PMT", E_PMT);
+	SetBranchAddress(T, "T_PMT_median", &T_PMT_median);
+	SetBranchAddress(T, "Max_PMT", &Max_PMT);
+	SetBranchAddress(T, "E_Max_PMT", &E_Max_PMT);
+}
+
+void ReducedDataScanner::setWritepoints(TTree* T) {
 	T->Branch("nP", &nP, "nP/I");
 	T->Branch("nE", &nE, "nE/I");
 	T->Branch("V", &V, "V/I");

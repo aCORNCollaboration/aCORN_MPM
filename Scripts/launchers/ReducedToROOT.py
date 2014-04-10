@@ -10,6 +10,8 @@ if __name__ == "__main__":
 	cmdlist = open("replay_cmds.txt","w")
 		
 	for d in os.listdir(datadir):
+		#if d[:3] not in ["cal"]:
+		#	continue
 		subdirs = []
 		try:
 			subdirs = os.listdir(datadir+"/"+d)

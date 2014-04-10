@@ -14,6 +14,9 @@ public:
 		
 	/// set TChain branch data readpoints
 	virtual void setReadpoints(TTree* T);
+	
+	/// set TTree write points
+	void setWritepoints(TTree* T);
 };
 
 #endif

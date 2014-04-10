@@ -116,6 +116,9 @@
 		4C4409CF18F4716B001E72E6 /* RunSetScanner.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RunSetScanner.cc; path = Analysis/RunSetScanner.cc; sourceTree = "<group>"; };
 		4C4409D018F4716B001E72E6 /* SegmentSaver.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SegmentSaver.cc; path = Analysis/SegmentSaver.cc; sourceTree = "<group>"; };
 		4C4409D118F4716B001E72E6 /* SegmentSaver.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = SegmentSaver.hh; path = Analysis/SegmentSaver.hh; sourceTree = "<group>"; };
+		4C4409D218F4880D001E72E6 /* PMT_Gainmatcher.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PMT_Gainmatcher.cc; sourceTree = "<group>"; };
+		4C4409D418F5A0A0001E72E6 /* HistogramSequenceFitter.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = HistogramSequenceFitter.hh; path = ROOTUtils/HistogramSequenceFitter.hh; sourceTree = "<group>"; };
+		4C4409D518F5BE93001E72E6 /* HistogramSequenceFitter.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HistogramSequenceFitter.cc; path = ROOTUtils/HistogramSequenceFitter.cc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -243,10 +246,12 @@
 		4C44099218EF27A3001E72E6 /* ROOTUtils */ = {
 			isa = PBXGroup;
 			children = (
-				4C4409B018EF5BC3001E72E6 /* TChainScanner.cpp */,
+				4C4409D418F5A0A0001E72E6 /* HistogramSequenceFitter.hh */,
+				4C4409D518F5BE93001E72E6 /* HistogramSequenceFitter.cc */,
 				4C4409B118EF5BC3001E72E6 /* TChainScanner.hh */,
-				4C44099018EF279B001E72E6 /* GraphUtils.cc */,
+				4C4409B018EF5BC3001E72E6 /* TChainScanner.cpp */,
 				4C44099118EF279B001E72E6 /* GraphUtils.hh */,
+				4C44099018EF279B001E72E6 /* GraphUtils.cc */,
 			);
 			name = ROOTUtils;
 			sourceTree = "<group>";
@@ -317,6 +322,7 @@
 			isa = PBXGroup;
 			children = (
 				4C4409BB18F37ECF001E72E6 /* ReducedToROOT.cc */,
+				4C4409D218F4880D001E72E6 /* PMT_Gainmatcher.cc */,
 			);
 			name = Standalone;
 			sourceTree = "<group>";
@@ -324,12 +330,12 @@
 		4C4409BD18F449AF001E72E6 /* Analysis */ = {
 			isa = PBXGroup;
 			children = (
-				4C4409CB18F4716B001E72E6 /* BaseDataScanner.cc */,
-				4C4409CC18F4716B001E72E6 /* BaseDataScanner.hh */,
-				4C4409CD18F4716B001E72E6 /* ReducedDataScanner.cc */,
-				4C4409CE18F4716B001E72E6 /* ReducedDataScanner.hh */,
 				4C4409BE18F449C8001E72E6 /* RunSetScanner.hh */,
 				4C4409CF18F4716B001E72E6 /* RunSetScanner.cc */,
+				4C4409CC18F4716B001E72E6 /* BaseDataScanner.hh */,
+				4C4409CB18F4716B001E72E6 /* BaseDataScanner.cc */,
+				4C4409CE18F4716B001E72E6 /* ReducedDataScanner.hh */,
+				4C4409CD18F4716B001E72E6 /* ReducedDataScanner.cc */,
 				4C4409D118F4716B001E72E6 /* SegmentSaver.hh */,
 				4C4409D018F4716B001E72E6 /* SegmentSaver.cc */,
 			);

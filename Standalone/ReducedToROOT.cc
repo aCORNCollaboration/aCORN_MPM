@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 	// data TTree
 	TTree* T  = new TTree("RedEvt","aCORN reduced event data");
 	ReducedDataScanner R;
-	R.setReadpoints(T);
+	R.setWritepoints(T);
 	
 	while(!inf.fail()) {
 		inf >> std::dec >> std::skipws >>  R.T_p >> R.E_p >> R.T_e2p >> R.E_e >> R.nE >> R.V

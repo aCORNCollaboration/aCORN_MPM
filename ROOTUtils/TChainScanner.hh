@@ -40,7 +40,7 @@ public:
 	UInt_t nEvents;						//< number of events in current TChain
 	
 	/// over-write this in subclass to automaticlly set readout points on first loaded file
-	virtual void setReadpoints(TTree*) {}
+	virtual void setReadpoints(TTree*) = 0;
 	
 protected:
 	

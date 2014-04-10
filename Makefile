@@ -46,7 +46,7 @@ IOUtils = ControlMenu.o OutputManager.o PathUtils.o QFile.o SMExcept.o strutils.
 
 Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o
 
-ROOTUtils = GraphUtils.o TChainScanner.o
+ROOTUtils = GraphUtils.o TChainScanner.o HistogramSequenceFitter.o
 
 Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o SegmentSaver.o
 
@@ -62,7 +62,7 @@ libaCORN_MPM.a: $(objects)
 % : %.cc libaCORN_MPM.a
 	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) -o $@
 
-StandaloneObjs = ReducedToROOT
+StandaloneObjs = ReducedToROOT PMT_Gainmatcher
 
 standalone: $(StandaloneObjs)
 

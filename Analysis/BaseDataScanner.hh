@@ -5,7 +5,10 @@
 #include <RTypes.h>
 #include "RunSetScanner.hh"
 
-const unsigned int NCH_MAX = 32;
+const unsigned int NCH_MAX = 32;	//< number of channels in DAQ
+const unsigned int N_E_PMT = 19;	//< number of main electron scintillator PMTs
+const unsigned int N_V_PMT = 8;		//< number of veto PMTs
+
 
 /// Generic class for processed data TChains
 class BaseDataScanner: public RunSetScanner {
