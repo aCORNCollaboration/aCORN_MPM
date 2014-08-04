@@ -1,4 +1,4 @@
-#include <RTypes.h>
+#include <Rtypes.h>
 #include <TTree.h>
 #include <TFile.h>
 #include <fstream>

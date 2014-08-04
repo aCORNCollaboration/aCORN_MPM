@@ -2,7 +2,7 @@
 #define BASEDATASCANNER_HH
 
 #include "Enums.hh"
-#include <RTypes.h>
+#include <Rtypes.h>
 #include "RunSetScanner.hh"
 
 const unsigned int NCH_MAX = 32;        ///< number of channels in DAQ
