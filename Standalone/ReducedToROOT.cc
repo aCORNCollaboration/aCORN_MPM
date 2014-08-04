@@ -36,77 +36,77 @@
 
 
 int main(int argc, char** argv) {
-	if(argc<3) {
-		printf("Use: ./ReducedToROOT [reduced.txt filename] [output.root filename]\n");
-		return 1;
-	}
-	
-	// input file
-	std::ifstream inf;
-	inf.open(argv[1]);
-	
-	// scan to "####" block starting data
-	char lbuf[1024];
-	while(!inf.fail()) {
-		inf.getline(lbuf,1023,'\n');
-		if(lbuf[0]=='#') break;
-	}
-	if(lbuf[0] != '#') {
-		printf("Data block not found!\n");
-		return -1;
-	}
-	
-	// output file
-	TFile* outf = new TFile(argv[2],"RECREATE");
-	outf->cd();
-
-	// data TTree
-	TTree* T  = new TTree("RedEvt","aCORN reduced event data");
-	ReducedDataScanner R;
-	R.setWritepoints(T);
-	
-	while(!inf.fail()) {
-		inf >> std::dec >> std::skipws >>  R.T_p >> R.E_p >> R.T_e2p >> R.E_e >> R.nE >> R.V
-			>> std::hex >> R.DetFired >> R.DetPiled >> R.Idx;
-		
-		if(inf.fail()) break;
-		
-		for(unsigned int i=0; i<NCH_MAX; i++) R.E_PMT[i] = R.T_PMT[i] = 0;
-		
-		//std::cout << T_p << "\t" << E_p << "\t" << nE;
-		assert(R.nE+R.V < NCH_MAX);
-		UInt_t dtl[NCH_MAX];	// Electron PMT "detail" code
-		
-		std::vector<Char_t> tps;
-		R.Max_PMT = -1;
-		R.E_Max_PMT = 0;
-		for(unsigned int i=0; i<R.nE+R.V; i++) {
-			inf >> std::hex >> dtl[i];
-			//std::cout << "\t" << dtl[i];
-			unsigned int chn = (dtl[i]>>19);
-			assert(chn < NCH_MAX);
-			R.E_PMT[chn] = (dtl[i]>>4) & ((1<<15)-1);
-			R.T_PMT[chn] = dtl[i] & ((1<<4)-1);
-			tps.push_back(R.T_PMT[chn]);
-			if(R.E_Max_PMT < R.E_PMT[chn]) { R.Max_PMT = chn; R.E_Max_PMT = R.E_PMT[chn]; }
-		}
-		//std::cout << "\n";
-		std::sort(tps.begin(),tps.end());
-		R.T_PMT_median = tps.size()?tps[tps.size()/2]:0;
-		R.makeFlags();
-		
-		// make sure we're at the end of the line (note '\r' endings...)
-		inf.getline(lbuf,2,'\r');
-		assert(!inf.fail());
-		
-		T->Fill();
-	}
-	
-	std::cout << "Loaded " << T->GetEntries() << " events.\n";
-	
-	T->Write();
-	outf->Close();
-	return 0;
+    if(argc<3) {
+        printf("Use: ./ReducedToROOT [reduced.txt filename] [output.root filename]\n");
+        return 1;
+    }
+    
+    // input file
+    std::ifstream inf;
+    inf.open(argv[1]);
+    
+    // scan to "####" block starting data
+    char lbuf[1024];
+    while(!inf.fail()) {
+        inf.getline(lbuf,1023,'\n');
+        if(lbuf[0]=='#') break;
+    }
+    if(lbuf[0] != '#') {
+        printf("Data block not found!\n");
+        return -1;
+    }
+    
+    // output file
+    TFile* outf = new TFile(argv[2],"RECREATE");
+    outf->cd();
+    
+    // data TTree
+    TTree* T  = new TTree("RedEvt","aCORN reduced event data");
+    ReducedDataScanner R;
+    R.setWritepoints(T);
+    
+    while(!inf.fail()) {
+        inf >> std::dec >> std::skipws >>  R.T_p >> R.E_p >> R.T_e2p >> R.E_e >> R.nE >> R.V
+        >> std::hex >> R.DetFired >> R.DetPiled >> R.Idx;
+        
+        if(inf.fail()) break;
+        
+        for(unsigned int i=0; i<NCH_MAX; i++) R.E_PMT[i] = R.T_PMT[i] = 0;
+        
+        //std::cout << T_p << "\t" << E_p << "\t" << nE;
+        assert(R.nE+R.V < NCH_MAX);
+        UInt_t dtl[NCH_MAX];	// Electron PMT "detail" code
+        
+        std::vector<Char_t> tps;
+        R.Max_PMT = -1;
+        R.E_Max_PMT = 0;
+        for(unsigned int i=0; i<R.nE+R.V; i++) {
+            inf >> std::hex >> dtl[i];
+            //std::cout << "\t" << dtl[i];
+            unsigned int chn = (dtl[i]>>19);
+            assert(chn < NCH_MAX);
+            R.E_PMT[chn] = (dtl[i]>>4) & ((1<<15)-1);
+            R.T_PMT[chn] = dtl[i] & ((1<<4)-1);
+            tps.push_back(R.T_PMT[chn]);
+            if(R.E_Max_PMT < R.E_PMT[chn]) { R.Max_PMT = chn; R.E_Max_PMT = R.E_PMT[chn]; }
+        }
+        //std::cout << "\n";
+        std::sort(tps.begin(),tps.end());
+        R.T_PMT_median = tps.size()?tps[tps.size()/2]:0;
+        R.makeFlags();
+        
+        // make sure we're at the end of the line (note '\r' endings...)
+        inf.getline(lbuf,2,'\r');
+        assert(!inf.fail());
+        
+        T->Fill();
+    }
+    
+    std::cout << "Loaded " << T->GetEntries() << " events.\n";
+    
+    T->Write();
+    outf->Close();
+    return 0;
 }
 
 /*
