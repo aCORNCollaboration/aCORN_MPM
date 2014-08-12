@@ -3,6 +3,7 @@
 
 #include "TChainScanner.hh"
 #include "Enums.hh"
+#include "RunMetadata.hh"
 
 #include "QFile.hh"
 #include "TagCounter.hh"
@@ -20,31 +21,31 @@ public:
     virtual ~RunSetScanner();
     
     /// add run to data (return whether successful)
-    virtual bool addRun(RunNum rn);
+    virtual bool addRun(RunID rn);
     /// add list of runs to data; return number successfully added
-    unsigned int addRuns(const std::vector<RunNum>& rns);
+    unsigned int addRuns(const std::vector<RunID>& rns);
     /// return path to run .root file
-    virtual std::string locateRun(RunNum) { assert(false); return ""; }
+    virtual std::string locateRun(RunID) { assert(false); return ""; }
     
     /// speedload, keeping track of currently loaded run number
     virtual void speedload(unsigned int e);
     /// subclass this for routines when new run is loaded
-    virtual void loadNewRun(RunNum) {}
-    /// get run number of current event
-    virtual RunNum getRun() const { return evtRun; }
+    virtual void loadNewRun(RunID) {}
+    /// get run ID of current event
+    virtual RunID getRun() const { return evtRun; }
     /// check whether this is simulated data
     virtual bool isSimulated() const { return false; }
     
     /// print info about this scanner
     virtual void display();
     
-    RunNum evtRun;                      ///< run number for current event
+    RunID evtRun;                       ///< run number for current event
     double totalTime;                   ///< combined length of runs in seconds
-    TagCounter<RunNum>  runTimes;       ///< times for each run loaded
+    TagCounter<RunID>  runTimes;        ///< times for each run loaded
     
 protected:
     
-    std::vector<RunNum> runlist;        ///< list of loaded runs
+    std::vector<RunID> runlist;        ///< list of loaded runs
 };
 
 

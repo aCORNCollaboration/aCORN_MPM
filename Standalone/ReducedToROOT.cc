@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
     // input file
     std::ifstream inf;
     inf.open(argv[1]);
+    std::cout << "Processing '" << argv[1] << "'...\n";
     
     // scan to "####" block starting data
     char lbuf[1024];
@@ -102,7 +103,7 @@ int main(int argc, char** argv) {
         T->Fill();
     }
     
-    std::cout << "Loaded " << T->GetEntries() << " events.\n";
+    std::cout << "'" << argv[1] << "' Loaded " << T->GetEntries() << " events.\n";
     
     T->Write();
     outf->Close();

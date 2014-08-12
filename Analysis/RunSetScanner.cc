@@ -1,7 +1,8 @@
 #include "RunSetScanner.hh"
 #include "PathUtils.hh"
 #include "SMExcept.hh"
-#include <stdio.h>
+
+#include <iostream>
 #include <stdlib.h>
 
 RunSetScanner::RunSetScanner(const std::string& treeName):
@@ -9,10 +10,10 @@ TChainScanner(treeName), totalTime(0) { }
 
 RunSetScanner::~RunSetScanner() { }
 
-unsigned int RunSetScanner::addRuns(const std::vector<RunNum>& rns) {
+unsigned int RunSetScanner::addRuns(const std::vector<RunID>& rns) {
     printf("\n------------------- Assembling %i runs into TChain... ",(int)rns.size()); fflush(stdout);
     unsigned int n = 0;
-    for(std::vector<RunNum>::const_iterator it = rns.begin(); it != rns.end(); it++) {
+    for(std::vector<RunID>::const_iterator it = rns.begin(); it != rns.end(); it++) {
         n+=addRun(*it);
         printf("*"); fflush(stdout);
     }
@@ -30,16 +31,14 @@ void RunSetScanner::speedload(unsigned int e) {
         Tch->GetTree()->LoadBaskets();
         nLocalEvents = Tch->GetTree()->GetEntries();
         noffset = Tch->GetChainOffset();
-        if((int)runlist.size()>Tch->GetTreeNumber())
-            evtRun = runlist[Tch->GetTreeNumber()];
-        else
-            evtRun = Tch->GetTreeNumber();
+        assert((size_t)Tch->GetTreeNumber() < runlist.size());
+        evtRun = runlist[Tch->GetTreeNumber()];
         loadNewRun(evtRun);
     }
     Tch->GetTree()->GetEvent(e-noffset);
 }
 
-bool RunSetScanner::addRun(RunNum r) {
+bool RunSetScanner::addRun(RunID r) {
     std::string f = locateRun(r);
     if(f.size() && addFile(f)) {
         runlist.push_back(r);
@@ -49,6 +48,6 @@ bool RunSetScanner::addRun(RunNum r) {
         runTimes.add(r,0);
         return true;
     }
-    printf("**** FAILED TO LOCATE analyzed data for run %i at '%s'! *****\n",r,f.c_str());
+    std::cout << "**** FAILED TO LOCATE analyzed data for run " << r << " at '" << f << "'! *****\n";
     return false;
 }

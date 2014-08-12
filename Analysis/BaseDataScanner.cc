@@ -1,7 +1,7 @@
 #include "BaseDataScanner.hh"
 
 BaseDataScanner::BaseDataScanner(const std::string& treeName):
-RunSetScanner(treeName) { }
+RunSetScanner(treeName), physicsWeight(1.) { }
 
 void BaseDataScanner::makeFlags() {
     flags = TriggerCategory(0);

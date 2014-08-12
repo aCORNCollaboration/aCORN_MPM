@@ -6,6 +6,7 @@
 #include <istream>
 #include <sstream>
 #include "QFile.hh"
+#include "strutils.hh"
 
 template<typename T>
 class TagCounter {

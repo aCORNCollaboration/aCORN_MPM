@@ -6,17 +6,17 @@
 /// class for assembling and scanning TChain of "Reduced" data
 class ReducedDataScanner: public BaseDataScanner {
 public:
-	/// constructor
-	ReducedDataScanner(): BaseDataScanner("RedEvt") {}
-	
-	/// find path to processed run .root file
-	virtual std::string locateRun(RunNum) { return ""; }
-		
-	/// set TChain branch data readpoints
-	virtual void setReadpoints(TTree* T);
-	
-	/// set TTree write points
-	void setWritepoints(TTree* T);
+    /// constructor
+    ReducedDataScanner(): BaseDataScanner("RedEvt") {}
+    
+    /// return path to run .root file
+    virtual std::string locateRun(RunID r);
+    
+    /// set TChain branch data readpoints
+    virtual void setReadpoints(TTree* T);
+    
+    /// set TTree write points
+    void setWritepoints(TTree* T);
 };
 
 #endif
