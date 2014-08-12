@@ -16,8 +16,8 @@ public:
     /// Constructor
     BaseDataScanner(const std::string& treeName);
     
-    Long_t T_p;                 ///< proton time, 10ns units
-    Int_t T_e2p;                ///< proton time-of-flight from electron signal, 10ns units
+    Long_t T_p;                 ///< proton time, loaded in 10ns units, calibrated to [ns]
+    Int_t T_e2p;                ///< proton time-of-flight from electron signal, loaded in 10ns, calibrated to [ns]
     
     Int_t E_p;                  ///< proton energy (uncalibrated channels)
     Int_t E_e;                  ///< Electron energy (uncalibrated channels)
@@ -40,8 +40,20 @@ public:
     
     /// generate event flags
     virtual void makeFlags();
+    /// load calibrations for new run
+    virtual void loadNewRun(RunID r);
+    /// calibrations after loading event
+    virtual void calibrate();
+    
     
     double physicsWeight;       ///< simulated event spectrum re-weighting factor
+   
+protected:
+    std::map<RunID, AcornCalibrator*> cals;     ///< calibrators for each run
+    AcornCalibrator* currentCal;                ///< calibrator for current run
+    
+    /// load calibrator for current run
+    void loadCal(RunID rn);
 };
 
 #endif

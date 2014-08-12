@@ -5,6 +5,8 @@
 #include <iostream>
 #include <cassert>
 
+MetadataDB MetadataDB::MDB;
+
 // metadata CSV version 6:
 //
 // 0    1           2               3    4                5              6              7     8         9
@@ -58,4 +60,18 @@ RunMetadata MetadataDB::getRun(RunID r) const {
     assert(it != md.end());
     if(it != md.end()) return it->second;
     return RunMetadata();
+}
+
+vector<RunID> MetadataDB::seriesRuns(RunNum S, RunMetadata::DataTier T) const {
+    vector<RunID> v;
+    auto r0 = series.find(S);
+    if(r0 == series.end()) return v;
+    for(auto it = r0->second.begin(); it != r0->second.end(); it++) {
+        RunID rn(S,*it);
+        auto m = md.find(rn);
+        assert(m != md.end());
+        if(m->second.tier == T)
+            v.push_back(rn);
+    }
+    return v;
 }

@@ -3,7 +3,7 @@
 
 #include "TChainScanner.hh"
 #include "Enums.hh"
-#include "RunMetadata.hh"
+#include "AcornCalibrator.hh"
 
 #include "QFile.hh"
 #include "TagCounter.hh"
@@ -29,6 +29,8 @@ public:
     
     /// speedload, keeping track of currently loaded run number
     virtual void speedload(unsigned int e);
+    ///  subclass this for calibrations after loading event
+    virtual void calibrate() { }
     /// subclass this for routines when new run is loaded
     virtual void loadNewRun(RunID) {}
     /// get run ID of current event
@@ -39,13 +41,13 @@ public:
     /// print info about this scanner
     virtual void display();
     
-    RunID evtRun;                       ///< run number for current event
+    RunID evtRun;                       ///< run ID for current event
     double totalTime;                   ///< combined length of runs in seconds
     TagCounter<RunID>  runTimes;        ///< times for each run loaded
     
 protected:
     
-    std::vector<RunID> runlist;        ///< list of loaded runs
+    std::vector<RunID> runlist;         ///< list of loaded runs
 };
 
 

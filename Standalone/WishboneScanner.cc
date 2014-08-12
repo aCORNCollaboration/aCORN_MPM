@@ -2,23 +2,36 @@
 #include "ReducedDataScanner.hh"
 #include "PathUtils.hh"
 #include "OutputManager.hh"
+#include "RunMetadata.hh"
 #include "strutils.hh"
 
-int main(int, char**) {
+#include <stdio.h>
+
+int main(int argc, char** argv) {
     
-    RunNum series = 999;
-    
-    ReducedDataScanner RDS;
-    int nfailed = 0;
-    int i = 0;
-    while(nfailed < 5) {
-        if(RDS.addRun(RunID(series,i))) nfailed = 0;
-        else nfailed++;
-        i++;
+    if(argc != 2) {
+        printf("Please supply a series number for analysis.\n");
+        return 0;
     }
     
-    OutputManager OM("Wishbone", getEnvSafe("ACORN_WISHBONE")+"/Series_"+itos(series));
-    WishboneAnalyzer WA(&OM);
+    RunNum series = atoi(argv[1]);
+    
+    if(series == 0) {
+        printf("Merging series data...\n");
+        OutputManager OM("Wishbone", "/home/mpmendenhall/Data/");
+        WishboneAnalyzer WA(&OM,"aCORN_Wishbone");
+        WA.mergeDir();
+        return 0;
+    }
+    
+    ReducedDataScanner RDS;
+    if(!RDS.addRuns(MetadataDB::MDB.seriesRuns(series))) {
+        printf("Series %u contains no useful runs. Analysis stopped.\n", series);
+        return 0;
+    }
+    
+    OutputManager OM("Wishbone", getEnvSafe("ACORN_WISHBONE"));
+    WishboneAnalyzer WA(&OM, "/Series_"+itos(series));
     
     WA.loadProcessedData(RDS);
     WA.makeOutput();

@@ -2,6 +2,11 @@
 #define RUNMETADATA_HH
 
 #include "Enums.hh"
+#include <map>
+#include <vector>
+
+using std::map;
+using std::vector;
 
 /// Metadata for aCORN run
 class RunMetadata {
@@ -25,28 +30,34 @@ public:
     } field;    ///< field direction
     
     /// Calibrate PMT sum to energy
-    double calibPMT(double S) { return slope*S + intercept; }
+    double calibPMT(double S) const { return slope*S + intercept; }
     
     double slope;       ///< calibration slope
     double intercept;   ///< calibration intercept
 };
 
 #include "PathUtils.hh"
-#include <map>
 #include <string>
 
 /// Metadata file loader
 class MetadataDB {
 public:
-    /// Constructor, optionally loading CSV file
-    MetadataDB(const std::string& fname = getEnvSafe("ACORN_METADATA"));
     
     /// get metadata for run
     RunMetadata getRun(RunID r) const;
     
+    /// get runlist by tier for series
+    vector<RunID> seriesRuns(RunNum S, RunMetadata::DataTier T = RunMetadata::GOOD) const;
+    
+    static MetadataDB MDB;      /// singleton instance
+    
 protected:
-    std::map<RunID, RunMetadata> md;                    ///< available metadata
-    std::map<RunNum, std::vector<RunNum>> series;       ///< listing by series
+    
+    /// Constructor, optionally loading CSV file
+    MetadataDB(const std::string& fname = getEnvSafe("ACORN_METADATA"));
+    
+    map<RunID, RunMetadata> md;                 ///< available metadata
+    map<RunNum, vector<RunNum>> series;         ///< listing by series
 };
 
 #endif

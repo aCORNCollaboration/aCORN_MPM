@@ -36,6 +36,7 @@ void RunSetScanner::speedload(unsigned int e) {
         loadNewRun(evtRun);
     }
     Tch->GetTree()->GetEvent(e-noffset);
+    calibrate();
 }
 
 bool RunSetScanner::addRun(RunID r) {

@@ -152,7 +152,7 @@ unsigned int RunAccumulator::mergeDir() {
         // check whether data directory contains cloneable subdirectories
         std::string datinfl = basePath+"/"+(*it)+"/"+(*it);
         if(!inflExists(datinfl)) continue;
-                                                      SegmentSaver* subRA = makeAnalyzer(*it,datinfl);
+        SegmentSaver* subRA = makeAnalyzer(*it,datinfl);
         addSegment(*subRA);
         delete(subRA);
         nMerged++;
