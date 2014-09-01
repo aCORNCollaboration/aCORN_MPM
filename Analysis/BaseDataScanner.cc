@@ -19,6 +19,7 @@ void BaseDataScanner::loadNewRun(RunID rn) {
 }
 
 void BaseDataScanner::calibrate() {
+    if(E_p != -1) E_p_0 = E_p;
     T_p *= NS_PER_CLOCK;
     T_e2p *= NS_PER_CLOCK;
     E_recon = currentCal->calEnergy(E_e);

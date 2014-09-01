@@ -18,3 +18,4 @@ if __name__ == "__main__":
     os.system("cat replay_cmds.txt")
     os.system("nice -n 15 parallel < replay_cmds.txt > replay_log.txt 2>&1")
     os.system("rm replay_cmds.txt")
+    os.system("../../WishboneScanner 0");

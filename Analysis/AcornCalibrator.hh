@@ -3,6 +3,7 @@
 
 #include "Enums.hh"
 #include "RunMetadata.hh"
+#include "ManualInfo.hh"
 
 /// Calibrator and associated information class for aCORN data
 class AcornCalibrator {

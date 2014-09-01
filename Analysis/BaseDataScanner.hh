@@ -20,10 +20,11 @@ public:
     Int_t T_e2p;                ///< proton time-of-flight from electron signal, loaded in 10ns, calibrated to [ns]
     
     Int_t E_p;                  ///< proton energy (uncalibrated channels)
+    Int_t E_p_0;                ///< previous proton energy for multiple-electron flag
     Int_t E_e;                  ///< Electron energy (uncalibrated channels)
     Double_t E_recon;           ///< Calibrated reconstructed electron energy
     
-    Int_t nP;                   ///< number of protons
+    Int_t nP;                   ///< number of protons between electron trigger and this proton event
     UInt_t nE;                  ///< number of electron PMTs triggered
     Int_t V;                    ///< number of veto PMTs triggered
     
