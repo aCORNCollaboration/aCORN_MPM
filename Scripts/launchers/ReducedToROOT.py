@@ -13,7 +13,7 @@ if __name__ == "__main__":
     flist = os.listdir(datadir)
     flist.sort()
     for f in flist:
-        if f[0]=="s" and f[-4:] == ".txt":
+        if f[0]=="s" and f[-7:] == "rd2.txt": # and f[-4:] == ".txt":
             cmdlist.write(r2rcmd + " %s/%s"%(datadir,f) + " %s/%s.root\n"%(outdir,f[:-4]))
     cmdlist.close()
     os.system("cat replay_cmds.txt")

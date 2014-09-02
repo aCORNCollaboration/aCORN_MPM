@@ -7,7 +7,7 @@
 class ReducedDataScanner: public BaseDataScanner {
 public:
     /// constructor
-    ReducedDataScanner(): BaseDataScanner("RedEvt") {}
+    ReducedDataScanner(bool fp): BaseDataScanner("RedEvt",fp) {}
     
     /// return path to run .root file
     virtual std::string locateRun(RunID r);
