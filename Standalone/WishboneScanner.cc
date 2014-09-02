@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
         return 0;
     }
     
-    ReducedDataScanner RDS;
+    ReducedDataScanner RDS(series >= 1519);
     if(!RDS.addRuns(MetadataDB::MDB.seriesRuns(series))) {
         printf("Series %u contains no useful runs. Analysis stopped.\n", series);
         return 0;

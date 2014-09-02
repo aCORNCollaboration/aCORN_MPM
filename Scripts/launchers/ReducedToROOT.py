@@ -13,7 +13,12 @@ if __name__ == "__main__":
     flist = os.listdir(datadir)
     flist.sort()
     for f in flist:
-        if f[0]=="s" and f[-7:] == "rd2.txt": # and f[-4:] == ".txt":
+        if f[0] in ["S","s"] and f[-4:] == ".txt":
+            if f[0]=="S": # special case for differently-capitalized filenames
+                os.system("mv %s/%s %s/%s"%(datadir,f,datadir,f.lower()))
+                f = f.lower()
+            #if f[1:4] not in ["610","611"]:
+            #    continue
             cmdlist.write(r2rcmd + " %s/%s"%(datadir,f) + " %s/%s.root\n"%(outdir,f[:-4]))
     cmdlist.close()
     os.system("cat replay_cmds.txt")

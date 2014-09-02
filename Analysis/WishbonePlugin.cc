@@ -62,12 +62,12 @@ void WishbonePlugin::makePlots() {
     hNVeto->Draw();
     myA->printCanvas("NVeto");
     
-    hProtonSignal[0]->SetMinimum(hProtonSignal[1]->GetMinimum());
+    //hProtonSignal[0]->SetMinimum(hProtonSignal[1]->GetMinimum());
     hProtonSignal[0]->Draw();
-    hProtonSignal[1]->Draw("Same");
+    //hProtonSignal[1]->Draw("Same");
     drawVLine(E_p_lo/1000., myA->defaultCanvas, 2);
     drawVLine(E_p_hi/1000., myA->defaultCanvas, 2);
     myA->printCanvas("ProtonSignal");
     
-    myA->defaultCanvas->SetLogy(false);
+   // myA->defaultCanvas->SetLogy(false);
 }

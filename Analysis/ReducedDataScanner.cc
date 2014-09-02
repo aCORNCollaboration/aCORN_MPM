@@ -55,8 +55,9 @@ void ReducedDataScanner::setWritepoints(TTree* T) {
 
 std::string ReducedDataScanner::locateRun(RunID r) {
     char fnm[1024];
+    sprintf(fnm,"%s/s%ir%04i_red.root", getEnvSafe("ACORN_REDUCED_ROOT").c_str(), r.first, r.second);
+    if(fileExists(fnm)) return fnm;
     sprintf(fnm,"%s/s%04ir%04i_red.root", getEnvSafe("ACORN_REDUCED_ROOT").c_str(), r.first, r.second);
-    //printf("Looking for '%s'...\n",fnm);
     if(fileExists(fnm)) return fnm;
     sprintf(fnm,"%s/s%04ir%04i_rd2.root", getEnvSafe("ACORN_REDUCED_ROOT").c_str(), r.first, r.second);
     if(fileExists(fnm)) return fnm;
