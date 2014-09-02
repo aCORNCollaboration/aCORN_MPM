@@ -1,0 +1,17 @@
+\clearpage
+\subsection*{Series %(series)i}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.45]{%(sdir)s/ProtonSignal.pdf}
+    \caption{Proton detector signal. Vertical lines mark ``proton'' signal cuts.}
+    \label{fig:proton_signal_%(series)i}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \subfloat[Beta spectrometer PMTs.]{\includegraphics[scale=0.45]{%(sdir)s/NPMTs.pdf}}
+    \subfloat[Veto panel PMTs.]{\includegraphics[scale=0.45]{%(sdir)s/NVeto.pdf}}
+    \caption{PMT signal multiplicity.}
+    \label{fig:nveto_%(series)i}
+\end{figure}

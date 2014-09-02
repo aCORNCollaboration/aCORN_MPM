@@ -24,7 +24,7 @@ def check_missing():
 
 if __name__ == "__main__":
     
-    slist = check_missing() #get_series_list()
+    slist = get_series_list()
     cmdlist = open("replay_cmds.txt","w")
     for s in slist:
         cmdlist.write("../../WishboneScanner %i\n"%s)
@@ -35,3 +35,7 @@ if __name__ == "__main__":
     os.system("nice -n 15 parallel < replay_cmds.txt > replay_log.txt 2>&1")
     os.system("rm replay_cmds.txt")
     os.system("../../WishboneScanner 0");
+    
+    print "Checking missing files..."
+    check_missing()
+    print "Done."

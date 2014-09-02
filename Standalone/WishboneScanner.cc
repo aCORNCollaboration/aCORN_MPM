@@ -6,6 +6,7 @@
 #include "strutils.hh"
 
 #include <stdio.h>
+#include <TStyle.h>
 
 int main(int argc, char** argv) {
     
@@ -15,6 +16,8 @@ int main(int argc, char** argv) {
     }
     
     RunNum series = atoi(argv[1]);
+    
+    gStyle->SetOptStat("");
     
     if(series == 0) {
         printf("Merging series data...\n");
