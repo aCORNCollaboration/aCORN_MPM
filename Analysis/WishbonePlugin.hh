@@ -17,13 +17,18 @@ public:
     virtual void makePlots();
     
     TH1* hProtonSignal[2];      ///< proton detector signal, electron coincident or not
+    TH1* h4pTiming;             ///< "4p" mode discriminator arrival time
     TH2F* hWishbone;            ///< wishbone plot
     TH1* hNVeto;                ///< number of veto PMTs for wishbone-like events
     TH2F* hNE;                  ///< number of main PMTs triggered vs. total event energy
     TH2F* hPMTs;                ///< which PMTs fired, as a function of event
+    TH2F* hChanSpec;             ///< individual PMTs spectrum distribution
+    TH2F* hModuleMult;          ///< module multiplicity, for module dropout issues
     
     double E_p_lo = 650;        ///< proton signal low cut for wishbone data
     double E_p_hi = 2200;       ///< proton signal high cut for wishbone data
+    
+    TH1* hWishboneEProj[2];     ///< Wishbone energy spectrum, backtground and background-subtracted
 };
 
 

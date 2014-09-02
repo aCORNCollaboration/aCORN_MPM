@@ -6,9 +6,11 @@
 #include "RunSetScanner.hh"
 
 const unsigned int NCH_MAX = 32;        ///< number of channels in DAQ
+const unsigned int N_MODULES = 2;       ///< number of modules in DAQ
+const unsigned int CHAN_PER_MOD = 16;   ///< number of channels per module
 const unsigned int N_E_PMT = 19;        ///< number of main electron scintillator PMTs
 const unsigned int N_V_PMT = 8;         ///< number of veto PMTs
-const unsigned int NS_PER_CLOCK = 10;   ///< detector time-of-flight clock pulse
+const unsigned int NS_PER_CLOCK = 10;   ///< digitizer clock tick size
 
 /// Generic class for processed data TChains
 class BaseDataScanner: public RunSetScanner {
@@ -19,10 +21,10 @@ public:
     bool is4p;                  ///< whether this is "4-proton" style data
     
     Long_t T_p;                 ///< proton (energy pulse) arrival time, loaded in 10ns units, calibrated to [ns]
-    Long_t T_d;                 ///< [4p] discriminator arrival time
+    Long_t T_d;                 ///< [4p] discriminator arrival time, loaded in 10ns units, calibrated to [ns]
     Int_t nPSig;                ///< [4p] number of proton signals
     Int_t T_e2p;                ///< proton time-of-flight from electron signal, loaded in 10ns, calibrated to [ns]
-    Int_t T_e2d;                ///< [4p] proton discriminator time to electron signal
+    Int_t T_e2d;                ///< [4p] proton discriminator time to electron signal, loaded in 10ns, calibrated to [ns]
     
     Int_t E_p;                  ///< proton energy (uncalibrated channels)
     Int_t E_p_0;                ///< previous proton energy for multiple-electron flag
@@ -31,18 +33,20 @@ public:
     
     Int_t nP;                   ///< number of protons between electron trigger and this proton event
     UInt_t nE;                  ///< number of electron PMTs triggered
-    Int_t V;                    ///< number of veto PMTs triggered
+    Int_t nV;                   ///< number of veto PMTs triggered
     
     UInt_t DetFired;            ///< detector firing bit map 0-30
     UInt_t DetPiled;            ///< pileup flags [e- dead zone][det. 0-30]
     Int_t Idx;                  ///< proton index
     Short_t E_PMT[NCH_MAX];     ///< individual PMT energy
-    Char_t T_PMT[NCH_MAX];      ///< individual PMT time
-    Char_t T_PMT_median;        ///< median PMT timing offset
+    Char_t T_PMT[NCH_MAX];      ///< individual PMT time relative to first PMT arrival [clock ticks]
+    Char_t T_PMT_median;        ///< median PMT timing offset from initial PMT signal arrival [clock ticks]
     Char_t Max_PMT;             ///< PMT with largest signal
     Short_t E_Max_PMT;          ///< energy of max PMT signal
     
     TriggerCategory flags;      ///< Event category flags
+    UInt_t nFiredMod[N_MODULES];///< count of triggers in each module
+    bool modDropoutEvt;         ///< whether this is a suspect "module dropout" event
     
     /// generate event flags
     virtual void makeFlags();
@@ -50,7 +54,6 @@ public:
     virtual void loadNewRun(RunID r);
     /// calibrations after loading event
     virtual void calibrate();
-    
     
     double physicsWeight;       ///< simulated event spectrum re-weighting factor
    
@@ -60,6 +63,8 @@ protected:
     
     /// load calibrator for current run
     void loadCal(RunID rn);
+    /// calculate number of signals triggered in given module
+    void nFiredModule();
 };
 
 #endif

@@ -25,6 +25,17 @@ WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"
     hNETemplate.GetYaxis()->SetTitle("Number of PMTs triggered");
     hNETemplate.GetXaxis()->SetTitle("Electron energy [keV]");
     hNE = (TH2F*)registerHist("hNE",hNETemplate);
+    
+    TH2F hPSTemplate("hPSTemplate","PMT Spectra", 200, 0, 20., NCH_MAX, -0.5, NCH_MAX-0.5);
+    hPSTemplate.GetXaxis()->SetTitle("raw signal (#times 10^{3})");
+    hPSTemplate.GetYaxis()->SetTitle("detector channel number");
+    hPSTemplate.GetYaxis()->SetTitleOffset(1.4);
+    hChanSpec = (TH2F*)registerHist("hChanSpec",hPSTemplate);
+    
+    TH2F hMultTemplate("hMultTemplate","Module Multiplicity", CHAN_PER_MOD+1, -0.5, CHAN_PER_MOD+0.5, CHAN_PER_MOD+1, -0.5, CHAN_PER_MOD+0.5);
+    hMultTemplate.GetXaxis()->SetTitle("Module 1 Triggers");
+    hMultTemplate.GetYaxis()->SetTitle("Module 2 Triggers");
+    hModuleMult = (TH2F*)registerHist("hModuleMult",hMultTemplate);
 }
 
 void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
@@ -39,9 +50,16 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
     if(PDS.E_recon > 100 && isWishboneTime) hProtonSignal[1]->Fill(PDS.E_p_0/1000., weight);
     
     if(isProton) {
+        if(PDS.nE || PDS.nV)
+            hModuleMult->Fill(PDS.nFiredMod[0], PDS.nFiredMod[1], weight);
+        if(PDS.modDropoutEvt) return;
+        for(unsigned int i=0; i<NCH_MAX; i++) {
+            if(isWishboneTime && PDS.E_PMT[i])
+                hChanSpec->Fill(PDS.E_PMT[i]/1000., i, weight);
+        }
         hNE->Fill(PDS.E_recon, PDS.nE, weight);
-        hNVeto->Fill(PDS.V, weight);
-        if(!PDS.V)
+        hNVeto->Fill(PDS.nV, weight);
+        if(!PDS.nV)
             hWishbone->Fill(PDS.E_recon, PDS.T_e2p/1000., weight);
     }
 }
@@ -55,6 +73,13 @@ void WishbonePlugin::makePlots() {
     myA->defaultCanvas->SetLogz(true);
     hNE->Draw("Col");
     myA->printCanvas("NPMTs");
+
+    hModuleMult->Draw("Col Z");
+    myA->printCanvas("ModMult");
+    
+    hChanSpec->Draw("Col");
+    myA->printCanvas("ChannelSpectra");
+    
     myA->defaultCanvas->SetLogz(false);
     
     myA->defaultCanvas->SetLogy(true);

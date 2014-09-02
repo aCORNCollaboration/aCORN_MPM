@@ -98,10 +98,10 @@ int main(int argc, char** argv) {
     while(!inf.fail()) {
         if(is4p) {
             inf >> std::dec >> std::skipws >>  R.T_p >> R.T_d >> R.E_p >> R.nPSig
-            >> R.T_e2p >> R.T_e2d >> R.E_e >> R.nE >> R.V
+            >> R.T_e2p >> R.T_e2d >> R.E_e >> R.nE >> R.nV
             >> std::hex >> R.DetFired >> R.DetPiled >> R.Idx;
         } else {
-            inf >> std::dec >> std::skipws >>  R.T_p >> R.E_p >> R.T_e2p >> R.E_e >> R.nE >> R.V
+            inf >> std::dec >> std::skipws >>  R.T_p >> R.E_p >> R.T_e2p >> R.E_e >> R.nE >> R.nV
             >> std::hex >> R.DetFired >> R.DetPiled >> R.Idx;
         }
         
@@ -110,14 +110,14 @@ int main(int argc, char** argv) {
         for(unsigned int i=0; i<NCH_MAX; i++) R.E_PMT[i] = R.T_PMT[i] = 0;
         
         //std::cout << T_p << "\t" << E_p << "\t" << nE;
-        //std::cout << "nE = " << R.nE << " nV = " << R.V << "\n";
-        assert(R.nE+R.V < NCH_MAX);
+        //std::cout << "nE = " << R.nE << " nV = " << R.nV << "\n";
+        assert(R.nE+R.nV < NCH_MAX);
         
         // Electron PMT "detail" codes
         std::vector<Char_t> tps;
         R.Max_PMT = -1;
         R.E_Max_PMT = 0;
-        for(unsigned int i=0; i<R.nE+R.V+R.nPSig; i++) {
+        for(unsigned int i=0; i<R.nE+R.nV+R.nPSig; i++) {
             UInt_t dtl;
             inf >> std::hex >> dtl;
             unsigned int chn = (dtl>>19);               // channel number

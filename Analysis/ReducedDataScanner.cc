@@ -7,7 +7,7 @@ void ReducedDataScanner::setReadpoints(TTree* T) {
     SetBranchAddress(T, "nP", &nP);
     if(is4p) SetBranchAddress(T, "nPSig", &nPSig);
     SetBranchAddress(T, "nE", &nE);
-    SetBranchAddress(T, "V", &V);
+    SetBranchAddress(T, "nV", &nV);
     
     SetBranchAddress(T, "T_p", &T_p);
     if(is4p) SetBranchAddress(T, "T_d", &T_d);
@@ -32,7 +32,7 @@ void ReducedDataScanner::setWritepoints(TTree* T) {
     T->Branch("nP", &nP, "nP/I");
     if(is4p) T->Branch("nPSig", &nPSig, "nPSig/I");
     T->Branch("nE", &nE, "nE/I");
-    T->Branch("V", &V, "V/I");
+    T->Branch("nV", &nV, "nV/I");
     
     T->Branch("T_p", &T_p, "T_p/L");
     if(is4p) T->Branch("T_d", &T_d, "T_d/L");

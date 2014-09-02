@@ -16,7 +16,7 @@ double fill_energy_histogram(ReducedDataScanner& R, TH1* h, double escale = 1000
 		if(R.T_p < clk_prev) clk_ttl += clk_prev;
 		clk_prev = R.T_p;
 	
-		if(R.V) continue;
+		if(R.nV) continue;
 		h->Fill(R.E_e * escale);
 	}
 	h->GetXaxis()->SetTitle("energy [keV]");
@@ -93,7 +93,7 @@ void collect_hdata(TH1F** hBi, ReducedDataScanner& R, double* p_scale, double* p
 
 	R.startScan();
 	while(R.nextPoint()) {
-		if(R.V) continue;
+		if(R.nV) continue;
 		double E = 0;
 		if(p_scale && p_weight) {
 			for(unsigned int i=0; i<N_E_PMT; i++) E += R.E_PMT[N_V_PMT+i]*p_scale[i]*p_weight[i];
@@ -200,7 +200,7 @@ int main(int, char**) {
 	TH1F* hBiScaled = new TH1F("hBiScaled","PMT 207Bi spectrum",200,0,3000);
 	R.startScan();
 	while(R.nextPoint()) {
-		if(R.V) continue;
+		if(R.nV) continue;
 		hBiScaled->Fill(R.E_e * 1000./38000.);
 		double E = 0;
 		for(unsigned int i=0; i<N_E_PMT; i++) E += R.E_PMT[N_V_PMT+i]*p_scale[i]*p_weight[i];
