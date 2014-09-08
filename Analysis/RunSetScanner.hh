@@ -47,7 +47,9 @@ public:
     
 protected:
     
-    std::vector<RunID> runlist;         ///< list of loaded runs
+    std::vector<RunID> runlist;                 ///< list of loaded runs
+    /// at run load time, figure out run total time
+    virtual double _getRunTime(RunID) { return 0; }
 };
 
 

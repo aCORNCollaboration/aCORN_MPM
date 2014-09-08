@@ -10,8 +10,8 @@
 double fill_energy_histogram(ReducedDataScanner& R, TH1* h, double escale = 1000./38000.) {
 	R.startScan();
 	h->Sumw2();
-	Long_t clk_ttl = 0;
-	Long_t clk_prev = 0;
+	Long64_t clk_ttl = 0;
+	Long64_t clk_prev = 0;
 	while(R.nextPoint()) {
 		if(R.T_p < clk_prev) clk_ttl += clk_prev;
 		clk_prev = R.T_p;

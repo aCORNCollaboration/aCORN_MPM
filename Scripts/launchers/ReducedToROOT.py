@@ -17,7 +17,7 @@ if __name__ == "__main__":
             if f[0]=="S": # special case for differently-capitalized filenames
                 os.system("mv %s/%s %s/%s"%(datadir,f,datadir,f.lower()))
                 f = f.lower()
-            #if f[1:4] not in ["610","611"]:
+            #if f[1:5] not in ["1519"]:
             #    continue
             cmdlist.write(r2rcmd + " %s/%s"%(datadir,f) + " %s/%s.root\n"%(outdir,f[:-4]))
     cmdlist.close()

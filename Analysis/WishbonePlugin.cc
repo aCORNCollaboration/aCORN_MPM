@@ -16,9 +16,10 @@ WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"
     double E0 = 0;
     double E1 = 1000;
     
-    TH2F hTemplate("hTemplate","aCORN Wishbone", nEnBins, E0, E1, 500, -0., 10.);
+    TH2F hTemplate("hTemplate","aCORN Wishbone", nEnBins, E0, E1, 1000, -0., 10.);
     hTemplate.GetXaxis()->SetTitle("Electron energy [keV]");
     hTemplate.GetYaxis()->SetTitle("Proton TOF [#mus]");
+    hTemplate.GetYaxis()->SetTitleOffset(1.4);
     hWishbone = (TH2F*)registerHist("hWishbone",hTemplate);
     
     TH2F hNETemplate("hNETemplate","PMT trigger counts", 100, 0, 1000, 20, -0.5, 19.5);

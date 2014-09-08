@@ -1,4 +1,5 @@
 #include "BaseDataScanner.hh"
+#include <iostream>
 
 BaseDataScanner::BaseDataScanner(const std::string& treeName, bool fp):
 RunSetScanner(treeName), is4p(fp), physicsWeight(1.) { }
@@ -16,6 +17,14 @@ void BaseDataScanner::loadNewRun(RunID rn) {
         currentCal = cals[rn] = new AcornCalibrator(rn);
     else
         currentCal = it->second;
+}
+
+double BaseDataScanner::_getRunTime(RunID rn) {
+    int nback = 1;
+    T_p = 0;
+    while(T_p <= 0) speedload(nEvents-(nback++));
+    //std::cout << rn << " Run time " << T_p << " ns" << "\n";
+    return T_p/1.e9;
 }
 
 void BaseDataScanner::calibrate() {

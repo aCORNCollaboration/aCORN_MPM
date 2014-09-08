@@ -20,8 +20,8 @@ public:
     
     bool is4p;                  ///< whether this is "4-proton" style data
     
-    Long_t T_p;                 ///< proton (energy pulse) arrival time, loaded in 10ns units, calibrated to [ns]
-    Long_t T_d;                 ///< [4p] discriminator arrival time, loaded in 10ns units, calibrated to [ns]
+    Long64_t T_p;               ///< proton (energy pulse) arrival time, loaded in 10ns units, calibrated to [ns]
+    Long64_t T_d;               ///< [4p] discriminator arrival time, loaded in 10ns units, calibrated to [ns]
     Int_t nPSig;                ///< [4p] number of proton signals
     Int_t T_e2p;                ///< proton time-of-flight from electron signal, loaded in 10ns, calibrated to [ns]
     Int_t T_e2d;                ///< [4p] proton discriminator time to electron signal, loaded in 10ns, calibrated to [ns]
@@ -61,6 +61,8 @@ protected:
     std::map<RunID, AcornCalibrator*> cals;     ///< calibrators for each run
     AcornCalibrator* currentCal;                ///< calibrator for current run
     
+    /// at run load time, figure out run total time
+    virtual double _getRunTime(RunID);
     /// load calibrator for current run
     void loadCal(RunID rn);
     /// calculate number of signals triggered in given module

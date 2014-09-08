@@ -94,18 +94,38 @@ int main(int argc, char** argv) {
     ReducedDataScanner R(is4p);
     R.setWritepoints(T);
     R.nPSig = 0;
+    Long64_t T_p_max = 0;
     
-    while(!inf.fail()) {
+    int badLines = 0;
+    while(inf.good()) {
+        int stage = 0;
         if(is4p) {
-            inf >> std::dec >> std::skipws >>  R.T_p >> R.T_d >> R.E_p >> R.nPSig
-            >> R.T_e2p >> R.T_e2d >> R.E_e >> R.nE >> R.nV
-            >> std::hex >> R.DetFired >> R.DetPiled >> R.Idx;
+            while(1) {
+                inf >> std::dec >> std::skipws >> R.T_p; stage++; if(!inf.good()) break;
+                inf >> std::dec >> std::skipws >> R.T_d; stage++; if(!inf.good()) break;
+                inf >> std::dec >> std::skipws >> R.E_p; stage++; if(!inf.good()) break;
+                inf >> std::dec >> std::skipws >> R.nPSig; stage++; if(!inf.good()) break;
+                inf >> std::dec >> std::skipws >> R.T_e2p; stage++; if(!inf.good()) break;
+                inf >> std::dec >> std::skipws >> R.T_e2d; stage++; if(!inf.good()) break;
+                inf >> std::dec >> std::skipws >> R.E_e; stage++; if(!inf.good()) break;
+                inf >> std::dec >> std::skipws >> R.nE; stage++; if(!inf.good()) break;
+                inf >> std::dec >> std::skipws >> R.nV; stage++; if(!inf.good()) break;
+                inf >> std::hex >> std::skipws >>  R.DetFired >> R.DetPiled >> R.Idx;
+                break;
+            }
         } else {
             inf >> std::dec >> std::skipws >>  R.T_p >> R.E_p >> R.T_e2p >> R.E_e >> R.nE >> R.nV
             >> std::hex >> R.DetFired >> R.DetPiled >> R.Idx;
         }
         
-        if(inf.fail()) break;
+        if(!inf.good()) {
+            badLines++;
+            //std::cout << "Read fail " << inf.rdstate() << " at stage " << stage << "\n";
+            inf.clear();
+            inf.getline(lbuf, 512, '\r');
+            //std::cout << "Bad line '" << lbuf << "'\n";
+            continue;
+        }
         
         for(unsigned int i=0; i<NCH_MAX; i++) R.E_PMT[i] = R.T_PMT[i] = 0;
         
@@ -134,12 +154,16 @@ int main(int argc, char** argv) {
         
         // make sure we're at the end of the line (note '\r' endings...)
         inf.getline(lbuf,2,'\r');
-        assert(!inf.fail());
+        if(inf.fail()) {
+            std::cout << "'" << argv[1] << "' hit mal-formed line ending!\n";
+            break;
+        }
         
+        if(T_p_max < R.T_p) T_p_max = R.T_p;
         T->Fill();
     }
     
-    std::cout << "'" << argv[1] << "' Loaded " << T->GetEntries() << " events.\n";
+    std::cout << "'" << argv[1] << "' Loaded " << T->GetEntries() << " events; " << badLines << " bad lines; t= " << T_p_max << "\n";
     
     T->Write();
     outf->Close();

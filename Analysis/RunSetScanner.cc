@@ -43,10 +43,9 @@ bool RunSetScanner::addRun(RunID r) {
     std::string f = locateRun(r);
     if(f.size() && addFile(f)) {
         runlist.push_back(r);
-        //RunInfo R = CalDBSQL::getCDB()->getRunInfo(r);
-        //BlindTime b = CalDBSQL::getCDB()->fiducialTime(r);
-        //totalTime += b;
-        runTimes.add(r,0);
+        double rtime = _getRunTime(r);
+        totalTime += rtime;
+        runTimes.add(r,rtime);
         return true;
     }
     std::cout << "**** FAILED TO LOCATE analyzed data for run " << r << " at '" << f << "'! *****\n";
