@@ -19,7 +19,11 @@ if __name__ == "__main__":
                 f = f.lower()
             #if f[1:5] not in ["1519"]:
             #    continue
-            cmdlist.write(r2rcmd + " %s/%s"%(datadir,f) + " %s/%s.root\n"%(outdir,f[:-4]))
+            outfname = "%s/%s.root"%(outdir,f[:-4])
+            if not os.path.isfile(outfname):
+                cmdlist.write(r2rcmd + " %s/%s %s\n"%(datadir,f,outfname))
+            else:
+                print outfname,"already exists. Skipping."
     cmdlist.close()
     os.system("cat replay_cmds.txt")
     os.system("nice -n 15 parallel < replay_cmds.txt")

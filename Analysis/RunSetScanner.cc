@@ -25,17 +25,20 @@ void RunSetScanner::display() {
     printf("RunSetScanner: %i runs, %i events\n",getnFiles(),nEvents);
 }
 
-void RunSetScanner::speedload(unsigned int e) {
+void RunSetScanner::speedload(unsigned int e, bool loadBaskets) {
     if(e < noffset || e-noffset >= nLocalEvents) {
-        Tch->LoadTree(e);
-        Tch->GetTree()->LoadBaskets();
+        if(loadBaskets) Tch->GetTree()->DropBaskets();
+        Tch->GetEvent(e);
+        if(loadBaskets) Tch->GetTree()->LoadBaskets();
         nLocalEvents = Tch->GetTree()->GetEntries();
         noffset = Tch->GetChainOffset();
         assert((size_t)Tch->GetTreeNumber() < runlist.size());
         evtRun = runlist[Tch->GetTreeNumber()];
         loadNewRun(evtRun);
+    } else {
+        Tch->GetEvent(e);
     }
-    Tch->GetTree()->GetEvent(e-noffset);
+    // Tch->GetTree()->GetEvent(e-noffset);
     calibrate();
 }
 
@@ -46,8 +49,10 @@ bool RunSetScanner::addRun(RunID r) {
         double rtime = _getRunTime(r);
         totalTime += rtime;
         runTimes.add(r,rtime);
+        runCounts.add(r,nnEvents.back());
         return true;
     }
     std::cout << "**** FAILED TO LOCATE analyzed data for run " << r << " at '" << f << "'! *****\n";
     return false;
 }
+

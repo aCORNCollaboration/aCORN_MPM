@@ -26,7 +26,7 @@ public:
     Int_t T_e2p;                ///< proton time-of-flight from electron signal, loaded in 10ns, calibrated to [ns]
     Int_t T_e2d;                ///< [4p] proton discriminator time to electron signal, loaded in 10ns, calibrated to [ns]
     
-    Int_t E_p;                  ///< proton energy (uncalibrated channels)
+    Int_t E_p;                  ///< proton energy (uncalibrated channels); may also be a flag for multi-electron readout
     Int_t E_p_0;                ///< previous proton energy for multiple-electron flag
     Int_t E_e;                  ///< Electron energy (uncalibrated channels)
     Double_t E_recon;           ///< Calibrated reconstructed electron energy
@@ -54,6 +54,8 @@ public:
     virtual void loadNewRun(RunID r);
     /// calibrations after loading event
     virtual void calibrate();
+    /// display current event
+    virtual void display() const;
     
     double physicsWeight;       ///< simulated event spectrum re-weighting factor
    

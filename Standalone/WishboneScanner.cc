@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
         return 0;
     }
     
-    RunNum series = atoi(argv[1]);
+    int series = atoi(argv[1]);
     
     gStyle->SetOptStat("");
     
@@ -27,13 +27,22 @@ int main(int argc, char** argv) {
         return 0;
     }
     
+    OutputManager OM("Wishbone", getEnvSafe("ACORN_WISHBONE"));
+    
+    if(series < 0) {
+        series = -series;
+        std::string wbname = "Series_"+itos(series);
+        WishboneAnalyzer WA(&OM, wbname, OM.basePath+"/"+wbname+"/"+wbname);
+        WA.makeOutput();
+        return 0;
+    }
+    
     ReducedDataScanner RDS(series >= 1519);
     if(!RDS.addRuns(MetadataDB::MDB.seriesRuns(series))) {
         printf("Series %u contains no useful runs. Analysis stopped.\n", series);
         return 0;
     }
     
-    OutputManager OM("Wishbone", getEnvSafe("ACORN_WISHBONE"));
     WishboneAnalyzer WA(&OM, "/Series_"+itos(series));
     
     WA.loadProcessedData(RDS);

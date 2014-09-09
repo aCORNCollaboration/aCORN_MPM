@@ -3,9 +3,9 @@
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.45]{%(sdir)s/ChannelSpectra.pdf}
-    \caption{Detector channels raw spectra.}
-    \label{fig:pmtspectra_%(series)i}
+    \subfloat[Energy projection; red: signal, blue: background.]{\includegraphics[scale=0.45]{%(sdir)s/WishboneEnergy.pdf}}
+    \subfloat[Time projection.]{\includegraphics[scale=0.45]{%(sdir)s/WishboneTime.pdf}}
+    \label{fig:wishbone_proj_%(series)i}
 \end{figure}
 
 \begin{figure}[H]

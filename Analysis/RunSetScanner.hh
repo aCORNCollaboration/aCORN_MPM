@@ -8,6 +8,8 @@
 #include "QFile.hh"
 #include "TagCounter.hh"
 
+#include <TH1.h>
+
 #include <map>
 #include <cassert>
 
@@ -28,7 +30,7 @@ public:
     virtual std::string locateRun(RunID) { assert(false); return ""; }
     
     /// speedload, keeping track of currently loaded run number
-    virtual void speedload(unsigned int e);
+    virtual void speedload(unsigned int e, bool loadBaskets = true);
     ///  subclass this for calibrations after loading event
     virtual void calibrate() { }
     /// subclass this for routines when new run is loaded
@@ -44,6 +46,7 @@ public:
     RunID evtRun;                       ///< run ID for current event
     double totalTime;                   ///< combined length of runs in seconds
     TagCounter<RunID>  runTimes;        ///< times for each run loaded
+    TagCounter<RunID>  runCounts;       ///< total event counts for each run loaded
     
 protected:
     

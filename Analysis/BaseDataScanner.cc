@@ -19,10 +19,10 @@ void BaseDataScanner::loadNewRun(RunID rn) {
         currentCal = it->second;
 }
 
-double BaseDataScanner::_getRunTime(RunID rn) {
+double BaseDataScanner::_getRunTime(RunID) {
     int nback = 1;
     T_p = 0;
-    while(T_p <= 0) speedload(nEvents-(nback++));
+    while(T_p <= 0) speedload(nEvents-(nback++),false);
     //std::cout << rn << " Run time " << T_p << " ns" << "\n";
     return T_p/1.e9;
 }
@@ -33,6 +33,7 @@ void BaseDataScanner::calibrate() {
     T_d *= NS_PER_CLOCK;
     T_e2p *= NS_PER_CLOCK;
     T_e2d *= NS_PER_CLOCK;
+    assert(currentCal);
     E_recon = currentCal->calEnergy(E_e);
     nFiredModule();
     modDropoutEvt = !(nFiredMod[0]*nFiredMod[1]) && (nFiredMod[0]+nFiredMod[1]>=6);
@@ -50,4 +51,8 @@ void BaseDataScanner::nFiredModule() {
         for(unsigned int i=0; i<NCH_MAX; i++)
             nFiredMod[m] += ((mod_mask[m] & (1<<i)) && (DetFired & (1<<i)));
     }
+}
+
+void BaseDataScanner::display() const {
+    std::cout << "E_p = " << E_p << "\tE_p_0 = " << E_p_0 << "\tE_e = " << E_e << "\tT_p = " << T_p << "\n";
 }

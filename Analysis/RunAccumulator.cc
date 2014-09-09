@@ -131,10 +131,10 @@ void RunAccumulator::loadProcessedData(BaseDataScanner& PDS) {
         //        totalCounts[afp][gv]++;
         //}
         fillCoreHists(PDS,PDS.physicsWeight);
-}
-printf("\tscanned %i points\n",nScanned);
-
-runTimes += PDS.runTimes;
+    }
+    runTimes += PDS.runTimes;
+    runCounts += PDS.runCounts;
+    printf("\tscanned %i points\n",nScanned);
 }
 
 void RunAccumulator::makeOutput(bool doPlots) {
@@ -159,6 +159,19 @@ unsigned int RunAccumulator::mergeDir() {
     }
     makeOutput();
     return nMerged;
+}
+
+
+TH1* RunAccumulator::hToRate(TH1* h, bool differential) {
+    TH1* hc = (TH1*)h->Clone();
+    hc->Scale(1./runTimes.total());
+    if(differential) {
+        for(int i=1; i<hc->GetNbinsX(); i++) {
+            TAxis* A = hc->GetXaxis();
+            hc->SetBinContent(i, hc->GetBinContent(i)/A->GetBinWidth(i));
+        }
+    }
+    return hc;
 }
 
 /* --------------------------------------------------- */

@@ -4,6 +4,25 @@
 #include "RunAccumulator.hh"
 #include "ManualInfo.hh"
 
+#include <vector>
+#include <utility>
+using std::vector;
+using std::pair;
+
+/// Utility class for wishbone plot backrgound subtraction and projections
+class TH2Slicer {
+public:
+    /// Constructor
+    TH2Slicer(TH2* hh): h(hh) { }
+    
+    /// Project contents in bins closest to yrange; return actual interval summed
+    double projSlice(double y0, double y1, TH1*& projOut);
+    
+protected:
+    static int pcount;        ///< projection number counter for unique naming
+    TH2* h;
+};
+
 /// Analyzer plugin for wishbone data
 class WishbonePlugin: public AnalyzerPlugin {
 public:
@@ -13,8 +32,11 @@ public:
     /// Fill core histograms from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
     
+    /// generate calculated hists
+    virtual void calculateResults();
     /// Generate output plots
     virtual void makePlots();
+    
     
     TH1* hProtonSignal[2];      ///< proton detector signal, electron coincident or not
     TH1* h4pTiming;             ///< "4p" mode discriminator arrival time
@@ -28,7 +50,9 @@ public:
     double E_p_lo = 650;        ///< proton signal low cut for wishbone data
     double E_p_hi = 2200;       ///< proton signal high cut for wishbone data
     
-    TH1* hWishboneEProj[2];     ///< Wishbone energy spectrum, backtground and background-subtracted
+    
+    TH1* hWishboneEProj[2];     ///< Wishbone energy spectrum, background and background-subtracted
+    TH1* hWishboneTProj;        ///< Wishbone time-axis projection
 };
 
 

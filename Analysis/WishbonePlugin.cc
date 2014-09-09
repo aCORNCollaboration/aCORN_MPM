@@ -1,5 +1,28 @@
 #include "WishbonePlugin.hh"
 #include "GraphicsUtils.hh"
+#include "strutils.hh"
+
+int TH2Slicer::pcount = 0;
+    
+double TH2Slicer::projSlice(double y0, double y1, TH1*& projOut) {
+    TAxis* A = h->GetYaxis();
+    int b0 = A->FindBin(y0);
+    int b1 = A->FindBin(y1);
+    
+    TH1D* hProj = h->ProjectionX(("_slice_"+itos(pcount++)).c_str(), b0, b1, "e");
+    if(projOut) {
+        projOut->Add(hProj);
+        delete hProj;
+    }
+    else projOut = hProj;
+    
+    return A->GetBinUpEdge(b1)-A->GetBinLowEdge(b0);
+}
+
+
+////////////
+////////////
+////////////
 
 WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone") {
     
@@ -12,9 +35,9 @@ WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"
     hNVeto = registerHist("hNVeto","Veto panels count",9,-0.5,8.5);
     hNVeto->GetXaxis()->SetTitle("Number of veto panels");
     
-    unsigned int nEnBins = 500;
+    unsigned int nEnBins = 800;
     double E0 = 0;
-    double E1 = 1000;
+    double E1 = 1600;
     
     TH2F hTemplate("hTemplate","aCORN Wishbone", nEnBins, E0, E1, 1000, -0., 10.);
     hTemplate.GetXaxis()->SetTitle("Electron energy [keV]");
@@ -41,14 +64,15 @@ WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"
 
 void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
     
+    //PDS.display();
     if(PDS.E_p_0 <= 0) return;
-
-    hProtonSignal[0]->Fill(PDS.E_p_0/1000., weight);
+    
+    if(PDS.E_p > 0) hProtonSignal[0]->Fill(PDS.E_p_0/1000., weight);
     
     bool isProton = E_p_lo < PDS.E_p_0 && PDS.E_p_0 < E_p_hi;
     bool isWishboneTime = 3000 < PDS.T_e2p && PDS.T_e2p < 4200;
     
-    if(PDS.E_recon > 100 && isWishboneTime) hProtonSignal[1]->Fill(PDS.E_p_0/1000., weight);
+    if(PDS.E_p > 0 && PDS.E_recon > 100 && isWishboneTime) hProtonSignal[1]->Fill(PDS.E_p_0/1000., weight);
     
     if(isProton) {
         if(PDS.nE || PDS.nV)
@@ -60,18 +84,46 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
         }
         hNE->Fill(PDS.E_recon, PDS.nE, weight);
         hNVeto->Fill(PDS.nV, weight);
-        if(!PDS.nV)
+        if(!PDS.nV && PDS.T_e2p>0)
             hWishbone->Fill(PDS.E_recon, PDS.T_e2p/1000., weight);
     }
 }
 
+void WishbonePlugin::calculateResults() {
+    hWishboneEProj[false] = hWishboneEProj[true] = NULL;
+    TH2Slicer wbs(hWishbone);
+    double tfg = wbs.projSlice(3.0, 4.5, hWishboneEProj[true]);
+    double tbg = wbs.projSlice(1.0, 3.0, hWishboneEProj[false]);
+    tbg += wbs.projSlice(4.5, 9, hWishboneEProj[false]);
+    
+    double s0 = 1000./myA->runTimes.total()/hWishboneEProj[true]->GetBinWidth(1);
+    hWishboneEProj[true]->Scale(s0);
+    hWishboneEProj[false]->Scale(s0*tfg/tbg);
+    hWishboneEProj[true]->Add(hWishboneEProj[false],-1.0);
+    
+    hWishboneEProj[true]->GetYaxis()->SetTitle("rate [mHz/keV]");
+    hWishboneEProj[true]->GetYaxis()->SetTitleOffset(1.45);
+    hWishboneEProj[true]->SetTitle("aCORN electron spectrum");
+    hWishboneEProj[false]->SetTitle("aCORN electron spectrum background");
+    hWishboneEProj[false]->SetLineColor(4);
+    hWishboneEProj[true]->SetLineColor(2);
+    
+    hWishbone->GetYaxis()->SetRange();
+    hWishboneTProj = hWishbone->ProjectionY("_tproj", 0, -1, "e");
+    hWishboneTProj->SetTitle("Wishbone time of flight projection");
+    hWishboneTProj->Scale(1./myA->runTimes.total()/hWishboneTProj->GetBinWidth(1));
+    hWishboneTProj->GetYaxis()->SetTitle("event rate [Hz/#mus]");
+    hWishboneTProj->GetYaxis()->SetTitleOffset(1.45);
+}
+
 void WishbonePlugin::makePlots() {
+    
+    myA->defaultCanvas->SetLogz(true);
     
     hWishbone->GetYaxis()->SetRangeUser(2.,5.);
     hWishbone->Draw("Col");
     myA->printCanvas("Wishbone");
-
-    myA->defaultCanvas->SetLogz(true);
+    
     hNE->Draw("Col");
     myA->printCanvas("NPMTs");
 
@@ -85,15 +137,45 @@ void WishbonePlugin::makePlots() {
     
     myA->defaultCanvas->SetLogy(true);
     
-    hNVeto->Draw();
+    TH1* hNVetoR = myA->hToRate(hNVeto,false);
+    hNVetoR->GetYaxis()->SetTitle("rate [Hz]");
+    hNVetoR->GetYaxis()->SetTitleOffset(1.4);
+    hNVetoR->SetMinimum(1e-6);
+    hNVetoR->SetMaximum(100);
+    hNVetoR->Draw();
     myA->printCanvas("NVeto");
+    delete hNVetoR;
     
     //hProtonSignal[0]->SetMinimum(hProtonSignal[1]->GetMinimum());
-    hProtonSignal[0]->Draw();
+    TH1* hProtonSignalR = myA->hToRate(hProtonSignal[0],true);
+    hProtonSignalR->GetYaxis()->SetTitle("rate [mHz/channel]");
+    hProtonSignalR->GetYaxis()->SetTitleOffset(1.4);
+    hProtonSignalR->SetMinimum(0.1);
+    hProtonSignalR->SetMaximum(100);
+    hProtonSignalR->Draw();
     //hProtonSignal[1]->Draw("Same");
     drawVLine(E_p_lo/1000., myA->defaultCanvas, 2);
     drawVLine(E_p_hi/1000., myA->defaultCanvas, 2);
     myA->printCanvas("ProtonSignal");
+    delete hProtonSignalR;
     
-   // myA->defaultCanvas->SetLogy(false);
+   myA->defaultCanvas->SetLogy(false);
+   int nrebin = 4;
+   hWishboneEProj[true]->Rebin(nrebin);
+   hWishboneEProj[true]->Scale(1./nrebin);
+   hWishboneEProj[false]->Rebin(nrebin);
+   hWishboneEProj[false]->Scale(1./nrebin);
+   hWishboneEProj[true]->SetMinimum(-0.2);
+   hWishboneEProj[true]->SetMaximum(2);
+   hWishboneEProj[true]->Draw();
+   hWishboneEProj[false]->Draw("Same");
+   drawHLine(0., myA->defaultCanvas, 1);
+   myA->printCanvas("WishboneEnergy");
+   
+   //hWishboneTProj->Rebin(nrebin);
+   //hWishboneTProj->Scale(1./nrebin);
+   hWishboneTProj->SetMinimum(-0.5);
+   hWishboneTProj->SetMaximum(10);
+   hWishboneTProj->Draw("E0");
+   myA->printCanvas("WishboneTime");
 }

@@ -21,7 +21,7 @@ public:
     /// jump scanner to specified event
     virtual void gotoEvent(unsigned int e);
     /// load identified "speed scan" point
-    virtual void speedload(unsigned int e);
+    virtual void speedload(unsigned int e, bool loadBaskets = true);
     /// load next "speed scan" point
     virtual bool nextPoint();	
     /// get current speed scan point
