@@ -3,14 +3,15 @@
 
 \begin{figure}[H]
     \centering
-    \subfloat[Energy projection; red: signal, blue: background.]{\includegraphics[scale=0.45]{%(sdir)s/WishboneEnergy.pdf}}
-    \subfloat[Time projection.]{\includegraphics[scale=0.45]{%(sdir)s/WishboneTime.pdf}}
-    \label{fig:wishbone_proj_%(series)i}
+    \includegraphics[scale=0.45]{%(sdir)s/Wishbone.pdf}
+    \caption{``Wishbone'' plot. Color axis units are Hz/MeV/$\mu$s.}
+    \label{fig:wishbone_%(series)i}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.45]{%(sdir)s/Wishbone.pdf}
-    \caption{``Wishbone'' plot.}
-    \label{fig:wishbone_%(series)i}
+    \subfloat[Energy projection; red: signal, blue: background.]{\includegraphics[scale=0.45]{%(sdir)s/WishboneEnergy.pdf}}
+    \subfloat[Time projection, all energies.]{\includegraphics[scale=0.45]{%(sdir)s/WishboneTime.pdf}}
+    \caption{``Wishbone'' axis projections.}
+    \label{fig:wishbone_proj_%(series)i}
 \end{figure}

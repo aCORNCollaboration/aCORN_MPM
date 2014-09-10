@@ -58,6 +58,7 @@ WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"
     hTemplate.GetYaxis()->SetTitle("Proton TOF [#mus]");
     hTemplate.GetYaxis()->SetTitleOffset(1.4);
     hWishbone = (TH2F*)registerHist("hWishbone",hTemplate);
+    hWishbone->GetYaxis()->SetRange();
     
     TH2F hNETemplate("hNETemplate","PMT trigger counts", 100, 0, 1000, 20, -0.5, 19.5);
     hNETemplate.GetYaxis()->SetTitle("Number of PMTs triggered");
@@ -105,8 +106,8 @@ void WishbonePlugin::calculateResults() {
     hWishboneEProj[false] = hWishboneEProj[true] = NULL;
     TH2Slicer wbs(hWishbone);
     double tfg = wbs.projSlice(T_p_lo/1000., T_p_hi/1000., hWishboneEProj[true]);
-    double tbg = wbs.projSlice(1.0, T_p_lo/1000., hWishboneEProj[false]);
-    tbg += wbs.projSlice(T_p_hi/1000., 9, hWishboneEProj[false]);
+    double tbg = wbs.projSlice(T_p_min/1000., T_p_lo/1000., hWishboneEProj[false]);
+    tbg += wbs.projSlice(T_p_hi/1000., T_p_max/1000., hWishboneEProj[false]);
     
     hWishboneBGSub = wbs.subtractProfile(hWishboneEProj[false],1./tbg);
     
@@ -133,7 +134,7 @@ void WishbonePlugin::calculateResults() {
 
 void set_plot_style() {
     const Int_t NRGBs = 5;
-    const Int_t NCont = 255;
+    const Int_t NCont = 127;
     
     Double_t stops[NRGBs] = { 0.00, 0.25, 0.50, 0.75, 1.00 };
     Double_t red[NRGBs]   = { 0.00, 0.00, 1.00, 0.75, 1.00 };
@@ -145,10 +146,11 @@ void set_plot_style() {
 
 void WishbonePlugin::makePlots() {
     
-    set_plot_style();
-    hWishboneBGSub->GetYaxis()->SetRangeUser(2.,5.);
+    hWishboneBGSub->Rebin2D(4,2);
+    hWishboneBGSub->Scale(1./8.);
     hWishboneBGSub->SetMinimum(-5.);
     hWishboneBGSub->SetMaximum(5.);
+    set_plot_style();
     hWishboneBGSub->Draw("Col Z");
     myA->printCanvas("Wishbone");
     gStyle->SetPalette(1);
@@ -190,23 +192,25 @@ void WishbonePlugin::makePlots() {
     myA->printCanvas("ProtonSignal");
     delete hProtonSignalR;
     
-   myA->defaultCanvas->SetLogy(false);
-   int nrebin = 4;
-   hWishboneEProj[true]->Rebin(nrebin);
-   hWishboneEProj[true]->Scale(1./nrebin);
-   hWishboneEProj[false]->Rebin(nrebin);
-   hWishboneEProj[false]->Scale(1./nrebin);
-   hWishboneEProj[true]->SetMinimum(-0.2);
-   hWishboneEProj[true]->SetMaximum(2);
-   hWishboneEProj[true]->Draw();
-   hWishboneEProj[false]->Draw("Same");
-   drawHLine(0., myA->defaultCanvas, 1);
-   myA->printCanvas("WishboneEnergy");
-   
-   hWishboneTProj->SetMinimum(0);
-   hWishboneTProj->SetMaximum(5);
-   hWishboneTProj->Draw("E0");
-   drawVLine(T_p_lo/1000., myA->defaultCanvas, 2);
-   drawVLine(T_p_hi/1000., myA->defaultCanvas, 2);
-   myA->printCanvas("WishboneTime");
+    myA->defaultCanvas->SetLogy(false);
+    int nrebin = 4;
+    hWishboneEProj[true]->Rebin(nrebin);
+    hWishboneEProj[true]->Scale(1./nrebin);
+    hWishboneEProj[false]->Rebin(nrebin);
+    hWishboneEProj[false]->Scale(1./nrebin);
+    hWishboneEProj[true]->SetMinimum(-0.2);
+    hWishboneEProj[true]->SetMaximum(2);
+    hWishboneEProj[true]->Draw();
+    hWishboneEProj[false]->Draw("Same");
+    drawHLine(0., myA->defaultCanvas, 1);
+    myA->printCanvas("WishboneEnergy");
+    
+    hWishboneTProj->SetMinimum(0);
+    hWishboneTProj->SetMaximum(5);
+    hWishboneTProj->Draw("E0");
+    drawVLine(T_p_lo/1000., myA->defaultCanvas, 2);
+    drawVLine(T_p_hi/1000., myA->defaultCanvas, 2);
+    drawVLine(T_p_min/1000., myA->defaultCanvas, 4);
+    drawVLine(T_p_max/1000., myA->defaultCanvas, 4);
+    myA->printCanvas("WishboneTime");
 }
