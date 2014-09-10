@@ -27,7 +27,7 @@ if __name__ == "__main__":
     slist = get_series_list()
     cmdlist = open("replay_cmds.txt","w")
     for s in slist:
-        cmdlist.write("../../WishboneScanner -%i\n"%s)
+        cmdlist.write("../../WishboneScanner %i\n"%s)
     cmdlist.close()
     
     print "Analyzing",len(slist),"series..."

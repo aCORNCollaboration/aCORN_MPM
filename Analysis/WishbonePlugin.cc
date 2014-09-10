@@ -1,6 +1,8 @@
 #include "WishbonePlugin.hh"
 #include "GraphicsUtils.hh"
 #include "strutils.hh"
+#include <TStyle.h>
+#include <TColor.h>
 
 int TH2Slicer::pcount = 0;
     
@@ -19,6 +21,18 @@ double TH2Slicer::projSlice(double y0, double y1, TH1*& projOut) {
     return A->GetBinUpEdge(b1)-A->GetBinLowEdge(b0);
 }
 
+TH2* TH2Slicer::subtractProfile(const TH1* p, double s) const {
+    assert(p->GetNbinsX() == h->GetNbinsX());
+    TH2* hh = (TH2*)(h->Clone((std::string(h->GetName())+"_bgsub").c_str()));
+    for(Int_t nx=0; nx<=h->GetNbinsX()+1; nx++) {
+        double dz = p->GetBinContent(nx)*s;
+        for(Int_t ny=1; ny<=h->GetNbinsY(); ny++) {
+            Int_t b = h->GetBin(nx,ny);
+            hh->SetBinContent(b,h->GetBinContent(b)-dz*h->GetYaxis()->GetBinWidth(ny));
+        }
+    }
+    return hh;
+}
 
 ////////////
 ////////////
@@ -39,7 +53,7 @@ WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"
     double E0 = 0;
     double E1 = 1600;
     
-    TH2F hTemplate("hTemplate","aCORN Wishbone", nEnBins, E0, E1, 1000, -0., 10.);
+    TH2F hTemplate("hTemplate","aCORN Wishbone", nEnBins, E0, E1, 1001, -0.005, 10.005);
     hTemplate.GetXaxis()->SetTitle("Electron energy [keV]");
     hTemplate.GetYaxis()->SetTitle("Proton TOF [#mus]");
     hTemplate.GetYaxis()->SetTitleOffset(1.4);
@@ -64,13 +78,11 @@ WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"
 
 void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
     
-    //PDS.display();
     if(PDS.E_p_0 <= 0) return;
-    
     if(PDS.E_p > 0) hProtonSignal[0]->Fill(PDS.E_p_0/1000., weight);
     
     bool isProton = E_p_lo < PDS.E_p_0 && PDS.E_p_0 < E_p_hi;
-    bool isWishboneTime = 3000 < PDS.T_e2p && PDS.T_e2p < 4200;
+    bool isWishboneTime = T_p_lo < PDS.T_e2p && PDS.T_e2p < T_p_hi;
     
     if(PDS.E_p > 0 && PDS.E_recon > 100 && isWishboneTime) hProtonSignal[1]->Fill(PDS.E_p_0/1000., weight);
     
@@ -92,9 +104,11 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
 void WishbonePlugin::calculateResults() {
     hWishboneEProj[false] = hWishboneEProj[true] = NULL;
     TH2Slicer wbs(hWishbone);
-    double tfg = wbs.projSlice(3.0, 4.5, hWishboneEProj[true]);
-    double tbg = wbs.projSlice(1.0, 3.0, hWishboneEProj[false]);
-    tbg += wbs.projSlice(4.5, 9, hWishboneEProj[false]);
+    double tfg = wbs.projSlice(T_p_lo/1000., T_p_hi/1000., hWishboneEProj[true]);
+    double tbg = wbs.projSlice(1.0, T_p_lo/1000., hWishboneEProj[false]);
+    tbg += wbs.projSlice(T_p_hi/1000., 9, hWishboneEProj[false]);
+    
+    hWishboneBGSub = wbs.subtractProfile(hWishboneEProj[false],1./tbg);
     
     double s0 = 1000./myA->runTimes.total()/hWishboneEProj[true]->GetBinWidth(1);
     hWishboneEProj[true]->Scale(s0);
@@ -108,21 +122,38 @@ void WishbonePlugin::calculateResults() {
     hWishboneEProj[false]->SetLineColor(4);
     hWishboneEProj[true]->SetLineColor(2);
     
-    hWishbone->GetYaxis()->SetRange();
     hWishboneTProj = hWishbone->ProjectionY("_tproj", 0, -1, "e");
     hWishboneTProj->SetTitle("Wishbone time of flight projection");
     hWishboneTProj->Scale(1./myA->runTimes.total()/hWishboneTProj->GetBinWidth(1));
     hWishboneTProj->GetYaxis()->SetTitle("event rate [Hz/#mus]");
     hWishboneTProj->GetYaxis()->SetTitleOffset(1.45);
+    
+    hWishboneBGSub->Scale(s0/hWishboneTProj->GetBinWidth(1));
+}
+
+void set_plot_style() {
+    const Int_t NRGBs = 5;
+    const Int_t NCont = 255;
+    
+    Double_t stops[NRGBs] = { 0.00, 0.25, 0.50, 0.75, 1.00 };
+    Double_t red[NRGBs]   = { 0.00, 0.00, 1.00, 0.75, 1.00 };
+    Double_t green[NRGBs] = { 0.00, 0.25, 1.00, 0.00, 0.80 };
+    Double_t blue[NRGBs]  = { 1.00, 0.50, 1.00, 0.00, 0.00 };
+    TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    gStyle->SetNumberContours(NCont);
 }
 
 void WishbonePlugin::makePlots() {
     
-    myA->defaultCanvas->SetLogz(true);
-    
-    hWishbone->GetYaxis()->SetRangeUser(2.,5.);
-    hWishbone->Draw("Col");
+    set_plot_style();
+    hWishboneBGSub->GetYaxis()->SetRangeUser(2.,5.);
+    hWishboneBGSub->SetMinimum(-5.);
+    hWishboneBGSub->SetMaximum(5.);
+    hWishboneBGSub->Draw("Col Z");
     myA->printCanvas("Wishbone");
+    gStyle->SetPalette(1);
+    
+    myA->defaultCanvas->SetLogz(true);
     
     hNE->Draw("Col");
     myA->printCanvas("NPMTs");
@@ -172,10 +203,10 @@ void WishbonePlugin::makePlots() {
    drawHLine(0., myA->defaultCanvas, 1);
    myA->printCanvas("WishboneEnergy");
    
-   //hWishboneTProj->Rebin(nrebin);
-   //hWishboneTProj->Scale(1./nrebin);
-   hWishboneTProj->SetMinimum(-0.5);
-   hWishboneTProj->SetMaximum(10);
+   hWishboneTProj->SetMinimum(0);
+   hWishboneTProj->SetMaximum(5);
    hWishboneTProj->Draw("E0");
+   drawVLine(T_p_lo/1000., myA->defaultCanvas, 2);
+   drawVLine(T_p_hi/1000., myA->defaultCanvas, 2);
    myA->printCanvas("WishboneTime");
 }

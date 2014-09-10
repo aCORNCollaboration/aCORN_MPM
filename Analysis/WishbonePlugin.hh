@@ -18,6 +18,9 @@ public:
     /// Project contents in bins closest to yrange; return actual interval summed
     double projSlice(double y0, double y1, TH1*& projOut);
     
+    /// Make a background-profile-subtracted copy of a histogram
+    TH2* subtractProfile(const TH1* p, double s=1.) const;
+        
 protected:
     static int pcount;        ///< projection number counter for unique naming
     TH2* h;
@@ -49,10 +52,12 @@ public:
     
     double E_p_lo = 650;        ///< proton signal low cut for wishbone data
     double E_p_hi = 2200;       ///< proton signal high cut for wishbone data
-    
+    double T_p_lo = 3000;       ///< proton TOF lower window for wishbone [ns]
+    double T_p_hi = 4500;       ///< proton TOF lower window for wishbone [ns]
     
     TH1* hWishboneEProj[2];     ///< Wishbone energy spectrum, background and background-subtracted
     TH1* hWishboneTProj;        ///< Wishbone time-axis projection
+    TH2* hWishboneBGSub;        ///< Background-subtracted wishbone
 };
 
 
