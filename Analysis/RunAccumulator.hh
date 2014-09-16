@@ -6,6 +6,9 @@
 #include "TagCounter.hh"
 #include "BaseDataScanner.hh"
 
+using std::vector;
+using std::pair;
+
 class AnalyzerPlugin;
 
 class RunAccumulator: public SegmentSaver {
@@ -90,7 +93,32 @@ public:
         virtual void compareMCtoData(AnalyzerPlugin*) {}
 
 protected:
-        std::vector<TH1*> myHists; ///< histograms registered by this plugin
+        vector<TH1*> myHists; ///< histograms registered by this plugin
+};
+
+/// Helper class for background-region-subtracted histograms
+class FGBGRegionsHist {
+public:
+    /// Constructor
+    FGBGRegionsHist(AnalyzerPlugin* P);
+    /// Setup using template histogram
+    void setTemplate(const TH1& hTemplate);    
+    /// add region to count as FG/BG
+    void addRegion(double x0, double x1, bool fg);
+    /// fill appropriate histogram
+    void fill(double cutval, double x, double w);
+    /// fill appropriate histogram, TH2 version
+    void fill(double cutval, double x, double y, double w);
+    /// generate rate-scaled, background-subtracted copies
+    void makeRates(bool binscale = true);
+    
+    TH1* hRates[2];     ///< background-subtracted, rate-scaled versions
+    
+protected:
+    AnalyzerPlugin* myP;                        ///< plugin to which this pair belongs
+    TH1* h[2];                                  ///< background, foreground region histograms
+    vector< pair<double,double> > regions[2];   ///< regions defined for FG/BG
+    double totalLength[2];                      ///< total length of FG/BG regions
 };
 
 #endif

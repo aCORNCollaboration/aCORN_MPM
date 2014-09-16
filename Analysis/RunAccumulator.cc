@@ -164,6 +164,7 @@ unsigned int RunAccumulator::mergeDir() {
 
 TH1* RunAccumulator::hToRate(TH1* h, bool differential) {
     TH1* hc = (TH1*)h->Clone();
+    hc->Sumw2();
     hc->Scale(1./runTimes.total());
     if(differential) {
         for(int i=1; i<hc->GetNbinsX(); i++) {
@@ -184,5 +185,53 @@ TH1* AnalyzerPlugin::registerHist(const std::string& hname, const std::string& t
 TH1* AnalyzerPlugin::registerHist(const std::string& nm, const TH1& hTemplate) {
     myHists.push_back(myA->registerSavedHist(nm,hTemplate));
     return myHists.back();
+}
+
+/*------------------------------------------------------*/
+
+FGBGRegionsHist::FGBGRegionsHist(AnalyzerPlugin* P): myP(P) {
+    for(int i=0; i<2; i++) {
+        h[i] = hRates[i] = NULL;
+        totalLength[i] = 0;
+    }
+}
+
+void FGBGRegionsHist::setTemplate(const TH1& hTemplate) {
+    std::string hname = hTemplate.GetName();
+    h[false] = myP->registerHist(hname+"_bg",hTemplate);
+    h[true]  = myP->registerHist(hname+"_fg",hTemplate);
+}
+
+void FGBGRegionsHist::addRegion(double x0, double x1, bool fg) {
+    regions[fg].push_back(pair<double,double>(x0,x1));
+    totalLength[fg] += x1-x0;
+}
+
+void FGBGRegionsHist::fill(double cutval, double x, double w) {
+    for(int i=0; i<2; i++) {
+        if(!h[i]) continue;
+        for(auto it = regions[i].begin(); it != regions[i].end(); it++)
+            if(it->first < cutval && cutval <= it->second)
+                h[i]->Fill(x,w);
+    }
+}
+
+void FGBGRegionsHist::fill(double cutval, double x, double y, double w) {
+    for(int i=0; i<2; i++) {
+        if(!h[i]) continue;
+        for(auto it = regions[i].begin(); it != regions[i].end(); it++)
+            if(it->first < cutval && cutval <= it->second)
+                dynamic_cast<TH2*>(h[i])->Fill(x,y,w);
+    }
+}
+
+void FGBGRegionsHist::makeRates(bool binscale) {
+    for(int i=0; i<2; i++) {
+        if(hRates[i]) delete hRates[i];
+        hRates[i] = myP->myA->hToRate(h[i],binscale);
+        hRates[i]->SetLineColor(4-2*i);
+    }
+    hRates[false]->Scale(totalLength[true]/totalLength[false]);
+    hRates[true]->Add(hRates[false],-1.);
 }
 
