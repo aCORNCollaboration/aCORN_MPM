@@ -51,7 +51,7 @@ public:
     FGBGRegionsHist hModuleMult;        ///< module multiplicity, for module dropout issues
     
     double E_p_lo = 650;        ///< proton signal low cut for wishbone data
-    double E_p_hi = 2200;       ///< proton signal high cut for wishbone data
+    double E_p_hi = 2400;       ///< proton signal high cut for wishbone data
     double T_p_min = 750;       ///< minimum TOF for background analysis [ns]
     double T_p_lo = 2750;       ///< proton TOF lower window for wishbone [ns]
     double T_p_hi = 4500;       ///< proton TOF lower window for wishbone [ns]

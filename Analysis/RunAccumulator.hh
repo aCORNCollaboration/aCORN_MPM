@@ -56,8 +56,8 @@ public:
     /// merge every subdirectory of basePath containing analyzed data
     unsigned int mergeDir();
     
-    /// make rate-scaled copy of histogram; optionally divide by bin size
-    TH1* hToRate(TH1* h, bool differential);
+    /// make rate-scaled copy of histogram; optionally divide by bin size on number of scale axes
+    TH1* hToRate(TH1* h, int scaleAxes);
     
 protected:
     std::map<std::string,AnalyzerPlugin*> myPlugins;        ///< analysis plugins
@@ -101,6 +101,8 @@ class FGBGRegionsHist {
 public:
     /// Constructor
     FGBGRegionsHist(AnalyzerPlugin* P);
+    /// Destructor
+    ~FGBGRegionsHist();
     /// Setup using template histogram
     void setTemplate(const TH1& hTemplate);    
     /// add region to count as FG/BG
@@ -110,7 +112,7 @@ public:
     /// fill appropriate histogram, TH2 version
     void fill(double cutval, double x, double y, double w);
     /// generate rate-scaled, background-subtracted copies
-    void makeRates(bool binscale = true);
+    void makeRates(int axesScale = 1);
     
     TH1* hRates[2];     ///< background-subtracted, rate-scaled versions
     

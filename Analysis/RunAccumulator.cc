@@ -162,14 +162,22 @@ unsigned int RunAccumulator::mergeDir() {
 }
 
 
-TH1* RunAccumulator::hToRate(TH1* h, bool differential) {
+TH1* RunAccumulator::hToRate(TH1* h, int scaleAxes) {
     TH1* hc = (TH1*)h->Clone();
     hc->Sumw2();
     hc->Scale(1./runTimes.total());
-    if(differential) {
-        for(int i=1; i<hc->GetNbinsX(); i++) {
-            TAxis* A = hc->GetXaxis();
-            hc->SetBinContent(i, hc->GetBinContent(i)/A->GetBinWidth(i));
+    if(scaleAxes>=1) {
+        for(int ix=1; ix<hc->GetNbinsX(); ix++) {
+            double bx = hc->GetXaxis()->GetBinWidth(ix);
+            if(scaleAxes>=2) {
+                for(int iy=1; iy<hc->GetNbinsY(); iy++) {
+                    Int_t b = hc->GetBin(ix,iy);
+                    double by = hc->GetYaxis()->GetBinWidth(iy);
+                    hc->SetBinContent(b, hc->GetBinContent(b)/bx/by);
+                }
+            } else {
+                hc->SetBinContent(ix, hc->GetBinContent(ix)/bx);
+            }
         }
     }
     return hc;
@@ -193,6 +201,13 @@ FGBGRegionsHist::FGBGRegionsHist(AnalyzerPlugin* P): myP(P) {
     for(int i=0; i<2; i++) {
         h[i] = hRates[i] = NULL;
         totalLength[i] = 0;
+    }
+}
+
+FGBGRegionsHist::~FGBGRegionsHist() {
+    for(int i=0; i<2; i++) {
+        if(hRates[i]) delete hRates[i];
+        hRates[i] = NULL;
     }
 }
 
@@ -225,10 +240,10 @@ void FGBGRegionsHist::fill(double cutval, double x, double y, double w) {
     }
 }
 
-void FGBGRegionsHist::makeRates(bool binscale) {
+void FGBGRegionsHist::makeRates(int axesScale) {
     for(int i=0; i<2; i++) {
         if(hRates[i]) delete hRates[i];
-        hRates[i] = myP->myA->hToRate(h[i],binscale);
+        hRates[i] = myP->myA->hToRate(h[i],axesScale);
         hRates[i]->SetLineColor(4-2*i);
     }
     hRates[false]->Scale(totalLength[true]/totalLength[false]);

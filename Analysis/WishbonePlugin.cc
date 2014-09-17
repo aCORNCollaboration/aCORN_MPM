@@ -100,10 +100,12 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
         if(PDS.nE || PDS.nV)
             hModuleMult.fill(PDS.T_e2p, PDS.nFiredMod[0], PDS.nFiredMod[1], weight);
         if(PDS.modDropoutEvt) return;
+        
         for(unsigned int i=0; i<NCH_MAX; i++) {
             if(PDS.E_PMT[i])
                 hChanSpec.fill(PDS.T_e2p, PDS.E_PMT[i]/1000., i, weight);
         }
+        
         hNE.fill(PDS.T_e2p, PDS.E_recon, PDS.nE, weight);
         hNVeto.fill(PDS.T_e2p, PDS.nV, weight);
         if(!PDS.nV && PDS.T_e2p>0)
@@ -163,37 +165,42 @@ void WishbonePlugin::makePlots() {
     hWishboneBGSub->SetMaximum(5.);
     set_plot_style();
     hWishboneBGSub->Draw("Col Z");
+    drawHLine(T_p_lo/1000., myA->defaultCanvas, 2);
+    drawHLine(T_p_hi/1000., myA->defaultCanvas, 2);
+    drawHLine(T_p_min/1000., myA->defaultCanvas, 4);
+    drawHLine(T_p_max/1000., myA->defaultCanvas, 4);
     myA->printCanvas("Wishbone");
     gStyle->SetPalette(1);
     
     myA->defaultCanvas->SetLogz(true);
     
-    hNE.makeRates(false);
+    hChanSpec.makeRates(2);
+    //hChanSpec.hRates[true]->SetMaximum(0.4);
+    hChanSpec.hRates[true]->Draw("Col Z");
+    myA->printCanvas("ChannelSpectra");    
+    
+    hNE.makeRates(0);
     hNE.hRates[true]->Draw("Col");
     myA->printCanvas("NPMTs");
 
-    hModuleMult.makeRates(false);   
+    hModuleMult.makeRates(0);   
     hModuleMult.hRates[true]->Draw("Col Z");
     myA->printCanvas("ModMult");
-    
-    hChanSpec.makeRates(false);
-    hChanSpec.hRates[true]->Draw("Col");
-    myA->printCanvas("ChannelSpectra");
     
     myA->defaultCanvas->SetLogz(false);
     
     myA->defaultCanvas->SetLogy(true);
     
-    hNVeto.makeRates(false);
+    hNVeto.makeRates(0);
     hNVeto.hRates[true]->GetYaxis()->SetTitle("rate [Hz]");
     hNVeto.hRates[true]->GetYaxis()->SetTitleOffset(1.4);
-    hNVeto.hRates[true]->SetMinimum(1e-6);
-    hNVeto.hRates[true]->SetMaximum(100);
+    hNVeto.hRates[true]->SetMinimum(1e-7);
+    hNVeto.hRates[true]->SetMaximum(10);
     hNVeto.hRates[true]->Draw();
     hNVeto.hRates[false]->Draw("Same");
     myA->printCanvas("NVeto");
     
-    hProtonSignal.makeRates(true);
+    hProtonSignal.makeRates(1);
     hProtonSignal.hRates[false]->GetYaxis()->SetTitle("rate [mHz/channel]");
     hProtonSignal.hRates[false]->GetYaxis()->SetTitleOffset(1.4);
     hProtonSignal.hRates[false]->SetMinimum(0.001);
