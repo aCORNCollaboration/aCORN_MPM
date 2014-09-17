@@ -174,9 +174,11 @@ TH1* RunAccumulator::hToRate(TH1* h, int scaleAxes) {
                     Int_t b = hc->GetBin(ix,iy);
                     double by = hc->GetYaxis()->GetBinWidth(iy);
                     hc->SetBinContent(b, hc->GetBinContent(b)/bx/by);
+                    hc->SetBinError(b, hc->GetBinError(b)/bx/by);
                 }
             } else {
                 hc->SetBinContent(ix, hc->GetBinContent(ix)/bx);
+                hc->SetBinError(ix, hc->GetBinError(ix)/bx);
             }
         }
     }
@@ -240,13 +242,14 @@ void FGBGRegionsHist::fill(double cutval, double x, double y, double w) {
     }
 }
 
-void FGBGRegionsHist::makeRates(int axesScale) {
+void FGBGRegionsHist::makeRates(int axesScale, double xscale) {
     for(int i=0; i<2; i++) {
         if(hRates[i]) delete hRates[i];
         hRates[i] = myP->myA->hToRate(h[i],axesScale);
         hRates[i]->SetLineColor(4-2*i);
     }
-    hRates[false]->Scale(totalLength[true]/totalLength[false]);
+    hRates[false]->Scale(xscale*totalLength[true]/totalLength[false]);
+    hRates[true]->Scale(xscale);
     hRates[true]->Add(hRates[false],-1.);
 }
 

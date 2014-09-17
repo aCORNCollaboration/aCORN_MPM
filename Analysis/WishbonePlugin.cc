@@ -39,7 +39,7 @@ TH2* TH2Slicer::subtractProfile(const TH1* p, double s) const {
 ////////////
 
 WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"),
-hProtonSignal(this), hNVeto(this), hNE(this), hPMTs(this), hChanSpec(this), hModuleMult(this) {
+hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this), hChanSpec(this), hModuleMult(this) {
     
     TH1F hProtonTemplate("hProtonSignal", "Proton detector signal", 200,0,20);
     hProtonTemplate.GetXaxis()->SetTitle("proton detector ADC channels (#times 10^{3})");
@@ -50,6 +50,11 @@ hProtonSignal(this), hNVeto(this), hNE(this), hPMTs(this), hChanSpec(this), hMod
     hNVetoTemplate.GetXaxis()->SetTitle("Number of veto panels");
     initRegions(hNVeto);
     hNVeto.setTemplate(hNVetoTemplate);
+    
+    TH1F hVetoSumTemplate("hVetoSum","Veto PMTs signal sum",100,0,20);
+    hVetoSumTemplate.GetXaxis()->SetTitle("raw signal sum (#times 10^{3})");
+    initRegions(hVetoSum);
+    hVetoSum.setTemplate(hVetoSumTemplate);
     
     unsigned int nEnBins = 800;
     double E0 = 0;
@@ -101,11 +106,15 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
             hModuleMult.fill(PDS.T_e2p, PDS.nFiredMod[0], PDS.nFiredMod[1], weight);
         if(PDS.modDropoutEvt) return;
         
+        double vetosum = 0;
         for(unsigned int i=0; i<NCH_MAX; i++) {
-            if(PDS.E_PMT[i])
+            if(PDS.E_PMT[i]) {
                 hChanSpec.fill(PDS.T_e2p, PDS.E_PMT[i]/1000., i, weight);
+                if(i<N_V_PMT) vetosum += PDS.E_PMT[i];
+            }
         }
-        
+        if(vetosum) hVetoSum.fill(PDS.T_e2p, vetosum/1000., weight);
+            
         hNE.fill(PDS.T_e2p, PDS.E_recon, PDS.nE, weight);
         hNVeto.fill(PDS.T_e2p, PDS.nV, weight);
         if(!PDS.nV && PDS.T_e2p>0)
@@ -212,6 +221,17 @@ void WishbonePlugin::makePlots() {
     myA->printCanvas("ProtonSignal");
     
     myA->defaultCanvas->SetLogy(false);
+    
+    hVetoSum.makeRates(1,1000.);
+    hVetoSum.hRates[false]->GetYaxis()->SetTitle("rate [#muHz/channel]");
+    hVetoSum.hRates[false]->GetYaxis()->SetTitleOffset(1.4);
+    hVetoSum.hRates[false]->SetMinimum(-20);
+    hVetoSum.hRates[false]->SetMaximum(200);
+    hVetoSum.hRates[false]->Draw();
+    drawHLine(0, myA->defaultCanvas, 1);
+    hVetoSum.hRates[true]->Draw("Same");
+    myA->printCanvas("VetoSum");
+    
     int nrebin = 4;
     hWishboneEProj[true]->Rebin(nrebin);
     hWishboneEProj[true]->Scale(1./nrebin);

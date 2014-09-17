@@ -112,8 +112,8 @@ public:
     /// fill appropriate histogram, TH2 version
     void fill(double cutval, double x, double y, double w);
     /// generate rate-scaled, background-subtracted copies
-    void makeRates(int axesScale = 1);
-    
+    void makeRates(int axesScale = 1, double xscale = 1.0);
+
     TH1* hRates[2];     ///< background-subtracted, rate-scaled versions
     
 protected:

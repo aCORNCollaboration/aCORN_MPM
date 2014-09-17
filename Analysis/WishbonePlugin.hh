@@ -45,6 +45,7 @@ public:
     //TH1* h4pTiming;                     ///< "4p" mode discriminator arrival time
     TH2F* hWishbone;                    ///< wishbone plot
     FGBGRegionsHist hNVeto;             ///< number of veto PMTs for wishbone-like events
+    FGBGRegionsHist hVetoSum;           ///< veto PMTs signal sum
     FGBGRegionsHist hNE;                ///< number of main PMTs triggered vs. total event energy
     FGBGRegionsHist hPMTs;              ///< which PMTs fired, as a function of event
     FGBGRegionsHist hChanSpec;          ///< individual PMTs spectrum distribution
