@@ -36,7 +36,7 @@ double Gluck_beta_MC::calc_soft() {
     
     // weight function
     double W_0VS = beta * E0_1 * E_2 * (M_0 + M_VS);
-    evt_w0 =  beta * E0_1 * E_2 * M_0;
+    evt_w0 =  beta * E0_1 * E_2 * M_0 * evt_w;
     if(W_0VS > Wmax_0VS) Wmax_0VS = W_0VS; 
     sum_W_0VS += W_0VS;
     n_W_0VS++;
@@ -118,20 +118,28 @@ void Gluck_beta_MC::calc_beta_N() {
 }
 
 void Gluck_beta_MC::propose_kinematics() {
+    
+    K = 0;
+    evt_w = 1;
+    
     // (5.4)
     E_2 = m_2 + (Delta-m_2)*myR->u[0];
+    p_2 = sqrt(E_2*E_2 - m_2*m_2);
     
+    c_2_min = -1;
+    if(pt2_max && p_2 > pt2_max)
+        c_2_min = sqrt(1.-pt2_max*pt2_max/(p_2*p_2));
+    c_2_wt = (1-c_2_min)/2;
+    c_2 = c_2_min + (1-c_2_min)*myR->u[2];
+
     // (2.10)
     E_1 = E0_1 = Delta - E_2;
-   
+       
     // (5.7)
     c_1 = 2*myR->u[1] - 1;
-    c_2 = 2*myR->u[2] - 1;
     phi_1 = 2*M_PI*myR->u[3];
     phi_2 = 2*M_PI*myR->u[4];
-    
-    evt_w = K = 0;
-    
+     
     calc_beta_N();
     calc_n_2();
 }
@@ -152,12 +160,12 @@ double Gluck_beta_MC::gen_evt_weighted() {
     if(P_H < myR->selectBranch()) {
         myR->next_0();
         propose_kinematics();
-        evt_w = calc_soft()/Wavg_0VS;
+        evt_w *= calc_soft()/Wavg_0VS;
         evt_w0 /= Wavg_0VS;
     } else {
         myR->next_H();
         propose_kinematics();
-        evt_w = calc_hard_brem()/w_avg;
+        evt_w *= calc_hard_brem()/w_avg;
         evt_w0 = 0;
     }
     calc_proton();
@@ -185,7 +193,6 @@ void Gluck_beta_MC::gen_evt() {
 
 void Gluck_beta_MC::calc_proton() {
     p_1 = E_1; // massless neutrino approximation
-    p_2 = sqrt(E_2*E_2 - m_2*m_2);
     for(int i=0; i<3; i++) p_f[i] = -n_1[i]*p_1 - n_2[i]*p_2 - K*n_gamma[i];
 }
 

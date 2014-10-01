@@ -2,6 +2,7 @@
 #include <Math/QuasiRandom.h>
 #include <TRandom3.h>
 #include <TH1F.h>
+#include <TH2F.h>
 #include <TPad.h>
 #include <cassert>
 
@@ -19,23 +20,76 @@ public:
 
 class RootQRandom: public Gluck_MC_Rndm_Src {
 public:
-    RootQRandom(): QR_1(1), QR_5(5), QR_8(8) { }
+    RootQRandom(): QR_1(1), QR_5(8), QR_8(11) { }
     virtual double selectBranch() { assert(QR_1.Next(&b)); return b; }
-    virtual void next_0() { assert(QR_5.Next(u)); }
-    virtual void next_H() { assert(QR_8.Next(u)); }
+    virtual void next_0() { assert(QR_5.Next(u0)); }
+    virtual void next_H() { assert(QR_8.Next(u0)); }
     QuasiRandomSobol QR_1, QR_5, QR_8;
     double b;
 };
 
+/// Base class for calculating aCORN spectrometer acceptance
+class SimpleCollimator: public EventCollimator {
+public:
+    /// Constructor
+    SimpleCollimator() { }
+   
+    double B0 = 400;    /// magnetic field [Gauss]
+    double r_e = 2;     /// electron collimator radius [cm]
+    double r_p = 2.5;   /// proton collimator radius [cm]
+    
+    bool hits_wall(double l, const double* p, int sgn) {
+        const double d2 = x[0]*x[0] + x[1]*x[1];
+        const double l2 = l*l;
+        if(d2 > l2) return false;
+        const double pt = transv(p);
+        double dcosth = sgn*(x[0]*p[1]-x[1]*p[0])/pt;
+        double a_max = (l2-d2)/(l+dcosth)/2;
+        double a = pt/B0*3.34;  // Larmor radius, cm
+        return  a < a_max;
+    }
+    
+    /// maximum transverse momentum [keV] for collimator of radius r [cm]
+    double pt_max(double r) const { return r*B0/3.34; }
+                   
+    /// calculate event pass probability
+    double pass() {
+        pass_e = (p_e[2] > 0)*hits_wall(r_e, p_e, -1);
+        pass_p = hits_wall(r_p, p_p, 1);
+        return pass_e * pass_p;
+    }
+};
+
+
+TH1* calcAsym(TH1* h1, TH1* h2) {
+    TH1* hAsym = (TH1*)h1->Clone("asym");
+    for(int i=0; i <= h1->GetNbinsX()+1; i++) {
+        double n1 = h1->GetBinContent(i);
+        double n2 = h2->GetBinContent(i);
+        if(n1+n2)
+            hAsym->SetBinContent(i,(n1-n2)/(n1+n2));
+    }
+    return hAsym;
+}
+
 int main(int, char**) {
-    Gluck_beta_MC G(new RootQRandom());
+    RootRandom RR;
+    RootQRandom RQR;
+    Gluck_beta_MC G(&RQR);
     G.test_calc_P_H();
     
-    int npts = 1e6;
+    SimpleCollimator SC;
+    G.pt2_max = SC.pt_max(SC.r_e);
+    
+    int npts = 1e8;
     
     TH1F hSpec("hSpec","Corrected beta spectrum",200,0,800);
-    TH1F hSpec2("hSpec2","other beta spectrum",200,0,800);
-    hSpec2.SetLineColor(2);
+    
+    TH1F haCorn[2] = { TH1F("haCorn1","other beta spectrum",200,0,800), TH1F("haCorn2","other beta spectrum",200,0,800) };
+    for(int i=0; i<2; i++) haCorn[i].SetLineColor(2+2*i);
+    
+    TH2F hPassPos("hPassPos","Vertex passed collimator",50,-4,4,50,-4,4);
+    
     TH1F hNu("hNu","Neutrino spectrum",200,0,800);
     hNu.SetLineColor(3);
     
@@ -45,12 +99,27 @@ int main(int, char**) {
     for(int i=0; i<npts; i++) {
         if(!(i%(npts/20))) { printf("*"); fflush(stdout); }
         G.gen_evt_weighted();
+        if(G.evt_w <= 0) continue;
+        
         hSpec.Fill(G.E_2-G.m_2, G.evt_w);
-        hSpec2.Fill(G.E_2-G.m_2, G.evt_w0);
+        //hSpec2.Fill(G.E_2-G.m_2, G.evt_w0);
+        
         hNu.Fill(G.E_1, G.evt_w);
+        
         if(G.K) hw.Fill(G.evt_w);
+        
+        for(int i=0; i<3; i++) {
+            SC.x[i] = 4*RQR.u0[i]-2;
+            SC.p_e[i] = G.n_2[i]*G.p_2;
+            SC.p_p[i] = G.p_f[i];
+        }
+        if(SC.pass()) {
+            haCorn[G.n_1[2] > 0].Fill(G.E_2-G.m_2, 1000*G.evt_w*G.c_2_wt);
+            hPassPos.Fill(SC.x[0],SC.x[1],G.evt_w*G.c_2_wt);
+        }
     }
     printf("\n");
+    
     /*
     G.SetRandom(new RootRandom());
     
@@ -63,13 +132,21 @@ int main(int, char**) {
     */
     
     hSpec.Draw();
-    hSpec2.Draw("Same");
+    for(int i=0; i<2; i++) haCorn[i].Draw("Same");
     hNu.Draw("Same");
     gPad->Print("Gluck_Beta_Spectrum.pdf");
     
-    gPad->SetLogy(true);
-    hw.Draw();
-    gPad->Print("Gluck_w_H.pdf");
+    TH1* hAsym = calcAsym(&haCorn[0],&haCorn[1]);
+    hAsym->Draw();
+    gPad->Print("Gluck_Asymmetry.pdf");
+    
+    gPad->SetCanvasSize(300,300);
+    hPassPos.Draw("Col");
+    gPad->Print("Gluck_Positions.pdf");
+    
+    //gPad->SetLogy(true);
+    //hw.Draw();
+    //gPad->Print("Gluck_w_H.pdf");
     
     G.showEffic();
     

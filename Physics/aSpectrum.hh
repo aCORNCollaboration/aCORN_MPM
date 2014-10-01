@@ -7,7 +7,7 @@
 class Gluck_MC_Rndm_Src {
 public:
     /// constructor
-    Gluck_MC_Rndm_Src() { }
+    Gluck_MC_Rndm_Src(): u(u0+3) { }
     /// destructor
     virtual ~Gluck_MC_Rndm_Src() { }
     
@@ -18,7 +18,8 @@ public:
     /// generate random number to select 
     virtual double selectBranch() = 0;
     
-    double u[8]; ///< random array
+    double u0[11];      ///< kinematics random array, with optional first 3 position
+    double* u;          ///< kinematics array starting at u0[3]
 };
 
 /// Implementation of F. Gl\"uck, Computer Physics Communications 101 (1997) 223--231 
@@ -58,6 +59,10 @@ public:
     double p_2;         ///< electron momentum magnitude
     double n_2[3];      ///< electron unit direction
     double beta;        ///< electron velocity v/c (2.10)
+    
+    double pt2_max = 0; ///< optional limit on maximum electron transverse momentum
+    double c_2_min;     ///< optional minimum electron cos theta
+    double c_2_wt;      ///< extra weight for c_2 selection
     
     double E0_1;        ///< antineutrino energy in center-of-mass frame (2.10)
     double E_1;         ///< antineutrino energy minus photon (4.9)
@@ -123,3 +128,28 @@ protected:
     /// calculate rho_0VS, rho_H non-gamma-emitting rate
     void calc_rho();
 };
+
+
+/// Base class for calculating aCORN spectrometer acceptance
+class EventCollimator {
+public:
+    /// Constructor
+    EventCollimator() { }
+    /// Destructor
+    virtual ~EventCollimator() { }
+    
+    /// calculate event pass probability
+    virtual double pass() = 0;
+    /// transverse magnitude
+    static double transv(const double* v) { return sqrt(v[0]*v[0]+v[1]*v[1]); }
+    
+    double x[3];        ///< vertex position
+    double p_e[3];      ///< electron momentum
+    double p_p[3];      ///< proton momentum
+    
+    double pass_e;      ///< probability of electron surviving
+    double pass_p;      ///< probability of proton surviving
+};
+
+
+
