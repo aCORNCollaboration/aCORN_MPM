@@ -255,7 +255,7 @@ double WilkinsonQ(double, double W, double W0, double M) {
 
 
 
-double SpenceL(double x, unsigned int N=20) {
+double SpenceL(double x, unsigned int N) {
 	smassert(-1.<x && x<=1.);
 	double s = 0;
 	double xk = x;

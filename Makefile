@@ -22,10 +22,6 @@ ifdef PROFILER_COMPILE
 	LDFLAGS += -pg
 endif
 
-ifdef UNBLINDED
-	CXXFLAGS += -DUNBLINDED
-endif
-
 ifdef PUBLICATION_PLOTS
 	CXXFLAGS += -DPUBLICATION_PLOTS
 endif
@@ -44,7 +40,7 @@ BaseTypes = TagCounter.o
 
 IOUtils = ControlMenu.o OutputManager.o PathUtils.o QFile.o SMExcept.o strutils.o
 
-Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o
+Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o aSpectrum.o
 
 ROOTUtils = GraphUtils.o GraphicsUtils.o TChainScanner.o HistogramSequenceFitter.o
 

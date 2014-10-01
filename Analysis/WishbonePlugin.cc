@@ -166,7 +166,9 @@ void set_plot_style() {
 
 void WishbonePlugin::makePlots() {
     
-    if(myA->runTimes.nTags() < 1000) {
+    bool isCombined = myA->runTimes.nTags() > 1000;
+    
+    if(!isCombined) {
         hWishboneBGSub->Rebin2D(4,4);
         hWishboneBGSub->Scale(1./16.);
     }
@@ -212,7 +214,7 @@ void WishbonePlugin::makePlots() {
     hProtonSignal.makeRates(1);
     hProtonSignal.hRates[false]->GetYaxis()->SetTitle("rate [mHz/channel]");
     hProtonSignal.hRates[false]->GetYaxis()->SetTitleOffset(1.4);
-    hProtonSignal.hRates[false]->SetMinimum(0.001);
+    hProtonSignal.hRates[false]->SetMinimum(isCombined?1e-4:1e-3);
     hProtonSignal.hRates[false]->SetMaximum(10);
     hProtonSignal.hRates[false]->Draw();
     hProtonSignal.hRates[true]->Draw("Same");

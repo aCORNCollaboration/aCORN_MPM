@@ -3,16 +3,16 @@
 
 \begin{figure}[H]
     \centering
-    \subfloat[Proton detector signal. Vertical lines mark ``proton'' signal cuts.]{\includegraphics[scale=0.45]{%(sdir)s/ProtonSignal.pdf}}
-    \subfloat[Detector channels raw spectra.]{\includegraphics[scale=0.45]{%(sdir)s/ChannelSpectra.pdf}}
+    \subfloat[Detector channels raw spectra (background-subtracted).]{\includegraphics[scale=0.45]{%(sdir)s/ChannelSpectra.pdf}}
+    \subfloat[Veto panel spectra. Red: signal; blue: background.]{\includegraphics[scale=0.45]{%(sdir)s/VetoSum.pdf}}
     \caption{Detector raw signals.}
     \label{fig:raw_signals_%(series)i}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \subfloat[Beta spectrometer PMTs.]{\includegraphics[scale=0.45]{%(sdir)s/NPMTs.pdf}}
-    \subfloat[Veto panel PMTs.]{\includegraphics[scale=0.45]{%(sdir)s/NVeto.pdf}}
+    \subfloat[Beta spectrometer PMTs (background-subtracted).]{\includegraphics[scale=0.45]{%(sdir)s/NPMTs.pdf}}
+    \subfloat[Veto panel PMTs. Red: signal; blue: background.]{\includegraphics[scale=0.45]{%(sdir)s/NVeto.pdf}}
     \caption{PMT signal multiplicity.}
     \label{fig:multiplicty_%(series)i}
 \end{figure}

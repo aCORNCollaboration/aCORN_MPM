@@ -27,6 +27,9 @@ const double gamma_euler = 0.577215;            //< Euler's constant
 
 // NOTE: functions of W are using Wilkinson's ``natural'' units for energy, W=(KE+m_e)/m_e
 
+/// Spence function, approximated by N-term sum
+double SpenceL(double x, unsigned int N = 20);
+
 //-------------- Spectrum corrections ------------------
 
 /// beta decay phase space without corrections

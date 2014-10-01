@@ -3,8 +3,9 @@
 
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.45]{%(sdir)s/Wishbone.pdf}
-    \caption{``Wishbone'' plot. Color axis units are Hz/MeV/$\mu$s. Horizontal lines mark backround and signal TOF regions.}
+    \subfloat[``Wishbone'' plot. Color axis units are Hz/MeV/$\mu$s. Horizontal lines mark backround and signal TOF regions.]{\includegraphics[scale=0.45]{%(sdir)s/Wishbone.pdf}}
+    \subfloat[Proton detector signal. Red: signal; blue: background. Vertical lines mark ``proton'' signal cuts.]{\includegraphics[scale=0.45]{%(sdir)s/ProtonSignal.pdf}}
+    \caption{Proton-coincidence data}
     \label{fig:wishbone_%(series)i}
 \end{figure}
 
