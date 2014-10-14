@@ -33,7 +33,7 @@ public:
     virtual ~SimpleCollimator() { }
     
     double B0 = 400;    /// magnetic field [Gauss]
-    double r_e = 2;     /// electron collimator radius [cm]
+    double r_e = 2.0;   /// electron collimator radius [cm]
     double r_p = 2.5;   /// proton collimator radius [cm]
     
     /// calculate whether event hits wall
@@ -44,6 +44,53 @@ public:
                    
     /// calculate event pass probability
     double pass();
+};
+
+
+///////////////////////////////////////////////////
+///////////////////////////////////////////////////
+///////////////////////////////////////////////////
+
+#include "BetaSpectrum.hh"
+
+
+/// Base class for calculating particle time-of-flight to detector
+class ParticleTOF {
+public:
+    /// Constructor
+    ParticleTOF() { }
+    /// Destructor
+    virtual ~ParticleTOF() { }
+    
+    /// calculate time-of-flight from initial position [cm] / momentum [keV/c]
+    virtual double calcTOF(const double* x, const double* p) const = 0;
+};
+
+/// relativistic electron TOF
+class ElectronTOF: public ParticleTOF {
+public:
+    /// Constructor
+    ElectronTOF() { }
+    
+    /// calculate time-of-flight from initial position [cm] / momentum [keV/c]
+    virtual double calcTOF(const double* x, const double* p) const;
+    
+    double det_z = -82;         /// z position of beta detector [cm]
+};
+
+/// nonrelativistic proton TOF with electrostatic mirror
+class ProtonTOF: public ParticleTOF {
+public:
+    /// Constructor
+    ProtonTOF() { }
+    
+    /// calculate time-of-flight from initial position [cm] / momentum [keV/c]
+    virtual double calcTOF(const double* x, const double* p) const;
+    
+    double V_mirror = 2.3;      /// potential across electrostatic mirror [kV]
+    double L_mirror = 43;       /// length of mirror region [cm]
+    double mirror_z = 27.8;     /// start position (0 V) of mirror [cm]
+    double det_z = 169.8;       /// z position of proton detector [cm]
 };
 
 #endif

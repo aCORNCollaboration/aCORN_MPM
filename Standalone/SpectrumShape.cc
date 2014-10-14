@@ -46,6 +46,8 @@ int main(int, char**) {
     G.test_calc_P_H();
     
     SimpleCollimator SC;
+    ElectronTOF eTOF;
+    ProtonTOF pTOF;
     G.pt2_max = SC.pt_max(SC.r_e);
     
     int npts = 1e8;
@@ -57,6 +59,11 @@ int main(int, char**) {
     
     TH2F hPassPos("hPassPos","Vertex passed collimator",50,-4,4,50,-4,4);
     
+    TH2F hWishbone("hWishbone","Wishbone plot", 400, 0, 800, 400, 2, 5);
+    hWishbone.GetXaxis()->SetTitle("Electron energy [keV]");
+    hWishbone.GetYaxis()->SetTitle("Proton TOF [#mus]");
+    hWishbone.GetYaxis()->SetTitleOffset(1.4);
+    
     TH1F hNu("hNu","Neutrino spectrum",200,0,800);
     hNu.SetLineColor(3);
     
@@ -67,7 +74,7 @@ int main(int, char**) {
         if(!(i%(npts/20))) { printf("*"); fflush(stdout); }
         G.gen_evt_weighted();
         if(G.evt_w <= 0) continue;
-        
+       
         hSpec.Fill(G.E_2-G.m_2, G.evt_w);
         //hSpec2.Fill(G.E_2-G.m_2, G.evt_w0);
         
@@ -77,27 +84,23 @@ int main(int, char**) {
         
         for(int i=0; i<3; i++) {
             SC.x[i] = 4*RQR.u0[i]-2;
-            SC.p_e[i] = G.n_2[i]*G.p_2;
-            SC.p_p[i] = G.p_f[i];
+            SC.p_e[i] = -G.n_2[i]*G.p_2;
+            SC.p_p[i] = -G.p_f[i];
         }
+        if(SC.x[1]*SC.x[1] + SC.x[2]*SC.x[2] > 2*2) continue;
+        
         if(SC.pass()) {
             haCorn[G.n_1[2] > 0].Fill(G.E_2-G.m_2, 1000*G.evt_w*G.c_2_wt);
             hPassPos.Fill(SC.x[0],SC.x[1],G.evt_w*G.c_2_wt);
+
+            // proton-to-electron time
+            double dt = pTOF.calcTOF(SC.x, SC.p_p) - eTOF.calcTOF(SC.x, SC.p_e);
+            hWishbone.Fill(G.E_2-G.m_2, 1e6*dt, G.evt_w*G.c_2_wt);
+            //printf("E=%.1f\tx0=%.2f\tp_p=%.2f\tdt=%g\n",G.E_2-G.m_2, SC.x[2], SC.p_p[2], 1e6*dt);
         }
     }
     printf("\n");
-    
-    /*
-    G.SetRandom(new RootRandom());
-    
-    for(int i=0; i<npts; i++) {
-        if(!(i%(npts/20))) { printf("*"); fflush(stdout); }
-        G.gen_evt();
-        hSpec2.Fill(G.E_2-G.m_2);
-    }
-    printf("\n");
-    */
-    
+        
     hSpec.Draw();
     for(int i=0; i<2; i++) haCorn[i].Draw("Same");
     hNu.Draw("Same");
@@ -111,9 +114,8 @@ int main(int, char**) {
     hPassPos.Draw("Col");
     gPad->Print("Gluck_Positions.pdf");
     
-    //gPad->SetLogy(true);
-    //hw.Draw();
-    //gPad->Print("Gluck_w_H.pdf");
+    hWishbone.Draw("Col");
+    gPad->Print("Gluck_Wishbone.pdf");
     
     G.showEffic();
     
