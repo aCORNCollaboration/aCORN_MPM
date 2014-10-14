@@ -129,27 +129,3 @@ protected:
     void calc_rho();
 };
 
-
-/// Base class for calculating aCORN spectrometer acceptance
-class EventCollimator {
-public:
-    /// Constructor
-    EventCollimator() { }
-    /// Destructor
-    virtual ~EventCollimator() { }
-    
-    /// calculate event pass probability
-    virtual double pass() = 0;
-    /// transverse magnitude
-    static double transv(const double* v) { return sqrt(v[0]*v[0]+v[1]*v[1]); }
-    
-    double x[3];        ///< vertex position
-    double p_e[3];      ///< electron momentum
-    double p_p[3];      ///< proton momentum
-    
-    double pass_e;      ///< probability of electron surviving
-    double pass_p;      ///< probability of proton surviving
-};
-
-
-

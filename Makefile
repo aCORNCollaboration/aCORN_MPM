@@ -40,7 +40,7 @@ BaseTypes = TagCounter.o
 
 IOUtils = ControlMenu.o OutputManager.o PathUtils.o QFile.o SMExcept.o strutils.o
 
-Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o aSpectrum.o
+Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o aSpectrum.o Collimator.o
 
 ROOTUtils = GraphUtils.o GraphicsUtils.o TChainScanner.o HistogramSequenceFitter.o
 

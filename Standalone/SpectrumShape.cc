@@ -1,4 +1,5 @@
 #include "aSpectrum.hh"
+#include "Collimator.hh"
 #include <Math/QuasiRandom.h>
 #include <TRandom3.h>
 #include <TH1F.h>
@@ -17,7 +18,6 @@ public:
     TRandom3 R;
 };
 
-
 class RootQRandom: public Gluck_MC_Rndm_Src {
 public:
     RootQRandom(): QR_1(1), QR_5(8), QR_8(11) { }
@@ -27,39 +27,6 @@ public:
     QuasiRandomSobol QR_1, QR_5, QR_8;
     double b;
 };
-
-/// Base class for calculating aCORN spectrometer acceptance
-class SimpleCollimator: public EventCollimator {
-public:
-    /// Constructor
-    SimpleCollimator() { }
-   
-    double B0 = 400;    /// magnetic field [Gauss]
-    double r_e = 2;     /// electron collimator radius [cm]
-    double r_p = 2.5;   /// proton collimator radius [cm]
-    
-    bool hits_wall(double l, const double* p, int sgn) {
-        const double d2 = x[0]*x[0] + x[1]*x[1];
-        const double l2 = l*l;
-        if(d2 > l2) return false;
-        const double pt = transv(p);
-        double dcosth = sgn*(x[0]*p[1]-x[1]*p[0])/pt;
-        double a_max = (l2-d2)/(l+dcosth)/2;
-        double a = pt/B0*3.34;  // Larmor radius, cm
-        return  a < a_max;
-    }
-    
-    /// maximum transverse momentum [keV] for collimator of radius r [cm]
-    double pt_max(double r) const { return r*B0/3.34; }
-                   
-    /// calculate event pass probability
-    double pass() {
-        pass_e = (p_e[2] > 0)*hits_wall(r_e, p_e, -1);
-        pass_p = hits_wall(r_p, p_p, 1);
-        return pass_e * pass_p;
-    }
-};
-
 
 TH1* calcAsym(TH1* h1, TH1* h2) {
     TH1* hAsym = (TH1*)h1->Clone("asym");
