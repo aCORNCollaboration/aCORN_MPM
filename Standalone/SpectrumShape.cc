@@ -30,7 +30,8 @@ public:
     virtual double selectBranch() { assert(QR_1.Next(&b)); return b; }
     virtual void next_0() { assert(QR_5.Next(u0)); }
     virtual void next_H() { assert(QR_8.Next(u0)); }
-    QuasiRandomSobol QR_1, QR_5, QR_8;
+    QuasiRandomNiederreiter QR_1;
+    QuasiRandomSobol QR_5, QR_8;
     double b;
 };
 
@@ -58,9 +59,8 @@ int main(int, char**) {
     
     gStyle->SetOptStat("");
     
-    RootRandom RR;
-    RootQRandom RQR;
-    Gluck_beta_MC G(&RQR);
+    RootQRandom* RQR = new RootQRandom();
+    Gluck_beta_MC G(RQR);
     G.test_calc_P_H();
     
     SimpleCollimator SC;
@@ -68,7 +68,7 @@ int main(int, char**) {
     ProtonTOF pTOF;
     G.pt2_max = SC.pt_max(SC.r_e);
     
-    int npts = 1e9;
+    int npts = 1e8;
     
     TH1F* hSpec = OM.registeredTH1F("hSpec","Corrected beta spectrum",200,0,800);
     
@@ -107,8 +107,10 @@ int main(int, char**) {
     
     TH1F hw("hw","weighting",200,0,1e-29);
    
+    int nprog = 50;
+    for(int i=0; i<nprog; i++) printf("="); printf("\n");
     for(int i=0; i<npts; i++) {
-        if(!(i%(npts/20))) { printf("*"); fflush(stdout); }
+        if(!(i%(npts/nprog))) { printf("*"); fflush(stdout); }
         G.gen_evt_weighted();
         if(G.evt_w <= 0) continue;
        
@@ -117,23 +119,22 @@ int main(int, char**) {
         for(int i=0; i<3; i++) cos_th_enu += G.n_1[i]*G.n_2[i]; // electron-nu cos angle
         
         hSpec->Fill(E_e, G.evt_w);
-        
         hNu->Fill(G.E_1, G.evt_w);
         
         if(G.K) hw.Fill(G.evt_w);
         
-        RQR.u0[0] = 4*RQR.u0[0]-2;
-        circle_the_square(RQR.u0+1, 2.0);
+        RQR->u0[0] = (2*RQR->u0[0]-1)*SC.r_e;
+        circle_the_square(RQR->u0+1, 3.0);
         
         for(int i=0; i<3; i++) {
-            SC.x[i] = RQR.u0[i];
+            SC.x[i] = RQR->u0[i];
             SC.p_e[i] = -G.n_2[i]*G.p_2;
             SC.p_p[i] = -G.p_f[i];
         }
         
         if(SC.pass()) {
-            haCorn[G.n_1[2] > 0][true]->Fill(E_e, 1000*G.evt_w*G.c_2_wt);
-            if(G.K==0) haCorn[G.n_1[2] > 0][false]->Fill(E_e, 1000*G.evt_w0*G.c_2_wt);
+            haCorn[G.n_1[2] > 0][true]->Fill(E_e, G.evt_w*G.c_2_wt);
+            if(G.K==0) haCorn[G.n_1[2] > 0][false]->Fill(E_e, G.evt_w0*G.c_2_wt);
             hPassPos->Fill(SC.x[0],SC.x[1],G.evt_w*G.c_2_wt);
 
             hAccept->Fill(E_e, cos_th_enu, G.evt_w*G.c_2_wt);
@@ -148,7 +149,10 @@ int main(int, char**) {
     printf("\n");
         
     hSpec->Draw();
-    for(int i=0; i<2; i++) haCorn[i][true]->Draw("Same");
+    for(int i=0; i<2; i++) {
+        haCorn[i][true]->Scale(500);
+        haCorn[i][true]->Draw("Same");
+    }
     hNu->Draw("Same");
     OM.printCanvas("Beta_Spectrum");
     
@@ -159,7 +163,7 @@ int main(int, char**) {
         hAsym[j]->Rebin(nrebin);
         hAsym[j]->Scale(1./nrebin);
         hAsym[j]->SetLineColor(4-2*j);
-        hAsym[j]->Draw(j?"Same":"");
+        hAsym[j]->Draw(j?"HIST Same":"HIST");
         printf("Asymmetry %i %.4f\n",j,hAsym[j]->Integral());
     }
     OM.printCanvas("Asymmetry");

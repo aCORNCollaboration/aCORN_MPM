@@ -319,9 +319,9 @@ void fixNaNs(TH1* h) {
 std::vector<TH2F*> sliceTH3(const TH3& h3, AxisDirection d) {
     smassert(d<=Z_DIRECTION);
     
-    TAxis* Ax1 = d==X_DIRECTION?h3.GetYaxis():h3.GetXaxis();
-    TAxis* Ax2 = d==Z_DIRECTION?h3.GetYaxis():h3.GetZaxis();
-    TAxis* Ax3 = d==X_DIRECTION?h3.GetXaxis():d==Y_DIRECTION?h3.GetYaxis():h3.GetZaxis();
+    const TAxis* Ax1 = d==X_DIRECTION?h3.GetYaxis():h3.GetXaxis();
+    const TAxis* Ax2 = d==Z_DIRECTION?h3.GetYaxis():h3.GetZaxis();
+    const TAxis* Ax3 = d==X_DIRECTION?h3.GetXaxis():d==Y_DIRECTION?h3.GetYaxis():h3.GetZaxis();
     const unsigned int n1 = Ax1->GetNbins();
     const unsigned int n2 = Ax2->GetNbins();
     const unsigned int n3 = Ax3->GetNbins();
@@ -407,8 +407,8 @@ std::vector<unsigned int> equipartition(const std::vector<float>& elems, unsigne
 }
 
 TH1* projectTH2(const TH2& h, double nb, double cx, double cy) {
-    TAxis* Ax = h.GetXaxis();
-    TAxis* Ay = h.GetYaxis();
+    const TAxis* Ax = h.GetXaxis();
+    const TAxis* Ay = h.GetYaxis();
     double x0 = Ax->GetXmin();
     double x1 = Ax->GetXmax();
     double y0 = Ay->GetXmin();

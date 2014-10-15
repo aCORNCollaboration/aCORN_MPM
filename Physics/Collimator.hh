@@ -32,9 +32,9 @@ public:
     /// Destructor
     virtual ~SimpleCollimator() { }
     
-    double B0 = 400;    /// magnetic field [Gauss]
-    double r_e = 2.0;   /// electron collimator radius [cm]
-    double r_p = 2.5;   /// proton collimator radius [cm]
+    double B0 = 356.1;  /// magnetic field [Gauss]
+    double r_e = 2.75;  /// electron collimator radius [cm]
+    double r_p = 4.0;   /// proton collimator radius [cm]
     
     /// calculate whether event hits wall
     bool hits_wall(double l, const double* p, int sgn);
@@ -87,7 +87,7 @@ public:
     /// calculate time-of-flight from initial position [cm] / momentum [keV/c]
     virtual double calcTOF(const double* x, const double* p) const;
     
-    double V_mirror = 2.3;      /// potential across electrostatic mirror [kV]
+    double V_mirror = 3.0;      /// potential across electrostatic mirror [kV]
     double L_mirror = 43;       /// length of mirror region [cm]
     double mirror_z = 27.8;     /// start position (0 V) of mirror [cm]
     double det_z = 169.8;       /// z position of proton detector [cm]
