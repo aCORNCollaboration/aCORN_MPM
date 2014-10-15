@@ -13,7 +13,7 @@ bool SimpleCollimator::hits_wall(double l, const double* p, int sgn) {
 }
 
 double SimpleCollimator::pass() {
-    pass_e = (p_e[2] < 0)*hits_wall(r_e, p_e, -1);
+    pass_e = (p_e[2] < 0)*hits_wall(r_e, p_e, 1);
     pass_p = hits_wall(r_p, p_p, 1);
     return pass_e * pass_p;
 }

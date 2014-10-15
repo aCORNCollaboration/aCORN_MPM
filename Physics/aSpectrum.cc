@@ -193,7 +193,12 @@ void Gluck_beta_MC::gen_evt() {
 
 void Gluck_beta_MC::calc_proton() {
     p_1 = E_1; // massless neutrino approximation
-    for(int i=0; i<3; i++) p_f[i] = -n_1[i]*p_1 - n_2[i]*p_2 - K*n_gamma[i];
+    mag_p_f = 0;
+    for(int i=0; i<3; i++) {
+        p_f[i] = -n_1[i]*p_1 - n_2[i]*p_2 - K*n_gamma[i];
+        mag_p_f += p_f[i]*p_f[i];
+    }
+    mag_p_f = sqrt(mag_p_f);
 }
 
 void Gluck_beta_MC::calc_rho() {

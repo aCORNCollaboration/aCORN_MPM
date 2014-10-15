@@ -152,18 +152,6 @@ void WishbonePlugin::calculateResults() {
     hWishboneBGSub->Scale(s0/hWishboneTProj->GetBinWidth(1));
 }
 
-void set_plot_style() {
-    const Int_t NRGBs = 5;
-    const Int_t NCont = 127;
-    
-    Double_t stops[NRGBs] = { 0.00, 0.25, 0.50, 0.75, 1.00 };
-    Double_t red[NRGBs]   = { 0.00, 0.00, 1.00, 0.75, 1.00 };
-    Double_t green[NRGBs] = { 0.00, 0.25, 1.00, 0.00, 0.80 };
-    Double_t blue[NRGBs]  = { 1.00, 0.50, 1.00, 0.00, 0.00 };
-    TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    gStyle->SetNumberContours(NCont);
-}
-
 void WishbonePlugin::makePlots() {
     
     bool isCombined = myA->runTimes.nTags() > 1000;
@@ -174,7 +162,7 @@ void WishbonePlugin::makePlots() {
     }
     hWishboneBGSub->SetMinimum(-5.);
     hWishboneBGSub->SetMaximum(5.);
-    set_plot_style();
+    makeRBpalette();
     hWishboneBGSub->Draw("Col Z");
     drawHLine(T_p_lo/1000., myA->defaultCanvas, 2);
     drawHLine(T_p_hi/1000., myA->defaultCanvas, 2);

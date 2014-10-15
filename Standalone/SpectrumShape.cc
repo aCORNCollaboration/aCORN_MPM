@@ -1,5 +1,11 @@
 #include "aSpectrum.hh"
 #include "Collimator.hh"
+#include "GraphicsUtils.hh"
+#include "strutils.hh"
+#include "PathUtils.hh"
+#include "OutputManager.hh"
+
+#include <TStyle.h>
 #include <Math/QuasiRandom.h>
 #include <TRandom3.h>
 #include <TH1F.h>
@@ -28,6 +34,13 @@ public:
     double b;
 };
 
+void circle_the_square(double* x, double r0) {
+    double phi = x[0]*2*M_PI;
+    double r = sqrt(x[1]*r0*r0);
+    x[0] = r*cos(phi);
+    x[1] = r*sin(phi);
+}
+
 TH1* calcAsym(TH1* h1, TH1* h2) {
     TH1* hAsym = (TH1*)h1->Clone("asym");
     for(int i=0; i <= h1->GetNbinsX()+1; i++) {
@@ -40,6 +53,11 @@ TH1* calcAsym(TH1* h1, TH1* h2) {
 }
 
 int main(int, char**) {
+    
+    OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated/");
+    
+    gStyle->SetOptStat("");
+    
     RootRandom RR;
     RootQRandom RQR;
     Gluck_beta_MC G(&RQR);
@@ -50,74 +68,135 @@ int main(int, char**) {
     ProtonTOF pTOF;
     G.pt2_max = SC.pt_max(SC.r_e);
     
-    int npts = 1e8;
+    int npts = 1e9;
     
-    TH1F hSpec("hSpec","Corrected beta spectrum",200,0,800);
+    TH1F* hSpec = OM.registeredTH1F("hSpec","Corrected beta spectrum",200,0,800);
     
-    TH1F haCorn[2] = { TH1F("haCorn1","other beta spectrum",200,0,800), TH1F("haCorn2","other beta spectrum",200,0,800) };
-    for(int i=0; i<2; i++) haCorn[i].SetLineColor(2+2*i);
+    TH1F* haCorn[2][2];
+    for(int i=0; i<2; i++) {
+        for(int j=0; j<2; j++) {
+            haCorn[i][j] = OM.registeredTH1F("haCorn_"+itos(i)+"_"+itos(j), "asymmetry beta spectrum", 200,0,800);
+            haCorn[i][j]->SetLineColor(2+2*i);
+        }
+    }
     
-    TH2F hPassPos("hPassPos","Vertex passed collimator",50,-4,4,50,-4,4);
+    TH2F* hPassPos = OM.registeredTH2F("hPassPos","Vertex passed collimator",50,-4,4,50,-4,4);
     
-    TH2F hWishbone("hWishbone","Wishbone plot", 400, 0, 800, 400, 2, 5);
-    hWishbone.GetXaxis()->SetTitle("Electron energy [keV]");
-    hWishbone.GetYaxis()->SetTitle("Proton TOF [#mus]");
-    hWishbone.GetYaxis()->SetTitleOffset(1.4);
+    TH2F* hWishbone = OM.registeredTH2F("hWishbone","simulated wishbone", 400, 0, 800, 400, 2, 5);
+    hWishbone->GetXaxis()->SetTitle("Electron energy [keV]");
+    hWishbone->GetYaxis()->SetTitle("Proton TOF [#mus]");
+    hWishbone->GetYaxis()->SetTitleOffset(1.4);
     
-    TH1F hNu("hNu","Neutrino spectrum",200,0,800);
-    hNu.SetLineColor(3);
+    TH2F* hAccept = OM.registeredTH2F("hAccept","simulated acceptance", 200, 0, 800, 200, -1, 1);
+    hAccept->GetXaxis()->SetTitle("Electron energy [keV]");
+    hAccept->GetYaxis()->SetTitle("cos #theta_{e#nu}");
+    hAccept->GetYaxis()->SetTitleOffset(1.4);
+    
+    TH2F* hpAccept = OM.registeredTH2F("hpAccept","simulated proton acceptance", 200, 0, 800, 200, -1, 1);
+    hpAccept->GetXaxis()->SetTitle("Electron energy [keV]");
+    hpAccept->GetYaxis()->SetTitle("cos #theta_{p}");
+    hpAccept->GetYaxis()->SetTitleOffset(1.4);
+    
+    TH2F* hnuAccept = OM.registeredTH2F("hnuAccept","simulated neutrino acceptance", 200, 0, 800, 200, -1, 1);
+    hnuAccept->GetXaxis()->SetTitle("Electron energy [keV]");
+    hnuAccept->GetYaxis()->SetTitle("cos #theta_{#nu}");
+    hnuAccept->GetYaxis()->SetTitleOffset(1.4);
+    
+    TH1F* hNu  = OM.registeredTH1F("hNu","Neutrino spectrum",200,0,800);
+    hNu->SetLineColor(3);
     
     TH1F hw("hw","weighting",200,0,1e-29);
    
-    
     for(int i=0; i<npts; i++) {
         if(!(i%(npts/20))) { printf("*"); fflush(stdout); }
         G.gen_evt_weighted();
         if(G.evt_w <= 0) continue;
        
-        hSpec.Fill(G.E_2-G.m_2, G.evt_w);
-        //hSpec2.Fill(G.E_2-G.m_2, G.evt_w0);
+        double E_e = G.E_2-G.m_2; // electron KE
+        double cos_th_enu = 0;
+        for(int i=0; i<3; i++) cos_th_enu += G.n_1[i]*G.n_2[i]; // electron-nu cos angle
         
-        hNu.Fill(G.E_1, G.evt_w);
+        hSpec->Fill(E_e, G.evt_w);
+        
+        hNu->Fill(G.E_1, G.evt_w);
         
         if(G.K) hw.Fill(G.evt_w);
         
+        RQR.u0[0] = 4*RQR.u0[0]-2;
+        circle_the_square(RQR.u0+1, 2.0);
+        
         for(int i=0; i<3; i++) {
-            SC.x[i] = 4*RQR.u0[i]-2;
+            SC.x[i] = RQR.u0[i];
             SC.p_e[i] = -G.n_2[i]*G.p_2;
             SC.p_p[i] = -G.p_f[i];
         }
-        if(SC.x[1]*SC.x[1] + SC.x[2]*SC.x[2] > 2*2) continue;
         
         if(SC.pass()) {
-            haCorn[G.n_1[2] > 0].Fill(G.E_2-G.m_2, 1000*G.evt_w*G.c_2_wt);
-            hPassPos.Fill(SC.x[0],SC.x[1],G.evt_w*G.c_2_wt);
+            haCorn[G.n_1[2] > 0][true]->Fill(E_e, 1000*G.evt_w*G.c_2_wt);
+            if(G.K==0) haCorn[G.n_1[2] > 0][false]->Fill(E_e, 1000*G.evt_w0*G.c_2_wt);
+            hPassPos->Fill(SC.x[0],SC.x[1],G.evt_w*G.c_2_wt);
 
+            hAccept->Fill(E_e, cos_th_enu, G.evt_w*G.c_2_wt);
+            hpAccept->Fill(E_e, SC.p_p[2]/G.mag_p_f, G.evt_w*G.c_2_wt);
+            hnuAccept->Fill(E_e, G.n_1[2], G.evt_w*G.c_2_wt);
+            
             // proton-to-electron time
             double dt = pTOF.calcTOF(SC.x, SC.p_p) - eTOF.calcTOF(SC.x, SC.p_e);
-            hWishbone.Fill(G.E_2-G.m_2, 1e6*dt, G.evt_w*G.c_2_wt);
-            //printf("E=%.1f\tx0=%.2f\tp_p=%.2f\tdt=%g\n",G.E_2-G.m_2, SC.x[2], SC.p_p[2], 1e6*dt);
+            hWishbone->Fill(E_e, 1e6*dt, G.evt_w*G.c_2_wt);
         }
     }
     printf("\n");
         
-    hSpec.Draw();
-    for(int i=0; i<2; i++) haCorn[i].Draw("Same");
-    hNu.Draw("Same");
-    gPad->Print("Gluck_Beta_Spectrum.pdf");
+    hSpec->Draw();
+    for(int i=0; i<2; i++) haCorn[i][true]->Draw("Same");
+    hNu->Draw("Same");
+    OM.printCanvas("Beta_Spectrum");
     
-    TH1* hAsym = calcAsym(&haCorn[0],&haCorn[1]);
-    hAsym->Draw();
-    gPad->Print("Gluck_Asymmetry.pdf");
+    TH1* hAsym[2];
+    int nrebin = 4;
+    for(int j=0; j<2; j++) {
+        hAsym[j] = calcAsym(haCorn[0][j],haCorn[1][j]);
+        hAsym[j]->Rebin(nrebin);
+        hAsym[j]->Scale(1./nrebin);
+        hAsym[j]->SetLineColor(4-2*j);
+        hAsym[j]->Draw(j?"Same":"");
+        printf("Asymmetry %i %.4f\n",j,hAsym[j]->Integral());
+    }
+    OM.printCanvas("Asymmetry");
     
     gPad->SetCanvasSize(300,300);
-    hPassPos.Draw("Col");
-    gPad->Print("Gluck_Positions.pdf");
+    hPassPos->Draw("Col");
+    OM.printCanvas("Positions");
     
-    hWishbone.Draw("Col");
-    gPad->Print("Gluck_Wishbone.pdf");
+    makeRBpalette();
+    
+    hAccept->Scale(1.e6/npts);
+    hAccept->SetMinimum(-0.3);
+    hAccept->SetMaximum(0.3);
+    hAccept->Draw("Col");
+    OM.printCanvas("Acceptance");
+    
+    hpAccept->Scale(1.e6/npts);
+    hpAccept->SetMinimum(-0.3);
+    hpAccept->SetMaximum(0.3);
+    hpAccept->Draw("Col");
+    OM.printCanvas("pAcceptance");
+    
+    hnuAccept->Scale(1.e6/npts);
+    hnuAccept->SetMinimum(-0.3);
+    hnuAccept->SetMaximum(0.3);
+    hnuAccept->Draw("Col");
+    OM.printCanvas("nuAcceptance");
+    
+    double wmx = 0.9*hWishbone->GetMaximum();
+    hWishbone->SetMinimum(-wmx);
+    hWishbone->SetMaximum(wmx);
+    hWishbone->Draw("Col");
+    OM.printCanvas("Wishbone");
     
     G.showEffic();
+    
+    OM.setWriteRoot(true);
     
     return 0;
 }

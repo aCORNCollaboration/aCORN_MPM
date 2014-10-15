@@ -77,6 +77,7 @@ public:
     double phi_1, phi_2;///< phase-space azimuths
     
     double p_f[3];      ///< recoil nucleon momentum
+    double mag_p_f;     ///< magnitude of recoil momentum
     
     double M_0;         ///< uncorrected decay amplitude (2.11, 2.12)
     double Mtilde;      ///< (3.2)

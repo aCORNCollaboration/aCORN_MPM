@@ -28,5 +28,8 @@ void drawExcludedRegion(Float_t x0, Float_t x1, TCanvas* C, Int_t color = 4, Int
 /// set up grayscale figures color palette, black-to-white by default, or inverted
 void makeGrayscalepalette(bool b2w = true);
 
+/// set up blue-white-red palette
+void makeRBpalette();
+
 #endif
 
