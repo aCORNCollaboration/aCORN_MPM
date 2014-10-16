@@ -12,38 +12,40 @@ public:
     virtual ~EventCollimator() { }
     
     /// calculate event pass probability
-    virtual double pass() = 0;
+    virtual double pass(const double* x, const double* p) = 0;
+    
     /// transverse magnitude
-    static double transv(const double* v) { return sqrt(v[0]*v[0]+v[1]*v[1]); }
-    
-    double x[3];        ///< vertex position
-    double p_e[3];      ///< electron momentum
-    double p_p[3];      ///< proton momentum
-    
-    double pass_e;      ///< probability of electron surviving
-    double pass_p;      ///< probability of proton surviving
+    static double normTwo(const double* v) { return sqrt(v[0]*v[0]+v[1]*v[1]); }
 };
 
-/// Simple collimator (fixed field, hard acceptance)
-class SimpleCollimator: public EventCollimator {
+/// Simple circular collimator (fixed field, hard acceptance)
+class HardCollimator: public EventCollimator {
 public:
     /// Constructor
-    SimpleCollimator() { }
+    HardCollimator(double BB, double rr): B(BB), r(rr) { }
     /// Destructor
-    virtual ~SimpleCollimator() { }
+    virtual ~HardCollimator() { }
     
-    double B0 = 356.1;  /// magnetic field [Gauss]
-    double r_e = 2.75;  /// electron collimator radius [cm]
-    double r_p = 4.0;   /// proton collimator radius [cm]
-    
-    /// calculate whether event hits wall
-    bool hits_wall(double l, const double* p, int sgn);
-    
-    /// maximum transverse momentum [keV] for collimator of radius r [cm]
-    double pt_max(double r) const { return r*B0/3.34; }
-                   
     /// calculate event pass probability
-    double pass();
+    virtual double pass(const double* x, const double* p);
+        
+    /// maximum transverse momentum [keV] for collimator of radius r [cm]
+    double pt_max() const { return r*B/3.34; }
+    
+    double B;   ///< magnetic field (Gauss)
+    double r;   ///< radius (cm)
+};
+
+/// Circular collimator with probabilistic acceptance
+class SoftCollimator: public HardCollimator {
+public:
+    /// Constructor
+    SoftCollimator(double BB, double rr, unsigned int nn = 1): HardCollimator(BB,rr), n(nn) { }
+    
+    /// calculate event pass probability
+    virtual double pass(const double* x, const double* p);
+    
+    unsigned int n;     ///< number of apertures
 };
 
 

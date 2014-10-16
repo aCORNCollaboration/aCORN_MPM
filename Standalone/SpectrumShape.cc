@@ -63,10 +63,13 @@ int main(int, char**) {
     Gluck_beta_MC G(RQR);
     G.test_calc_P_H();
     
-    SimpleCollimator SC;
+    double B0 = 356.1;  // field [Gauss]
     ElectronTOF eTOF;
     ProtonTOF pTOF;
-    G.pt2_max = SC.pt_max(SC.r_e);
+    HardCollimator eCol(B0, 2.75);
+    SoftCollimator pCol(B0, 4.0, 4);
+    
+    G.pt2_max = eCol.pt_max();
     
     int npts = 1e8;
     
@@ -120,31 +123,34 @@ int main(int, char**) {
         
         hSpec->Fill(E_e, G.evt_w);
         hNu->Fill(G.E_1, G.evt_w);
-        
         if(G.K) hw.Fill(G.evt_w);
         
-        RQR->u0[0] = (2*RQR->u0[0]-1)*SC.r_e;
+        // vertex position
+        RQR->u0[0] = (2*RQR->u0[0]-1)*eCol.r;
         circle_the_square(RQR->u0+1, 3.0);
-        
+        // momenta, with sign convention reversed
+        double p_e[3];
+        double p_p[3];
         for(int i=0; i<3; i++) {
-            SC.x[i] = RQR->u0[i];
-            SC.p_e[i] = -G.n_2[i]*G.p_2;
-            SC.p_p[i] = -G.p_f[i];
+            p_e[i] = -G.n_2[i]*G.p_2;
+            p_p[i] = -G.p_f[i];
         }
         
-        if(SC.pass()) {
-            haCorn[G.n_1[2] > 0][true]->Fill(E_e, G.evt_w*G.c_2_wt);
-            if(G.K==0) haCorn[G.n_1[2] > 0][false]->Fill(E_e, G.evt_w0*G.c_2_wt);
-            hPassPos->Fill(SC.x[0],SC.x[1],G.evt_w*G.c_2_wt);
+        double passprob = eCol.pass(RQR->u0, p_e) * pCol.pass(RQR->u0, p_p);
+        double wt = passprob * G.evt_w * G.c_2_wt;
+        if(!passprob) continue;
+        
+        haCorn[G.n_1[2] > 0][true]->Fill(E_e, wt);
+        if(G.K==0) haCorn[G.n_1[2] > 0][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
+        hPassPos->Fill(RQR->u0[0],RQR->u0[1],wt);
 
-            hAccept->Fill(E_e, cos_th_enu, G.evt_w*G.c_2_wt);
-            hpAccept->Fill(E_e, SC.p_p[2]/G.mag_p_f, G.evt_w*G.c_2_wt);
-            hnuAccept->Fill(E_e, G.n_1[2], G.evt_w*G.c_2_wt);
+        hAccept->Fill(E_e, cos_th_enu, wt);
+        hpAccept->Fill(E_e, p_p[2]/G.mag_p_f, wt);
+        hnuAccept->Fill(E_e, G.n_1[2], wt);
             
-            // proton-to-electron time
-            double dt = pTOF.calcTOF(SC.x, SC.p_p) - eTOF.calcTOF(SC.x, SC.p_e);
-            hWishbone->Fill(E_e, 1e6*dt, G.evt_w*G.c_2_wt);
-        }
+        // proton-to-electron time
+        double dt = pTOF.calcTOF(RQR->u0, p_p) - eTOF.calcTOF(RQR->u0, p_e);
+        hWishbone->Fill(E_e, 1e6*dt, wt);
     }
     printf("\n");
         
