@@ -18,20 +18,15 @@ using namespace ROOT::Math;
 class RootRandom: public Gluck_MC_Rndm_Src {
 public:
     RootRandom() { }
-    virtual double selectBranch() { return R.Rndm(); }
-    virtual void next_0() { R.RndmArray(5,u); }
-    virtual void next_H() { R.RndmArray(8,u); }
+    virtual void next() { R.RndmArray(8,u); }
     TRandom3 R;
 };
 
 class RootQRandom: public Gluck_MC_Rndm_Src {
 public:
-    RootQRandom(): QR_1(1), QR_5(8), QR_8(11) { }
-    virtual double selectBranch() { assert(QR_1.Next(&b)); return b; }
-    virtual void next_0() { assert(QR_5.Next(u0)); }
-    virtual void next_H() { assert(QR_8.Next(u0)); }
-    QuasiRandomNiederreiter QR_1;
-    QuasiRandomSobol QR_5, QR_8;
+    RootQRandom(): QR_8(11) { }
+    virtual void next() { assert(QR_8.Next(u0)); }
+    QuasiRandomSobol QR_8;
     double b;
 };
 
@@ -66,8 +61,8 @@ int main(int, char**) {
     double B0 = 356.1;  // field [Gauss]
     ElectronTOF eTOF;
     ProtonTOF pTOF;
-    HardCollimator eCol(B0, 2.75);
-    SoftCollimator pCol(B0, 4.0, 4);
+    CircleCollimator eCol(B0, 2.75, 27);
+    CircleCollimator pCol(B0, 4.0, 4);
     
     G.pt2_max = eCol.pt_max();
     
@@ -135,6 +130,8 @@ int main(int, char**) {
             p_e[i] = -G.n_2[i]*G.p_2;
             p_p[i] = -G.p_f[i];
         }
+        
+        if(p_e[2] > 0) continue; // lose upward-going electrons
         
         double passprob = eCol.pass(RQR->u0, p_e) * pCol.pass(RQR->u0, p_p);
         double wt = passprob * G.evt_w * G.c_2_wt;

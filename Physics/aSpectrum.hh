@@ -11,12 +11,8 @@ public:
     /// destructor
     virtual ~Gluck_MC_Rndm_Src() { }
     
-    /// get next random u[5] for electron, nu kinematics
-    virtual void next_0() = 0;
     /// get next random u[8] for electron, nu, gamma kinematics
-    virtual void next_H() = 0;
-    /// generate random number to select 
-    virtual double selectBranch() = 0;
+    virtual void next() = 0;
     
     double u0[11];      ///< kinematics random array, with optional first 3 position
     double* u;          ///< kinematics array starting at u0[3]

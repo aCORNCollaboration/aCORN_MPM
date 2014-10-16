@@ -156,14 +156,15 @@ void Gluck_beta_MC::calc_n_2() {
 
 double Gluck_beta_MC::gen_evt_weighted() {
     assert(myR);
-
-    if(P_H < myR->selectBranch()) {
-        myR->next_0();
+    myR->next();
+    
+    if(P_H < myR->u[0]) {
+        myR->u[0] = (myR->u[0]-P_H)/(1-P_H);
         propose_kinematics();
         evt_w *= calc_soft()/Wavg_0VS;
         evt_w0 /= Wavg_0VS;
     } else {
-        myR->next_H();
+        myR->u[0] /= P_H;
         propose_kinematics();
         evt_w *= calc_hard_brem()/w_avg;
         evt_w0 = 0;
@@ -174,9 +175,10 @@ double Gluck_beta_MC::gen_evt_weighted() {
 }
 
 void Gluck_beta_MC::gen_evt() {
+    assert(false);
     assert(myR);
     evt_w = 1;
-    
+    /*
     if(P_H < myR->selectBranch()) {
         do {
             myR->next_0();
@@ -184,11 +186,12 @@ void Gluck_beta_MC::gen_evt() {
         } while(calc_soft()/Wmax_0VS < myR->selectBranch());
     } else {
         do {
-            myR->next_H();
+            myR->next();
             propose_kinematics();
         } while(calc_hard_brem()/w_max < myR->selectBranch());
     }
     calc_proton();
+    */
 }
 
 void Gluck_beta_MC::calc_proton() {
@@ -256,13 +259,13 @@ void Gluck_beta_MC::test_calc_P_H() {
     for(int i=0; i<n_H; i++) {
         if(!(i%(n_H/20))) { printf("*"); fflush(stdout); }
         
-        myR->next_H();
+        myR->next();
+        
         propose_kinematics();
         double w = calc_hard_brem();
         t_rho_H +=  w;
         sw2 += w*w;
         
-        myR->next_0();
         propose_kinematics();
         calc_soft();
     }

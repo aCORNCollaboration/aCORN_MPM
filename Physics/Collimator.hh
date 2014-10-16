@@ -18,36 +18,22 @@ public:
     static double normTwo(const double* v) { return sqrt(v[0]*v[0]+v[1]*v[1]); }
 };
 
-/// Simple circular collimator (fixed field, hard acceptance)
-class HardCollimator: public EventCollimator {
+/// Circular collimator with probabilistic acceptance
+class CircleCollimator: public EventCollimator {
 public:
     /// Constructor
-    HardCollimator(double BB, double rr): B(BB), r(rr) { }
-    /// Destructor
-    virtual ~HardCollimator() { }
+    CircleCollimator(double BB, double rr, unsigned int nn = 0): B(BB), r(rr), n(nn) { }
     
     /// calculate event pass probability
     virtual double pass(const double* x, const double* p);
-        
+    
     /// maximum transverse momentum [keV] for collimator of radius r [cm]
     double pt_max() const { return r*B/3.34; }
     
-    double B;   ///< magnetic field (Gauss)
-    double r;   ///< radius (cm)
+    double B;           ///< magnetic field (Gauss)
+    double r;           ///< radius (cm)
+    unsigned int n;     ///< number of apertures (0 for hard cut)
 };
-
-/// Circular collimator with probabilistic acceptance
-class SoftCollimator: public HardCollimator {
-public:
-    /// Constructor
-    SoftCollimator(double BB, double rr, unsigned int nn = 1): HardCollimator(BB,rr), n(nn) { }
-    
-    /// calculate event pass probability
-    virtual double pass(const double* x, const double* p);
-    
-    unsigned int n;     ///< number of apertures
-};
-
 
 ///////////////////////////////////////////////////
 ///////////////////////////////////////////////////
