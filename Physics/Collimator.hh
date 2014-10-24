@@ -2,6 +2,66 @@
 #define COLLIMATOR_HH
 
 #include <cmath>
+#include "BetaSpectrum.hh"
+
+/// Base class for particle transport model
+class ParticleTransport {
+public:
+    /// Constructor
+    ParticleTransport() { }
+    /// Destructor
+    virtual ~ParticleTransport() { }
+    
+    /// set initial conditions
+    virtual void setVertex(const double* x, const double* p) = 0;
+    /// calculate time to z position
+    virtual double calcTOF(double z) const = 0;
+};
+
+/// relativistic electron TOF
+class ElectronTOF: public ParticleTransport {
+public:
+    /// Constructor
+    ElectronTOF() { }
+    
+    /// set initial conditions
+    virtual void setVertex(const double* x, const double* p);
+    /// calculate time-of-flight from initial position [cm] / momentum [keV/c]
+    virtual double calcTOF(double z) const;
+    
+    double z0;          ///< initial z position
+    double vi;          ///< 1/velocity
+};
+
+const double eDet_z = -82; ///< z position of beta detector [cm]
+const double pDet_z = 185; ///< z position of proton detector [cm]
+
+/// nonrelativistic proton TOF with electrostatic mirror
+class ProtonTOF: public ParticleTransport {
+public:
+    /// Constructor
+    ProtonTOF() { }
+    
+    /// set initial conditions
+    virtual void setVertex(const double* x, const double* p);
+    /// calculate time to z position
+    virtual double calcTOF(double z) const;
+    
+    double t_mr;                ///< time spent in mirror
+    double p_exit;              ///< momentum at mirror exit
+    
+    double V_mirror = 3.0;      ///< potential across electrostatic mirror [kV]
+    double L_mirror = 43;       ///< length of mirror region [cm]
+    double mirror_z = 27.8;     ///< start position (0 V) of mirror [cm]
+};
+
+
+
+///////////////////////////////////////////////////
+///////////////////////////////////////////////////
+///////////////////////////////////////////////////
+
+
 
 /// Base class for calculating aCORN spectrometer acceptance
 class EventCollimator {
@@ -22,7 +82,7 @@ public:
 class CircleCollimator: public EventCollimator {
 public:
     /// Constructor
-    CircleCollimator(double BB, double rr, unsigned int nn = 0): B(BB), r(rr), n(nn) { }
+    CircleCollimator(double BB, double rr, double rh, unsigned int nn = 1): B(BB), r(rr), r_hard(rh), n(nn) { }
     
     /// calculate event pass probability
     virtual double pass(const double* x, const double* p);
@@ -32,53 +92,23 @@ public:
     
     double B;           ///< magnetic field (Gauss)
     double r;           ///< radius (cm)
+    double r_hard;      ///< hard-cut radius (cm)
     unsigned int n;     ///< number of apertures (0 for hard cut)
 };
 
-///////////////////////////////////////////////////
-///////////////////////////////////////////////////
-///////////////////////////////////////////////////
-
-#include "BetaSpectrum.hh"
-
-
-/// Base class for calculating particle time-of-flight to detector
-class ParticleTOF {
+/*
+/// Timing-dependent stack of circular collimators
+class StackCollimator: public EventCollimator {
 public:
     /// Constructor
-    ParticleTOF() { }
-    /// Destructor
-    virtual ~ParticleTOF() { }
+    StackCollimator() { }
     
-    /// calculate time-of-flight from initial position [cm] / momentum [keV/c]
-    virtual double calcTOF(const double* x, const double* p) const = 0;
+    /// calculate event pass probability
+    virtual double pass(const double* x, const double* p);
+    
+    const ParticleTransport& PT;
 };
+*/
 
-/// relativistic electron TOF
-class ElectronTOF: public ParticleTOF {
-public:
-    /// Constructor
-    ElectronTOF() { }
-    
-    /// calculate time-of-flight from initial position [cm] / momentum [keV/c]
-    virtual double calcTOF(const double* x, const double* p) const;
-    
-    double det_z = -82;         /// z position of beta detector [cm]
-};
-
-/// nonrelativistic proton TOF with electrostatic mirror
-class ProtonTOF: public ParticleTOF {
-public:
-    /// Constructor
-    ProtonTOF() { }
-    
-    /// calculate time-of-flight from initial position [cm] / momentum [keV/c]
-    virtual double calcTOF(const double* x, const double* p) const;
-    
-    double V_mirror = 3.0;      /// potential across electrostatic mirror [kV]
-    double L_mirror = 43;       /// length of mirror region [cm]
-    double mirror_z = 27.8;     /// start position (0 V) of mirror [cm]
-    double det_z = 169.8;       /// z position of proton detector [cm]
-};
 
 #endif

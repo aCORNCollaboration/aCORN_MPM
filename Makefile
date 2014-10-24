@@ -45,7 +45,7 @@ Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o aSpectr
 ROOTUtils = GraphUtils.o GraphicsUtils.o TChainScanner.o HistogramSequenceFitter.o
 
 Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o AcornCalibrator.o \
-	SegmentSaver.o RunAccumulator.o RunMetadata.o WishbonePlugin.o
+	SegmentSaver.o RunAccumulator.o RunMetadata.o WishbonePlugin.o Positioner.o
 
 objects = $(BaseTypes) $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis)
 

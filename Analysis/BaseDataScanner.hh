@@ -2,6 +2,7 @@
 #define BASEDATASCANNER_HH
 
 #include "Enums.hh"
+#include "Positioner.hh"
 #include <Rtypes.h>
 #include "RunSetScanner.hh"
 
@@ -38,7 +39,7 @@ public:
     UInt_t DetFired;            ///< detector firing bit map 0-30
     UInt_t DetPiled;            ///< pileup flags [e- dead zone][det. 0-30]
     Int_t Idx;                  ///< proton index
-    Short_t E_PMT[NCH_MAX];     ///< individual PMT energy
+    Short_t E_PMT[NCH_MAX];     ///< individual PMT energy [raw channels]
     Char_t T_PMT[NCH_MAX];      ///< individual PMT time relative to first PMT arrival [clock ticks]
     Char_t T_PMT_median;        ///< median PMT timing offset from initial PMT signal arrival [clock ticks]
     Char_t Max_PMT;             ///< PMT with largest signal
@@ -47,6 +48,9 @@ public:
     TriggerCategory flags;      ///< Event category flags
     UInt_t nFiredMod[N_MODULES];///< count of triggers in each module
     bool modDropoutEvt;         ///< whether this is a suspect "module dropout" event
+    
+    double L_PMT[N_E_PMT];      ///< (calibrated) PMT light signals
+    Positioner Pos;             ///< event positioning information
     
     /// generate event flags
     virtual void makeFlags();
@@ -62,7 +66,7 @@ public:
 protected:
     std::map<RunID, AcornCalibrator*> cals;     ///< calibrators for each run
     AcornCalibrator* currentCal;                ///< calibrator for current run
-    
+                             
     /// at run load time, figure out run total time
     virtual double _getRunTime(RunID);
     /// load calibrator for current run

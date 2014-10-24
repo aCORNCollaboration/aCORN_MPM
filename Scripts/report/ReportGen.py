@@ -52,6 +52,8 @@ class ReportGenerator:
             
         self.body += r"\clearpage\section{Detector response}"
         self.body += self.makePages("Template_Page_1.tex")
+        self.body += r"\clearpage\section{Event positions}"
+        self.body += self.makePages("Template_Page_3.tex")
         self.body += r"\clearpage\section{Wishbone}"
         self.body += self.makePages("Template_Page_2.tex")
         

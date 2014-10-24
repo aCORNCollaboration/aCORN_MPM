@@ -2,7 +2,6 @@
 #define OUTPUTMANAGER_HH
 
 #include "QFile.hh"
-#include "SMExcept.hh"
 #include <TObject.h>
 #include <TCanvas.h>
 #include <TH1.h>

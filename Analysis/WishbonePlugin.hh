@@ -51,6 +51,10 @@ public:
     FGBGRegionsHist hChanSpec;          ///< individual PMTs spectrum distribution
     FGBGRegionsHist hModuleMult;        ///< module multiplicity, for module dropout issues
     
+    FGBGRegionsHist hPos;               ///< PMT hit center-of-mass positions
+    FGBGRegionsHist hPosSigma;          ///< PMT hit RMS spread
+    FGBGRegionsHist hEnergyRadius;      ///< PMT hit position radius vs energy
+    
     double E_p_lo = 650;        ///< proton signal low cut for wishbone data
     double E_p_hi = 2400;       ///< proton signal high cut for wishbone data
     double T_p_min = 750;       ///< minimum TOF for background analysis [ns]

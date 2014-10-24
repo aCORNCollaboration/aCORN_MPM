@@ -33,8 +33,13 @@ void BaseDataScanner::calibrate() {
     T_d *= NS_PER_CLOCK;
     T_e2p *= NS_PER_CLOCK;
     T_e2d *= NS_PER_CLOCK;
+    
     assert(currentCal);
     E_recon = currentCal->calEnergy(E_e);
+    
+    for(unsigned int i=0; i<N_E_PMT; i++) L_PMT[i] = E_PMT[N_V_PMT+i];
+    Pos.calcPos(L_PMT);
+    
     nFiredModule();
     modDropoutEvt = !(nFiredMod[0]*nFiredMod[1]) && (nFiredMod[0]+nFiredMod[1]>=6);
 }

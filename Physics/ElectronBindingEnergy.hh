@@ -2,7 +2,6 @@
 #define ELECTRONBINDINGENERGY_HH
 
 #include "QFile.hh"
-#include "SMExcept.hh"
 #include <vector>
 #include <map>
 

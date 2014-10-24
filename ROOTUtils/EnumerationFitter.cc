@@ -2,7 +2,6 @@
 #include "SMExcept.hh"
 #include "strutils.hh"
 #include "PathUtils.hh"
-#include "SMExcept.hh"
 
 
 

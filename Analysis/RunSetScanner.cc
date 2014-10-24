@@ -1,6 +1,5 @@
 #include "RunSetScanner.hh"
 #include "PathUtils.hh"
-#include "SMExcept.hh"
 
 #include <iostream>
 #include <stdlib.h>

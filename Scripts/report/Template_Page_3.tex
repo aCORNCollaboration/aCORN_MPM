@@ -1,0 +1,18 @@
+\clearpage
+\subsection*{Series %(series)i}
+
+\begin{figure}[H]
+    \centering
+    \subfloat[Event center-of-mass positions (background-subtracted).]{\includegraphics[scale=0.45]{%(sdir)s/Positions.pdf}}
+    \subfloat[Event position RMS spreads (background-subtracted)]{\includegraphics[scale=0.45]{%(sdir)s/PosSigma.pdf}}
+    \caption{Beta detector event positions.}
+    \label{fig:beta_positions_%(series)i}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \subfloat[Electron hit radius by energy (background-subtracted).]{\includegraphics[scale=0.45]{%(sdir)s/EnergyRadius.pdf}}
+    %%\subfloat[Veto panel PMTs. Red: signal; blue: background.]{\includegraphics[scale=0.45]{%(sdir)s/NVeto.pdf}}
+    \caption{Electron positions by energy.}
+    \label{fig:radius_%(series)i}
+\end{figure}

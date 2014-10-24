@@ -58,15 +58,29 @@ int main(int, char**) {
     Gluck_beta_MC G(RQR);
     G.test_calc_P_H();
     
-    double B0 = 356.1;  // field [Gauss]
+    const double B0 = 364;  // field [Gauss]
+    const double r_beam = 3.0;
     ElectronTOF eTOF;
     ProtonTOF pTOF;
-    CircleCollimator eCol(B0, 2.75, 27);
-    CircleCollimator pCol(B0, 4.0, 4);
+    CircleCollimator eCol(B0, 2.75, 5.08, 0);
+    CircleCollimator pCol(B0, 4.0, 5.08, 0);
     
     G.pt2_max = eCol.pt_max();
     
-    int npts = 1e8;
+    ////////////// Wishbone timing estimates
+    const double zmin[3] = {0,0,-r_beam};
+    const double zmax[3] = {0,0,r_beam};
+    const double pemax[3] = {0, 0, sqrt(G.Delta*G.Delta - m_e*m_e)};
+    const double pnumax[3] = {0, 0, -(G.Delta-m_e)};
+    pTOF.setVertex(zmin, pnumax);
+    const double tof_max = pTOF.calcTOF(pDet_z);
+    pTOF.setVertex(zmax, pemax);
+    const double tof_min = pTOF.calcTOF(pDet_z);
+    double tof_mid = 0.5*(tof_max+tof_min);
+    printf("Min proton TOF %.2f us, mid %.2f us, max %.2f us\n", tof_min*1e6, tof_mid*1e6, tof_max*1e6);
+    tof_mid = 3.4e-6;
+    
+    int npts = 1e7;
     
     TH1F* hSpec = OM.registeredTH1F("hSpec","Corrected beta spectrum",200,0,800);
     
@@ -122,7 +136,7 @@ int main(int, char**) {
         
         // vertex position
         RQR->u0[0] = (2*RQR->u0[0]-1)*eCol.r;
-        circle_the_square(RQR->u0+1, 3.0);
+        circle_the_square(RQR->u0+1, r_beam);
         // momenta, with sign convention reversed
         double p_e[3];
         double p_p[3];
@@ -135,25 +149,29 @@ int main(int, char**) {
         
         double passprob = eCol.pass(RQR->u0, p_e) * pCol.pass(RQR->u0, p_p);
         double wt = passprob * G.evt_w * G.c_2_wt;
-        if(!passprob) continue;
+        if(!wt) continue;
         
-        haCorn[G.n_1[2] > 0][true]->Fill(E_e, wt);
-        if(G.K==0) haCorn[G.n_1[2] > 0][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
+        // proton-to-electron time
+        pTOF.setVertex(RQR->u0, p_p);
+        eTOF.setVertex(RQR->u0, p_e);
+        double dt = pTOF.calcTOF(pDet_z) - eTOF.calcTOF(eDet_z);
+        hWishbone->Fill(E_e, 1e6*dt, wt);
+        
+        bool upper = dt > tof_mid + (tof_min - tof_mid)*(E_e/neutronBetaEp);
+        haCorn[upper][true]->Fill(E_e, wt);
+        if(G.K==0) haCorn[upper][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
         hPassPos->Fill(RQR->u0[0],RQR->u0[1],wt);
 
         hAccept->Fill(E_e, cos_th_enu, wt);
         hpAccept->Fill(E_e, p_p[2]/G.mag_p_f, wt);
         hnuAccept->Fill(E_e, G.n_1[2], wt);
-            
-        // proton-to-electron time
-        double dt = pTOF.calcTOF(RQR->u0, p_p) - eTOF.calcTOF(RQR->u0, p_e);
-        hWishbone->Fill(E_e, 1e6*dt, wt);
     }
     printf("\n");
         
     hSpec->Draw();
+    double acs = 0.8*hSpec->GetMaximum()/haCorn[0][true]->GetMaximum();
     for(int i=0; i<2; i++) {
-        haCorn[i][true]->Scale(500);
+        haCorn[i][true]->Scale(acs);
         haCorn[i][true]->Draw("Same");
     }
     hNu->Draw("Same");
@@ -166,6 +184,7 @@ int main(int, char**) {
         hAsym[j]->Rebin(nrebin);
         hAsym[j]->Scale(1./nrebin);
         hAsym[j]->SetLineColor(4-2*j);
+        hAsym[j]->SetMaximum(0);
         hAsym[j]->Draw(j?"HIST Same":"HIST");
         printf("Asymmetry %i %.4f\n",j,hAsym[j]->Integral());
     }
@@ -178,20 +197,20 @@ int main(int, char**) {
     makeRBpalette();
     
     hAccept->Scale(1.e6/npts);
-    hAccept->SetMinimum(-0.3);
-    hAccept->SetMaximum(0.3);
+    hAccept->SetMinimum(-0.5);
+    hAccept->SetMaximum(0.5);
     hAccept->Draw("Col");
     OM.printCanvas("Acceptance");
     
     hpAccept->Scale(1.e6/npts);
-    hpAccept->SetMinimum(-0.3);
-    hpAccept->SetMaximum(0.3);
+    hpAccept->SetMinimum(-0.5);
+    hpAccept->SetMaximum(0.5);
     hpAccept->Draw("Col");
     OM.printCanvas("pAcceptance");
     
     hnuAccept->Scale(1.e6/npts);
-    hnuAccept->SetMinimum(-0.3);
-    hnuAccept->SetMaximum(0.3);
+    hnuAccept->SetMinimum(-0.5);
+    hnuAccept->SetMaximum(0.5);
     hnuAccept->Draw("Col");
     OM.printCanvas("nuAcceptance");
     

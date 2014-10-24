@@ -50,7 +50,7 @@ void Gluck_beta_MC::vec_rel_n_2(double c, double phi, double* v) const {
     double n_perp[3];
     for(int i=0; i<3; i++) n_perp[i] = np_2[i]*cos(phi) + npp_2[i]*sin(phi);
     // (5.8)
-    for(int i=0; i<3; i++) v[i] = n_2[i]*c + n_perp[i] * s;
+    for(int i=0; i<3; i++) v[i] = n_2[i]*c + n_perp[i]*s;
 }
     
 double Gluck_beta_MC::calc_hard_brem() {

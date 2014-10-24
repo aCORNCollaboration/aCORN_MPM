@@ -1,5 +1,6 @@
 #include "ElectronBindingEnergy.hh"
 #include "strutils.hh"
+#include "SMExcept.hh"
 #include <stdio.h>
 
 const std::string BindingEnergyTable::shellnames = "KLMNOPQRST";

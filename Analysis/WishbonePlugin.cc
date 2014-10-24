@@ -39,7 +39,8 @@ TH2* TH2Slicer::subtractProfile(const TH1* p, double s) const {
 ////////////
 
 WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"),
-hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this), hChanSpec(this), hModuleMult(this) {
+hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this),
+hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(this) {
     
     TH1F hProtonTemplate("hProtonSignal", "Proton detector signal", 200,0,20);
     hProtonTemplate.GetXaxis()->SetTitle("proton detector ADC channels (#times 10^{3})");
@@ -85,6 +86,27 @@ hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this), hChan
     hMultTemplate.GetYaxis()->SetTitle("Module 2 Triggers");
     initRegions(hModuleMult);
     hModuleMult.setTemplate(hMultTemplate);
+    
+    TH2F hPosTemplate("hPos","Beta hit positions", 100, -3, 3, 100, -3, 3);
+    hPosTemplate.GetXaxis()->SetTitle("x [PMT spacings]");
+    hPosTemplate.GetYaxis()->SetTitle("y [PMT spacings]");
+    initRegions(hPos);
+    hPos.setTemplate(hPosTemplate);
+    
+    TH2F hPosSigmaTemplate("hPosSigma","Beta hit position spread", 100, 0, 2, 100, 0, 2);
+    hPosSigmaTemplate.GetXaxis()->SetTitle("#sigma_{x} [PMT spacings]");
+    hPosSigmaTemplate.GetYaxis()->SetTitle("#sigma_{y} [PMT spacings]");
+    hPosSigmaTemplate.GetYaxis()->SetTitleOffset(1.4);
+    initRegions(hPosSigma);
+    hPosSigma.setTemplate(hPosSigmaTemplate);
+    
+    
+    TH2F hEnergyRadiusTemplate("hEnergyRadius","Beta hit positions", 100, 0, 4, 100, 0, 800);
+    hEnergyRadiusTemplate.GetXaxis()->SetTitle("radius^{2} [(PMT spacings)^{2}]");
+    hEnergyRadiusTemplate.GetYaxis()->SetTitle("Energy [keV]");
+    hEnergyRadiusTemplate.GetYaxis()->SetTitleOffset(1.4);
+    initRegions(hEnergyRadius);
+    hEnergyRadius.setTemplate(hEnergyRadiusTemplate);
 }
 
 void WishbonePlugin::initRegions(FGBGRegionsHist& h) {
@@ -119,6 +141,10 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
         hNVeto.fill(PDS.T_e2p, PDS.nV, weight);
         if(!PDS.nV && PDS.T_e2p>0)
             hWishbone->Fill(PDS.E_recon, PDS.T_e2p/1000., weight);
+        
+        hPos.fill(PDS.T_e2p, PDS.Pos.px[0], PDS.Pos.px[1], weight);
+        hPosSigma.fill(PDS.T_e2p, PDS.Pos.sx[0], PDS.Pos.sx[1], weight);
+        hEnergyRadius.fill(PDS.T_e2p, PDS.Pos.r2(), PDS.E_recon, weight);
     }
 }
 
@@ -170,6 +196,24 @@ void WishbonePlugin::makePlots() {
     drawHLine(T_p_max/1000., myA->defaultCanvas, 4);
     myA->printCanvas("Wishbone");
     gStyle->SetPalette(1);
+    
+    hPos.makeRates(2);
+    hPos.hRates[true]->SetMinimum(0);
+    hPos.hRates[true]->SetMaximum(1);
+    hPos.hRates[true]->Draw("Col");
+    myA->printCanvas("Positions");
+    
+    hPosSigma.makeRates(2);
+    hPosSigma.hRates[true]->SetMinimum(0);
+    hPosSigma.hRates[true]->SetMaximum(10);
+    hPosSigma.hRates[true]->Draw("Col");
+    myA->printCanvas("PosSigma");
+    
+    hEnergyRadius.makeRates(2);
+    hEnergyRadius.hRates[true]->SetMinimum(0);
+    //hEnergyRadius.hRates[true]->SetMaximum(10);
+    hEnergyRadius.hRates[true]->Draw("Col");
+    myA->printCanvas("EnergyRadius");
     
     myA->defaultCanvas->SetLogz(true);
     

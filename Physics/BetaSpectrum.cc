@@ -1,11 +1,11 @@
 /// 
 
 #include "BetaSpectrum.hh"
+#include "SMExcept.hh"
 #include <stdio.h>
 #include <TMath.h>
 #include <vector>
 #include <map>
-#include "SMExcept.hh"
 
 /// hyperbolic sine
 double my_sinh(double x) { return (exp(x)-exp(-x))*0.5; }

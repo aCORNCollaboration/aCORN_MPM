@@ -2,7 +2,6 @@
 #include "SMExcept.hh"
 #include <stdlib.h>
 #include <time.h>
-#include <SMExcept.hh>
 
 TChainScanner::TChainScanner(const std::string& treeName): nEvents(0), nFiles(0), noEmpty(false), Tch(new TChain(treeName.c_str())),
 currentEvent(0), noffset(0), nLocalEvents(0) {
