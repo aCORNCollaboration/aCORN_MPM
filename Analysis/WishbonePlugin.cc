@@ -201,6 +201,8 @@ void WishbonePlugin::makePlots() {
     hPos.hRates[true]->SetMinimum(0);
     hPos.hRates[true]->SetMaximum(1);
     hPos.hRates[true]->Draw("Col");
+    Positioner Pos;
+    Pos.drawPMTs(1,true);
     myA->printCanvas("Positions");
     
     hPosSigma.makeRates(2);

@@ -1,4 +1,5 @@
 #include "Positioner.hh"
+#include "GraphicsUtils.hh"
 #include <cstdio>
 
 //         (-2)(-1)( 0)  x
@@ -8,6 +9,9 @@
 // 1    13  14  15  16
 // 2     17  18  19
 // y
+
+// sigma uniform: 1.124
+// sigma outer points: 1.414
 
 Positioner::Positioner() {
     v[0][0] = 1.;
@@ -54,3 +58,11 @@ void Positioner::calcPos(const double* L) {
         for(int i=0; i<2; i++) px[i] = sx[i] = -1000;
     }
 }
+
+void Positioner::drawPMTs(int color, bool drawnum) const {
+    for(unsigned int n=0; n<N; n++) {
+        drawCircle(0.45, color, 1, pos[0][n], pos[1][n]);
+        if(drawnum) { }
+    }
+}
+

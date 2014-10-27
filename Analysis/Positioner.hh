@@ -22,6 +22,9 @@ public:
     /// sigma x+y
     double sigma() const { return sqrt(sx[0]*sx[0]+sx[1]*sx[1]); }
     
+    /// draw PMT positions on plot
+    void drawPMTs(int color = 6, bool drawnum = false) const;
+    
     static const unsigned int N = 19;  ///< number of PMTs
     double v[2][2];             ///< lattice vectors in x,y
     int vpos[2][N];             ///< PMT positions in lattice vectors

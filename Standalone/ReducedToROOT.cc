@@ -129,17 +129,20 @@ int main(int argc, char** argv) {
         
         for(unsigned int i=0; i<NCH_MAX; i++) R.E_PMT[i] = R.T_PMT[i] = 0;
         
-        //std::cout << T_p << "\t" << E_p << "\t" << nE;
-        //std::cout << "nE = " << R.nE << " nV = " << R.nV << "\n";
+        //std::cout << "nE = " << R.nE << " nV = " << R.nV << " nPSig = " << R.nPSig << "\n";
         assert(R.nE+R.nV < NCH_MAX);
         
         // Electron PMT "detail" codes
         std::vector<Char_t> tps;
         R.Max_PMT = -1;
         R.E_Max_PMT = 0;
-        for(unsigned int i=0; i<R.nE+R.nV+R.nPSig; i++) {
+        int nLeft = R.nE + R.nV + R.nPSig;
+        while(nLeft) {
+            inf.get();
+            if(inf.peek() == '\r') break; // premature end-of-line (note '\r' endings)
             UInt_t dtl;
             inf >> std::hex >> dtl;
+            nLeft--;
             unsigned int chn = (dtl>>19);               // channel number
             if(chn >= NCH_MAX) continue;                // skip proton readouts, for now...
             R.E_PMT[chn] = (dtl>>4) & ((1<<15)-1);      // PMT ADC
@@ -152,12 +155,18 @@ int main(int argc, char** argv) {
         R.T_PMT_median = tps.size()?tps[tps.size()/2]:0;
         R.makeFlags();
         
-        // make sure we're at the end of the line (note '\r' endings...)
-        inf.getline(lbuf,2,'\r');
-        if(inf.fail()) {
-            std::cout << "'" << argv[1] << "' hit mal-formed line ending!\n";
+        // make sure we're at the end of the line
+        if(nLeft && nLeft != (R.nV + R.nPSig)) {
+            std::cout << "Premature end-of-line!\n";
             break;
+        } else {
+            inf.getline(lbuf,2,'\r');
+            if(inf.fail()) {
+                std::cout << "'" << argv[1] << "' hit mal-formed line ending!\n";
+                break;
+            }
         }
+        
         
         if(T_p_max < R.T_p) T_p_max = R.T_p;
         T->Fill();
