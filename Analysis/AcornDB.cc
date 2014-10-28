@@ -26,62 +26,63 @@ AcornDB::AcornDB() {
 }
 
 AcornDB::~AcornDB() {
-    if(db) sqlite3_close(db);
+    if(db) {
+        for(auto it = statements.begin(); it != statements.end(); it++) sqlite3_finalize(*it);
+        sqlite3_close(db);
+    }
+}
+
+int AcornDB::setQuery(const char* qry, sqlite3_stmt*& stmt) {
+    int rc = sqlite3_prepare_v2(db, qry, strlen(qry), &stmt, NULL);
+    if(rc != SQLITE_OK) {
+        SMExcept e("failed_query");
+        e.insert("message",sqlite3_errmsg(db));
+        throw(e);
+    }
+    return rc;
 }
 
 void AcornDB::getPMTSumCal(RunID rn, double& slope, double& intercept) {
     
-    static sqlite3_stmt* stmt;
     static const char* qry = "SELECT slope,intercept FROM pmt_sum_cal WHERE start_s <= ?1 AND ?1 <= end_s ORDER BY end_s-start_s ASC";
-    static const int rc0 = sqlite3_prepare_v2(db, qry, strlen(qry), &stmt, NULL);
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
     
-    if(rc0 == SQLITE_OK) {
-        sqlite3_bind_int(stmt, 1, 10000*rn.first + rn.second);
-        int rc1 = sqlite3_step(stmt);
-        if(rc1 == SQLITE_ROW) {
-            slope = sqlite3_column_double(stmt, 0);
-            intercept = sqlite3_column_double(stmt, 1);
-        } else {
-            SMExcept e("missing_pmtsumcal");
-            e.insert("message",sqlite3_errmsg(db));
-            throw(e);
-        }
-        sqlite3_reset(stmt);
+    sqlite3_bind_int(stmt, 1, 10000*rn.first + rn.second);
+    int rc1 = sqlite3_step(stmt);
+    if(rc1 == SQLITE_ROW) {
+        slope = sqlite3_column_double(stmt, 0);
+        intercept = sqlite3_column_double(stmt, 1);
     } else {
-        SMExcept e("failed_query");
+        SMExcept e("missing_pmtsumcal");
         e.insert("message",sqlite3_errmsg(db));
         throw(e);
     }
+    sqlite3_reset(stmt);
 }
 
 vector<RunID> AcornDB::seriesRuns(RunNum S, DataTier T) {
     
-    static sqlite3_stmt* stmt;
-    static const char* qry = "SELECT start_s,end_s FROM wishbone_series WHERE ?2 >= start_s AND ?1 <= end_s AND tier = ?3";
-    static const int rc0 = sqlite3_prepare_v2(db, qry, strlen(qry), &stmt, NULL);
+    static const char* qry = "SELECT start_s,end_s FROM data_series WHERE ?2 >= start_s AND ?1 <= end_s AND type = 'wishbone' AND tier = ?3";
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
     
     vector<RunID> v;
     
-    if(rc0 == SQLITE_OK) {
-        sqlite3_bind_int(stmt, 1, 10000*S);
-        sqlite3_bind_int(stmt, 2, 10000*(S+1)-1);
-        sqlite3_bind_int(stmt, 3, T);
-        while(sqlite3_step(stmt) == SQLITE_ROW) {
-            int s0 = sqlite3_column_int(stmt, 0);
-            int s1 = sqlite3_column_double(stmt, 1);
-            for(int i=s0; i<=s1; i++) {
-                RunID rn;
-                rn.first = i/10000;
-                rn.second = i%10000;
-                if(rn.first == S) v.push_back(rn);
-            }
+    sqlite3_bind_int(stmt, 1, 10000*S);
+    sqlite3_bind_int(stmt, 2, 10000*(S+1)-1);
+    sqlite3_bind_int(stmt, 3, T);
+    while(sqlite3_step(stmt) == SQLITE_ROW) {
+        int s0 = sqlite3_column_int(stmt, 0);
+        int s1 = sqlite3_column_double(stmt, 1);
+        for(int i=s0; i<=s1; i++) {
+            RunID rn;
+            rn.first = i/10000;
+            rn.second = i%10000;
+            if(rn.first == S) v.push_back(rn);
         }
-        sqlite3_reset(stmt);
-    } else {
-        SMExcept e("failed_query");
-        e.insert("message",sqlite3_errmsg(db));
-        throw(e);
     }
+    sqlite3_reset(stmt);
     
     return v;
 }

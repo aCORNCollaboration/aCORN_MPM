@@ -32,8 +32,12 @@ protected:
     /// Destructor
     ~AcornDB();
     
+    /// set up query for use
+    int setQuery(const char* qry, sqlite3_stmt*& stmt);
+    
     sqlite3* db = NULL;         ///< database connection
     static AcornDB* myDB;       ///< static singleton instance
+    vector<sqlite3_stmt*> statements;    ///< prepared statements awaiting deletion
 };
 
 

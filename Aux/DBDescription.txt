@@ -1,13 +1,21 @@
--- listing of series containing wishbone data
-CREATE TABLE wishbone_series (
-    start_s INTEGER,    -- start series+run                  
+-- listing of series containing wishbone and calibration data
+CREATE TABLE data_series (
+    start_s INTEGER,    -- start series+run     
     end_s INTEGER,      -- end series+run
+    type TEXT,          -- type of data
+    comments TEXT,      -- comments
     date INTEGER,       -- date of series
     runtime REAL,       -- run time [s]
     tier INTEGER,       -- data quality tier
-    field REAL          -- magnetic field direction
+    field REAL,         -- magnetic field direction, +/-1
+    energy_thresh TEXT, -- threshold on energy PMTs
+    veto_thresh TEXT,   -- threshold on veto PMTs
+    energy_volt TEXT,   -- voltage on energy PMTs
+    veto_volt TEXT,     -- voltage on veto PMTs
+    beta_trim REAL      -- Lower beta trim (LabView input)
 );
-CREATE UNIQUE INDEX idx_wishbone_series ON wishbone_series(start_s, end_s);
+CREATE UNIQUE INDEX idx_data_series ON data_series(start_s, end_s);
+CREATE INDEX idx_data_series_type ON data_series(type);
 
 -- energy calibration for PMT signal sum from metadata
 CREATE TABLE pmt_sum_cal (
