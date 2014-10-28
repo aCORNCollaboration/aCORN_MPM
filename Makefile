@@ -13,6 +13,7 @@ SHELL = /bin/sh
 CC = cc
 CXX = g++
 
+CFLAGS = -O3
 CXXFLAGS = -O3 --std=c++11 -fPIC `root-config --cflags` -I. -pedantic -Wall -Wextra \
 	-IIOUtils -IROOTUtils -IBaseTypes -IMathUtils -ICalibration -IAnalysis -IStudies -IPhysics
 LDFLAGS =  -L. -laCORN_MPM -lSpectrum -lMLP `root-config --libs` -lMathMore
@@ -44,8 +45,8 @@ Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o aSpectr
 
 ROOTUtils = GraphUtils.o GraphicsUtils.o TChainScanner.o HistogramSequenceFitter.o
 
-Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o AcornCalibrator.o \
-	SegmentSaver.o RunAccumulator.o RunMetadata.o WishbonePlugin.o Positioner.o
+Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o AcornCalibrator.o AcornDB.o \
+	SegmentSaver.o RunAccumulator.o WishbonePlugin.o Positioner.o
 
 objects = $(BaseTypes) $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis)
 

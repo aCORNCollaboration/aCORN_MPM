@@ -1,6 +1,7 @@
 #include "RunAccumulator.hh"
 #include "GraphUtils.hh"
 #include "SMExcept.hh"
+#include "PathUtils.hh"
 #include <time.h>
 
 RunAccumulator::RunAccumulator(OutputManager* pnt, const std::string& nm, const std::string& inflName):

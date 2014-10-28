@@ -1,8 +1,10 @@
 #include "AcornCalibrator.hh"
+#include "AcornDB.hh"
 
-AcornCalibrator::AcornCalibrator(RunID r): rn(r), md(MetadataDB::MDB.getRun(r)) {
+AcornCalibrator::AcornCalibrator(RunID r): rn(r) {
+    AcornDB::ADB().getPMTSumCal(rn, slope, intercept);
 }
 
 double AcornCalibrator::calEnergy(double ADC) const {
-    return md.calibPMT(ADC);
+    return slope*ADC + intercept;
 }

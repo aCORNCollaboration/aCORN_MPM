@@ -2,7 +2,7 @@
 #include "ReducedDataScanner.hh"
 #include "PathUtils.hh"
 #include "OutputManager.hh"
-#include "RunMetadata.hh"
+#include "AcornDB.hh"
 #include "strutils.hh"
 
 #include <stdio.h>
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     }
     
     ReducedDataScanner RDS(series >= 1519);
-    if(!RDS.addRuns(MetadataDB::MDB.seriesRuns(series))) {
+    if(!RDS.addRuns(AcornDB::ADB().seriesRuns(series))) {
         printf("Series %u contains no useful runs. Analysis stopped.\n", series);
         return 0;
     }

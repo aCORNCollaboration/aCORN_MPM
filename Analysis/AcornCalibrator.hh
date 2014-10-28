@@ -2,7 +2,6 @@
 #define ACORNCALIBRATOR_HH
 
 #include "Enums.hh"
-#include "RunMetadata.hh"
 #include "ManualInfo.hh"
 
 /// Calibrator and associated information class for aCORN data
@@ -16,7 +15,9 @@ public:
     
 protected:
     RunID rn;           ///< Run ID being calibrated
-    RunMetadata md;     ///< metadata file entry for run
+    
+    double slope;       ///< simple calibration slope
+    double intercept;   ///< simple calibration intercept
 };
 
 #endif
