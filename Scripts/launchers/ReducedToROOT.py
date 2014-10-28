@@ -3,9 +3,11 @@
 import os
 
 if __name__ == "__main__":
-    datadir = os.environ["ACORN_REDUCED_CALDATA"]
+    #datadir = os.environ["ACORN_REDUCED_CALDATA"]
+    datadir = os.environ["ACORN_REDUCED_DATA"]
     outdir = os.environ["ACORN_REDUCED_ROOT"]
     os.system("mkdir -p "+outdir)
+    
     r2rcmd = "../../ReducedToROOT %(infl)s %(outfl)s"
     r2rZcmd = "gunzip -c %(zfl)s > %(infl)s; " + r2rcmd + "; rm %(infl)s"
     
@@ -15,7 +17,6 @@ if __name__ == "__main__":
     flist.sort()
     for f in flist:
         
-        f_suffix = f.split(".")[-1]
         if not (f[0] in ["S","s"] and ".txt" in f):
             continue
         
@@ -26,17 +27,13 @@ if __name__ == "__main__":
             oldf = f
             f = f.replace("_cal","")
             os.system("mv %s/%s %s/%s"%(datadir,oldf,datadir,f))
-            
-        #if f[1:5] not in ["1519"]:
-        #    continue
         
         outfname = "%s/%s.root"%(outdir,f.replace(".txt","").replace(".gz",""))
         if os.path.isfile(outfname):
             print outfname,"already exists. Skipping."
             continue
                 
-        zfl = None
-        if f_suffix == "gz":
+        if f[-2:] == "gz":
             zfl = datadir+"/"+f
             infl = datadir+"/tmp_"+f[:-3]
             cmdlist.write(r2rZcmd%{"zfl":zfl, "infl":infl, "outfl":outfname}+"\n")

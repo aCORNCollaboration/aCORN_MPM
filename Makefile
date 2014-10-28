@@ -38,7 +38,7 @@ VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/:BaseTypes/:Analysis/
 
 BaseTypes = TagCounter.o
 
-IOUtils = ControlMenu.o OutputManager.o PathUtils.o QFile.o SMExcept.o strutils.o
+IOUtils = ControlMenu.o OutputManager.o PathUtils.o QFile.o SMExcept.o strutils.o sqlite3.o
 
 Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o aSpectrum.o Collimator.o
 

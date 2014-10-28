@@ -1,0 +1,47 @@
+-- listing of series containing wishbone data
+CREATE TABLE wishbone_series (
+    start_s INTEGER,    -- start series+run                  
+    end_s INTEGER,      -- end series+run
+    date INTEGER,       -- date of series
+    runtime REAL,       -- run time [s]
+    tier INTEGER,       -- data quality tier
+    field REAL          -- magnetic field direction
+);
+CREATE UNIQUE INDEX idx_wishbone_series ON wishbone_series(start_s, end_s);
+
+-- energy calibration for PMT signal sum from metadata
+CREATE TABLE pmt_sum_cal (
+    start_s INTEGER,    -- start series+run                  
+    end_s INTEGER,      -- end series+run
+    slope REAL,         -- slope
+    intercept REAL      -- intercept
+);
+CREATE UNIQUE INDEX idx_pmt_sum_cal ON pmt_sum_cal(start_s, end_s);
+
+-- PMT gain calibration parameters
+CREATE TABLE pmt_gaincal (
+    start_s INTEGER,    -- start series+run                  
+    end_s INTEGER,      -- end series+run
+    pmt INTEGER,        -- PMT number
+    sigPerPE REAL,      -- ADC-to-photoelectrons conversion
+    sigPerMeV REAL      -- signal-to-energy conversion
+);
+CREATE UNIQUE INDEX idx_pmt_gaincal ON pmt_gaincal(start_s, end_s);
+
+-- Generic named objects (use rowid as key on other collections)
+CREATE TABLE named_object (
+    type TEXT,          -- object type
+    name TEXT,          -- object name
+    descrip TEXT        -- object description
+);
+CREATE INDEX idx_named_object ON named_object(type);
+
+-- Graph points
+CREATE TABLE graph_points (
+    graph_id INTEGER,   -- rowid from named_object
+    x REAL,
+    dx REAL,
+    y REAL,
+    dy REAL
+);
+CREATE INDEX idx_graph_points ON graph_points(graph_id);
