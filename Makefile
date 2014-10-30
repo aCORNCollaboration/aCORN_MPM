@@ -72,4 +72,6 @@ clean:
 	-rm -f libaCORN_MPM.a
 	-rm -f *.o
 	-rm -rf *.dSYM
+	-rm -f ReducedToROOT  SpectrumShape  WishboneScanner
+
 

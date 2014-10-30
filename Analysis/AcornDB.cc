@@ -4,10 +4,18 @@
 #include <string.h>
 #include <stdio.h>
 
+void errorLogCallback(void*, int iErrCode, const char* zMsg){
+    fprintf(stderr, "SQL error (%d): %s\n", iErrCode, zMsg);
+}
+
+
 AcornDB* AcornDB::myDB = NULL;
 
 AcornDB& AcornDB::ADB() {
-    if(!AcornDB::myDB) myDB = new AcornDB();
+    if(!AcornDB::myDB) {
+        sqlite3_config(SQLITE_CONFIG_LOG, &errorLogCallback, NULL);
+        myDB = new AcornDB();
+    }
     return *myDB;
 }
 

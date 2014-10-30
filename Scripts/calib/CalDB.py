@@ -104,7 +104,7 @@ if __name__ == "__main__":
     conn = sqlite3.connect(os.environ["ACORN_DB"])
     curs = conn.cursor()
     
-    #load_metadata_csv(curs,os.environ["ACORN_METADATA"]);
+    load_metadata_csv(curs,os.environ["ACORN_METADATA"]);
     load_cal_csv(curs,"/home/mpmendenhall/Documents/aCORN/Database_for_Daily_Calibration_Full DataBase.csv");
     
     conn.commit()

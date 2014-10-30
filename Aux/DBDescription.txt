@@ -8,10 +8,10 @@ CREATE TABLE data_series (
     runtime REAL,       -- run time [s]
     tier INTEGER,       -- data quality tier
     field REAL,         -- magnetic field direction, +/-1
-    energy_thresh TEXT, -- threshold on energy PMTs
-    veto_thresh TEXT,   -- threshold on veto PMTs
-    energy_volt TEXT,   -- voltage on energy PMTs
-    veto_volt TEXT,     -- voltage on veto PMTs
+    energy_thresh REAL, -- threshold on energy PMTs
+    veto_thresh REAL,   -- threshold on veto PMTs
+    energy_volt REAL,   -- voltage on energy PMTs
+    veto_volt REAL,     -- voltage on veto PMTs
     beta_trim REAL      -- Lower beta trim (LabView input)
 );
 CREATE UNIQUE INDEX idx_data_series ON data_series(start_s, end_s);
@@ -25,6 +25,14 @@ CREATE TABLE pmt_sum_cal (
     intercept REAL      -- intercept
 );
 CREATE UNIQUE INDEX idx_pmt_sum_cal ON pmt_sum_cal(start_s, end_s);
+
+-- analyzed run timing data
+CREATE TABLE run_timing (
+    run INTEGER PRIMARY KEY,    -- series+run
+    start_time TEXT,            -- date/time of run start
+    wall_time REAL              -- wall time [s]
+    n_evts INTEGER              -- number of events in reduced file
+);
 
 -- PMT gain calibration parameters
 CREATE TABLE pmt_gaincal (

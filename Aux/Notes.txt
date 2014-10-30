@@ -1,0 +1,46 @@
+== Organizational notes ==
+
+Wishbone spreadsheet eLog 47
+Calibration metadata eLog 57
+    Field down = -1, up = 1
+    Tier Good = 1, Usable = 2, Unusable = 3
+    
+Reduce13 eLog 91  2/24/14
+Reduce14 eLog 93  3/13/14
+
+
+-- Running analysis --
+
+export ACORN_REDUCED_DATA=${HOME}/Data/aCORN/Reduced/
+export ACORN_REDUCED_CALDATA=${HOME}/Data/aCORN/Reduced_Calib/
+export ACORN_REDUCED_ROOT=${HOME}/Data/aCORN/ROOT/
+export ACORN_DB=${HOME}/Data/aCORN/aCORN_info.db
+export ACORN_METADATA=${HOME}/Documents/aCORN/MetaData_06102014.csv
+export ACORN_WISHBONE=${HOME}/Data/aCORN/Wishbone/
+export ACORN_SUMMARY=${HOME}/Documents/aCORN/Analyzed/
+
+# convert "reduced" ${ACORN_REDUCED_DATA}/s*.txt files to .root format
+make ReducedToROOT -j4
+cd Scripts/launchers/
+./ReducedToROOT.py
+
+# analyze wishbone series listed in metadata file
+make WishboneScanner -j4
+cd Scripts/launchers/
+./WishboneAnalysis.py --analyze
+
+-- Missing series labeled Tier 1 in metadata ---
+Series 972: not in reduced data; spreadsheet: "Data HDD stopped working // Data to be checked"
+Series 1013: not in reduced data; spreadsheet: "DAQ computer restarted at 19.00 !!! Then slow : only 28 runs … then shutdown"
+Series 1257: not in spreadsheet or reduced data
+
+-- Funny replay --
+535: reduced file says processed from 533??
+
+
+-- TODO --
+Figure out channel-to-modules mapping
+Background flatness, post-endpoint Chi^2/ndf
+Second-level energy calibrations
+4p-based Wishbone
+analytical spectrum model
