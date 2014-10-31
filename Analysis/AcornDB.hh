@@ -25,8 +25,10 @@ public:
     /// get list of runs for given wishbone series
     vector<RunID> seriesRuns(RunNum S, DataTier T = GOOD);
     
-    /// upload PMT calibration data
+    /// upload PMT gain calibration data
     void loadPMTcal(RunID start, RunID end, int n, double sigPerPE, double sigPerMeV);
+    /// get PMT gain calibration parameters
+    void getPMTcal(RunID rn, vector<double>& sigPerPE, vector<double>& sigPerMeV);
     
 protected:
     /// Constructor

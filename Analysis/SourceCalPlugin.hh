@@ -20,6 +20,7 @@ public:
     void bgSubtrPlots(SourceCalPlugin& bg);
     
     TH1* hEnergy;               ///< Calibrated energy spectrum
+    TH1* hEnergyRecal;          ///< Individual-PMT-based recalibrated spectrum
     TH1* hPMTSig[N_E_PMT];      ///< raw PMT signal spectra
 };
 

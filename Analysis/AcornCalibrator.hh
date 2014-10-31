@@ -13,11 +13,18 @@ public:
     /// Calibrate electron energy
     double calEnergy(double ADC) const;
     
+    /// Individual-PMT optimal sum calibration
+    double calEnergy(const Short_t* ADC) const;
+    
 protected:
     RunID rn;           ///< Run ID being calibrated
     
     double slope;       ///< simple calibration slope
     double intercept;   ///< simple calibration intercept
+    
+    std::vector<double> sigPerPE;       ///< energy resolution data
+    std::vector<double> sigPerMeV;      ///< gain calibration data
+    double PEPerMeV;                    ///< calibrated total PE per MeV
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include "AcornDB.hh"
 #include "PathUtils.hh"
 #include "SMExcept.hh"
+#include "BaseDataScanner.hh"
 #include <string.h>
 #include <stdio.h>
 
@@ -84,11 +85,9 @@ vector<RunID> AcornDB::seriesRuns(RunNum S, DataTier T) {
     sqlite3_bind_int(stmt, 3, T);
     while(sqlite3_step(stmt) == SQLITE_ROW) {
         int s0 = sqlite3_column_int(stmt, 0);
-        int s1 = sqlite3_column_double(stmt, 1);
+        int s1 = sqlite3_column_int(stmt, 1);
         for(int i=s0; i<=s1; i++) {
-            RunID rn;
-            rn.first = i/10000;
-            rn.second = i%10000;
+            RunID rn(i/10000, i%10000);
             if(rn.first == S) v.push_back(rn);
         }
     }
@@ -112,3 +111,20 @@ void AcornDB::loadPMTcal(RunID start, RunID end, int n, double sigPerPE, double 
     sqlite3_reset(stmt);
 }
 
+void AcornDB::getPMTcal(RunID rn, vector<double>& sigPerPE, vector<double>& sigPerMeV) {
+    static const char* qry = "SELECT pmt,sigPerPE,sigPerMeV FROM pmt_gaincal WHERE start_s <= ?1 AND ?1 <= end_s ORDER BY end_s-start_s ASC";
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
+
+    sigPerPE = vector<double>(N_E_PMT,0);
+    sigPerMeV = vector<double>(N_E_PMT,0);
+    sqlite3_bind_int(stmt, 1, combo_runid(rn));
+    while(sqlite3_step(stmt) == SQLITE_ROW) {
+        size_t n = sqlite3_column_int(stmt, 0);
+        if(n >= N_E_PMT) continue;
+        if(sigPerPE[n]) break;
+        sigPerPE[n] = sqlite3_column_double(stmt, 1);
+        sigPerMeV[n] = sqlite3_column_double(stmt, 2);
+    }
+    sqlite3_reset(stmt);
+}

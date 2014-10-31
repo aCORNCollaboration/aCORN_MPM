@@ -63,6 +63,8 @@ public:
     
     double physicsWeight;       ///< simulated event spectrum re-weighting factor
    
+    const AcornCalibrator* getCal() const { return currentCal; }
+   
 protected:
     std::map<RunID, AcornCalibrator*> cals;     ///< calibrators for each run
     AcornCalibrator* currentCal;                ///< calibrator for current run

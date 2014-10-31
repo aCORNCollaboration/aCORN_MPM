@@ -8,6 +8,9 @@ SourceCalPlugin::SourceCalPlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"SourceC
     hEnergy = registerHist("hEnergy", "Calibrated energy", 200, 0, 1500);
     hEnergy->GetXaxis()->SetTitle("Energy [keV]");
     
+    hEnergyRecal = registerHist("hEnergyRecal", "Re-calibrated energy", 200, 0, 1500);
+    hEnergyRecal->GetXaxis()->SetTitle("Energy [keV]");
+    
     for(unsigned int i=0; i<N_E_PMT; i++) {
     //for(unsigned int i=9; i<11; i++) {
         hPMTSig[i] = registerHist("hPMTSig_"+itos(i), "PMT " + itos(i+1) + " signal", 200, 0, 15);
@@ -18,6 +21,7 @@ SourceCalPlugin::SourceCalPlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"SourceC
 void SourceCalPlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
     if(PDS.Pos.r2() > 0.5*0.5) return;
     hEnergy->Fill(PDS.E_recon, weight);
+    hEnergyRecal->Fill(PDS.getCal()->calEnergy(PDS.E_PMT + N_V_PMT),weight);
     if(850 < PDS.E_recon && PDS.E_recon < 1200) {
         //for(unsigned int i=9; i<11; i++)
         for(unsigned int i=0; i<N_E_PMT; i++)
@@ -74,9 +78,45 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     myA->defaultCanvas->SetLogy(false);
     hEnergyRate->Add(hEnergyRateBG,-1.0);
     hEnergyRate->SetMaximum(80);
+    
+    TF1 fPois("pois", &poissonf, 900, 1150, 3);
+    fPois.SetParameter(0,60);
+    fPois.SetParameter(0,1000/257.);
+    fPois.SetParameter(2,257.);
+    fPois.SetLineColor(1);
+    hEnergyRate->Fit(&fPois,"R");
+    printf("Original energy: %g PE/MeV\n",fPois.GetParameter(2)/0.9948);
+    
     hEnergyRate->Draw();
     hEnergyRateBG->Draw("Same");
     myA->printCanvas("Energy");
+    
+    //------------------------
+    
+    TH1* hEnergyRecalRate = myA->hToRate(hEnergyRecal,1);
+    hEnergyRecalRate->Scale(1000);
+    hEnergyRecalRate->GetYaxis()->SetTitle("event rate [mHz/keV]");
+    hEnergyRecalRate->GetYaxis()->SetTitleOffset(1.4);
+    hEnergyRecalRate->SetLineColor(2);
+    TH1* hEnergyRecalRateBG = bg.myA->hToRate(bg.hEnergyRecal,1);
+    hEnergyRecalRateBG->Scale(1000);
+    hEnergyRecalRateBG->SetLineColor(4);
+    
+    hEnergyRecalRate->Add(hEnergyRecalRateBG,-1.0);
+    hEnergyRecalRate->SetMaximum(80);
+    TF1 fPoisR("pois", &poissonf, 1000, 1200, 3);
+    fPoisR.SetParameter(0,60);
+    fPoisR.SetParameter(0,1000/257.);
+    fPoisR.SetParameter(2,257.);
+    fPoisR.SetLineColor(1);
+    hEnergyRecalRate->Fit(&fPoisR,"R");
+    printf("Recalibrated energy: %g PE/MeV\n",fPoisR.GetParameter(2)/0.9948);
+    
+    hEnergyRecalRate->Draw();
+    hEnergyRecalRateBG->Draw("Same");
+    myA->printCanvas("EnergyRecal");
+    
+    //---------------------
     
     double pmt_res[N_E_PMT];
     double pmt_n0[N_E_PMT];

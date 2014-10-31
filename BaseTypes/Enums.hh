@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <ostream>
+#include <Rtypes.h>
 
 typedef unsigned int RunNum;
 /// wishbone series and run number
