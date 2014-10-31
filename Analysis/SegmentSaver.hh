@@ -7,29 +7,34 @@
 #include <map>
 #include <string>
 
+using std::map;
+using std::string;
+
 /// class for saving, retrieving, and summing histograms from file
 class SegmentSaver: public OutputManager {
 public:
     /// constructor, optionally with input filename
-    SegmentSaver(OutputManager* pnt, const std::string& nm = "SegmentSaver", const std::string& inflName = "");
+    SegmentSaver(OutputManager* pnt, const string& nm = "SegmentSaver", const string& inflName = "");
     /// destructor
     virtual ~SegmentSaver();
     /// get location of this analyzer's input file
-    const std::string& getInflName() const { return inflname; }
+    const string& getInflName() const { return inflname; }
     /// get age of analyzer's input file
     double getInflAge() const { return inflAge; }
     /// check whether correct input files exist at given location
-    static bool inflExists(const std::string& inflName);
+    static bool inflExists(const string& inflName);
     
     /// generate or restore from file a saved TH1F histogram
-    TH1* registerSavedHist(const std::string& hname, const std::string& title,unsigned int nbins, float xmin, float xmax);
+    TH1* registerSavedHist(const string& hname, const string& title,unsigned int nbins, float xmin, float xmax);
     /// generate or restore from file a saved histogram from a template
-    TH1* registerSavedHist(const std::string& hname, const TH1& hTemplate);
+    TH1* registerSavedHist(const string& hname, const TH1& hTemplate);
     
     /// get core histogram by name
-    TH1* getSavedHist(const std::string& hname);
+    TH1* getSavedHist(const string& hname);
     /// get core histogram by name, const version
-    const TH1* getSavedHist(const std::string& hname) const;
+    const TH1* getSavedHist(const string& hname) const;
+    /// get full histograms listing
+    const map<string,TH1*>& getHists() const { return saveHists; }
     /// zero out all saved histograms
     void zeroSavedHists();
     /// scale all saved histograms by a factor
@@ -46,14 +51,14 @@ public:
     // ----- Subclass me! ----- //
     
     /// create a new instance of this object (cloning self settings) for given directory
-    virtual SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) = 0;
+    virtual SegmentSaver* makeAnalyzer(const string& nm, const string& inflname) = 0;
     /// virtual routine for generating output plots
     virtual void makePlots() {}
     /// virtual routine for generating calculated hists
     virtual void calculateResults() { isCalculated = true; }
     
     TFile* fIn;                 ///< input file to read in histograms from
-    std::string inflname;       ///< where to look for input file
+    string inflname;            ///< where to look for input file
     bool isCalculated;
     
 protected:
@@ -61,7 +66,7 @@ protected:
     /// attempt to load histogram from input file
     TH1* tryLoad(const std::string& hname);
     
-    std::map<std::string,TH1*> saveHists;       ///< saved histograms
+    map<std::string,TH1*> saveHists;       ///< saved histograms
     double inflAge;                             ///< age of input file [s]; 0 for brand-new files
 };
 

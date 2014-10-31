@@ -42,7 +42,7 @@ CREATE TABLE pmt_gaincal (
     sigPerPE REAL,      -- ADC-to-photoelectrons conversion
     sigPerMeV REAL      -- signal-to-energy conversion
 );
-CREATE UNIQUE INDEX idx_pmt_gaincal ON pmt_gaincal(start_s, end_s);
+CREATE UNIQUE INDEX idx_pmt_gaincal ON pmt_gaincal(start_s, end_s, pmt);
 
 -- Generic named objects (use rowid as key on other collections)
 CREATE TABLE named_object (

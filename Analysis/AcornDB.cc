@@ -50,13 +50,15 @@ int AcornDB::setQuery(const char* qry, sqlite3_stmt*& stmt) {
     return rc;
 }
 
+int combo_runid(RunID rn) { return 10000*rn.first + rn.second; }
+
 void AcornDB::getPMTSumCal(RunID rn, double& slope, double& intercept) {
     
     static const char* qry = "SELECT slope,intercept FROM pmt_sum_cal WHERE start_s <= ?1 AND ?1 <= end_s ORDER BY end_s-start_s ASC";
     static sqlite3_stmt* stmt = NULL;
     if(!stmt) setQuery(qry, stmt);
     
-    sqlite3_bind_int(stmt, 1, 10000*rn.first + rn.second);
+    sqlite3_bind_int(stmt, 1, combo_runid(rn));
     int rc1 = sqlite3_step(stmt);
     if(rc1 == SQLITE_ROW) {
         slope = sqlite3_column_double(stmt, 0);
@@ -94,3 +96,19 @@ vector<RunID> AcornDB::seriesRuns(RunNum S, DataTier T) {
     
     return v;
 }
+
+void AcornDB::loadPMTcal(RunID start, RunID end, int n, double sigPerPE, double sigPerMeV) {    
+    static const char* qry = "INSERT OR REPLACE INTO pmt_gaincal(start_s, end_s, pmt, sigPerPE, sigPerMeV) VALUES (?1, ?2, ?3, ?4, ?5)";
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
+    
+    sqlite3_bind_int(stmt, 1, combo_runid(start));
+    sqlite3_bind_int(stmt, 2, combo_runid(end));
+    sqlite3_bind_int(stmt, 3, n);
+    sqlite3_bind_double(stmt, 4, sigPerPE);
+    sqlite3_bind_double(stmt, 5, sigPerMeV);
+    
+    sqlite3_step(stmt);
+    sqlite3_reset(stmt);
+}
+

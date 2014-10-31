@@ -105,7 +105,7 @@ public:
     /// calculate fit results
     void fit();
     /// generate interpolated histogram for time range
-    TH1* interpolate(const intervalList& dt);
+    TH1* interpolate(const intervalList& dt, TH1* h = NULL) const;
     
 protected:
     

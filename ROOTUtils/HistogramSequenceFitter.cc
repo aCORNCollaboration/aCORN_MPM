@@ -11,7 +11,7 @@
 IntervalIntegralFitter::IntervalIntegralFitter(unsigned int npar):
 N(npar), 
 //myMin(ROOT::Math::kConjugateFR),
-myMin(ROOT::Math::kVectorBFGS2),
+myMin(ROOT::Math::kVectorBFGS),
 myf(this, &IntervalIntegralFitter::eval_error, npar) {
     myParams = new double[N];
     mySteps = new double[N];
@@ -172,9 +172,10 @@ void HistogramSequenceFitter::fit() {
     myFitter->dIntegrals.resize(hs.size());
     fts.clear();
     
-    unsigned int nbins = dynamic_cast<const TArray*>(hs[0])->GetSize();
+    unsigned int nbins = hs[0]->GetNbinsX();
+    //unsigned int nbins = dynamic_cast<const TArray*>(hs[0])->GetSize();
     printf("Fitting sequence of %i histograms with %i bins...\n", (int)hs.size(), nbins);
-    for(unsigned int i=0; i<=nbins; i++) {
+    for(unsigned int i=0; i<=nbins+1; i++) {
         // collect data
         for(unsigned int j=0; j<hs.size(); j++) {
             myFitter->integrals[j] = hs[j]->GetBinContent(i);
@@ -186,9 +187,11 @@ void HistogramSequenceFitter::fit() {
     }
 }
 
-TH1* HistogramSequenceFitter::interpolate(const intervalList& dt) {
+TH1* HistogramSequenceFitter::interpolate(const intervalList& dt, TH1* h) const {
     assert(hs.size() && fts.size());
-    TH1* h = (TH1*)hs[0]->Clone();
+    if(!h) h = (TH1*)hs[0]->Clone();
+    //else assert(dynamic_cast<const TArray*>(h)->GetSize() == fts.size());
+    else assert(size_t(h->GetNbinsX()+2) == fts.size());
     
     //TVectorD ig(npar);
     
