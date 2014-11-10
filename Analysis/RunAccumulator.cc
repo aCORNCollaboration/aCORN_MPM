@@ -164,7 +164,7 @@ unsigned int RunAccumulator::mergeDir() {
 
 
 TH1* RunAccumulator::hToRate(TH1* h, int scaleAxes) {
-    TH1* hc = (TH1*)h->Clone();
+    TH1* hc = (TH1*)h->Clone((h->GetName()+string("_Rate")).c_str());
     hc->Sumw2();
     hc->Scale(1./runTimes.total());
     if(scaleAxes>=1) {

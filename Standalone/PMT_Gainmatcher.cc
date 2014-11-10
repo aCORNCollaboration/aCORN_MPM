@@ -105,6 +105,7 @@ void bg_subtraction_study() {
     PI.interpolate(SCAInterp);
     
     SCAfg.mySourceCalPlugin->bgSubtrPlots(*SCAInterp->mySourceCalPlugin);
+    SCAfg.setWriteRoot(true);
 }
 
 int main(int, char**) {

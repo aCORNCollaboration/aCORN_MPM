@@ -90,6 +90,7 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     hEnergyRate->Draw();
     hEnergyRateBG->Draw("Same");
     myA->printCanvas("Energy");
+    myA->addObject(hEnergyRate);
     
     //------------------------
     

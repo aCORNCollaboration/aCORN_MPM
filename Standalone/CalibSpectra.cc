@@ -88,6 +88,7 @@ public:
     double rho = 1.0;
     double I = 62.5e-6;
     double kB = 0.015;
+    double Emirror = 3.0;     ///< electrostatic mirror energy boost [keV]
     
     /// Bethe formula for energy deposition
     double bethe(double KE) const {
@@ -97,7 +98,7 @@ public:
         return bth>0? bth : 0;
     }
     
-    double EQfromEdep(double Edep) const { return gQ.Eval(Edep); }
+    double EQfromEdep(double Edep) const { return gQ.Eval(Edep+Emirror)/0.945; }
     
 protected:
     TGraph gQ;  ///< quenching curve; x=E_dep, y=E_Q
@@ -136,43 +137,42 @@ void fill_e_combos(double E0, double p0, pair<double,double>* ee, size_t n, TH1*
     }
 }
 
-/// Poisson-ize energy histogram
-void poisson_smear(const TH1& hIn, TH1& hOut, double PEperKeV) {
+
+/// Poisson-ize energy histogram; preserving total counts
+void poisson_smear(const TH1& hIn, TH1& hOut, double PEperKeV, QuenchCalculator* QC = NULL) {
     for(int i=1; i<=hIn.GetNbinsX(); i++) {
         double c0 = hIn.GetBinContent(i);
         if(!c0) continue;
-        double n0 = hIn.GetBinCenter(i)*PEperKeV;
+        double E0 = hIn.GetBinCenter(i);
+        double n0 = (QC?QC->EQfromEdep(E0):E0)*PEperKeV;
+        double nrm = 0;
+        for(int j=1; j<=hOut.GetNbinsX(); j++) nrm += TMath::Poisson(hOut.GetBinCenter(j)*PEperKeV, n0);
         for(int j=1; j<=hOut.GetNbinsX(); j++) {
             double E1 = hOut.GetBinCenter(j);
-            hOut.Fill(E1, c0 * TMath::Poisson(E1*PEperKeV, n0));
+            hOut.Fill(E1, c0 * TMath::Poisson(E1*PEperKeV, n0)/nrm);
         }
     }
 }
 
-int main(int, char**) {
-    
-    const std::string& sname = "Bi207";
-    
-    OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Sim_"+sname+"/");
+// generate calibration spectra
+void gen_calib_spectra(const std::string& sname, TH1*& hInitEnergy, TH1*& hEnergy) {
     
     NucDecayLibrary NDL(getEnvSafe("ACORN_AUX")+"/NuclearDecays/");
     NucDecaySystem& srcgen = NDL.getGenerator(sname);
     
     ElectronSurvival ES;
-    QuenchCalculator QC;
     
     QuasiRandomSobol QR(srcgen.getNDF());
     double u[128];
     
-    TH1F hInitEnergy("hInitEnergy", (sname + " electrons").c_str(), 1000, 0, 2000);
-    hInitEnergy.GetXaxis()->SetTitle("Energy [keV]");
-    hInitEnergy.GetYaxis()->SetTitle("Counts per 1000 decays");
-    hInitEnergy.GetYaxis()->SetTitleOffset(1.4);
+    hInitEnergy = new TH1F("hInitEnergy", (sname + " electrons").c_str(), 1000, 0, 2000);
+    hInitEnergy->GetXaxis()->SetTitle("Energy [keV]");
+    hInitEnergy->GetYaxis()->SetTitle("Counts / keV / 1e6 decays");
+    hInitEnergy->GetYaxis()->SetTitleOffset(1.4);
     
-    TH1F hEnergy("hEnergy", (sname + " electrons").c_str(), 2000, 0, 2000);
-    hEnergy.GetXaxis()->SetTitle("Energy [keV]");
-    TH1F hSmeared("hSmeared", (sname + " PE-smeared energy").c_str(), 500, 0, 1500);
-    hSmeared.GetXaxis()->SetTitle("Quenched Energy [keV]");
+    hEnergy = new TH1F("hEnergy", (sname + " electrons").c_str(), 2000, 0, 2000);
+    hEnergy->GetXaxis()->SetTitle("Energy [keV]");
+    hEnergy->GetYaxis()->SetTitleOffset(1.4);
     
     const size_t npts = 1000000;
     for(size_t i=0; i<npts; i++) {
@@ -183,43 +183,98 @@ int main(int, char**) {
         vector< pair<double,double> > eevts;
         for(auto it = v.begin(); it != v.end(); it++) {
             if(it->d == D_ELECTRON) {
-                hInitEnergy.Fill(it->E);
-                eevts.push_back(pair<double,double>(QC.EQfromEdep(it->E), 0.5*ES.survival_frac(it->E)));
+                hInitEnergy->Fill(it->E);
+                eevts.push_back(pair<double,double>(it->E, 0.5*ES.survival_frac(it->E)));
             }
         }
-        fill_e_combos(0., 1., &eevts[0], eevts.size(), &hEnergy);
+        fill_e_combos(0., 1., &eevts[0], eevts.size(), hEnergy);
     }
     
-    double ntot = hEnergy.Integral();
-    hEnergy.Scale(1./ntot);
+    hInitEnergy->Scale(1e6/npts);
+    hEnergy->Scale(1e6/npts);
+}
+
+// load calibration spectra from file
+void load_calib_spectra(const std::string& sname, TH1*& hInitEnergy, TH1*& hEnergy) {
+    
+    TFile felectron((getEnvSafe("ACORN_MCOUT") + "/aCORN_" + sname + "_e/Plots/aCORN_Scatter.root").c_str(),"READ");
+    hInitEnergy = (TH1*)felectron.Get("hEnergy0");      // counts / 1e6 decays
+    hEnergy = (TH1*)felectron.Get("hEnergy1");          // counts / 1e6 decays
+    assert(hEnergy && hInitEnergy);
+    
+    TFile fgamma((getEnvSafe("ACORN_MCOUT") + "/aCORN_" + sname + "_gamma/Plots/aCORN_Scatter.root").c_str(),"READ");
+    TH1* hInitEnergyG = (TH1*)fgamma.Get("hEnergy0");   // counts / 1e6 decays
+    TH1* hEnergyG = (TH1*)fgamma.Get("hEnergy1");       // counts / 1e6 decays
+    if(hInitEnergyG && hEnergyG) {
+        double gammaScale = 3.5;
+        hInitEnergy->Add(hInitEnergyG, gammaScale);
+        hEnergy->Add(hEnergyG, gammaScale);
+    } else {
+        printf("Gamma constributions not found for '%s'\n", sname.c_str());
+    }
+}
+
+// load data spectrum
+TH1* loadData() {
+    TFile f((getEnvSafe("ACORN_SUMMARY")+"SourceCal/SourceCal.root").c_str(),"READ");
+    TH1* hdat = (TH1*)f.Get("hEnergy_Rate");
+    assert(hdat);
+    return hdat;
+}
+
+int main(int, char**) {
+    
+    const std::string& sname = "Bi207";
+    
+    OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Sim_"+sname+"/");
+
+    TH1* hInitEnergy;
+    TH1* hEnergy;
+    //gen_calib_spectra(sname, hInitEnergy, hEnergy);
+    load_calib_spectra(sname, hInitEnergy, hEnergy);
+    
+    TH1F hSmeared("hSmeared", (sname + " PE-smeared energy").c_str(), 500, 0, 1500);
+    hSmeared.GetXaxis()->SetTitle("Quenched Energy [keV]");
+    hSmeared.GetYaxis()->SetTitle("Counts / 1e6 decays");
+    hSmeared.GetYaxis()->SetTitleOffset(1.4);
+
     
     gStyle->SetOptStat("");
     OM.defaultCanvas->SetLogy(true);
-    hEnergy.SetMinimum(1e-4);
-    hEnergy.SetMaximum(1);
-    hEnergy.Draw("HIST");
+    hInitEnergy->Draw("HIST");
+    hEnergy->Draw("HIST SAME");
     OM.printCanvas("Energy");
+    OM.defaultCanvas->SetLogy(false);
     
-    hInitEnergy.Scale(1000./npts);
-    hInitEnergy.Draw("HIST");
-    OM.printCanvas("InitEnergy");
-    
-    // lousy gamma tail estimate
-    //for(int j=1; j<=hSmeared.GetNbinsX(); j++) {
-    //    double E1 = hSmeared.GetBinCenter(j);
-    //    hSmeared.SetBinContent(j, 0.1/E1);
-    //}
-    poisson_smear(hEnergy, hSmeared, 0.26);
-    hSmeared.Scale(1000);
+    QuenchCalculator QC;
+    poisson_smear(*hEnergy, hSmeared, 0.22, &QC);
+    hSmeared.SetMaximum(3);
     
     TF1 fGaus("fGaus","gaus",400,550);
     hSmeared.Fit(&fGaus,"R");
     
-    OM.defaultCanvas->SetLogy(false);
-    hSmeared.SetMinimum(0);
-    hSmeared.SetMaximum(2.5);
     hSmeared.Draw("HIST");
     OM.printCanvas("EnergyPE");
     
+    TH1* hdat = loadData();
+    hdat->Draw();
+    hSmeared.Scale(26.);
+    hSmeared.Draw("HIST SAME");
+    OM.printCanvas("DataComparison");
+
+    
     return 0;
 }
+
+/*
+gSystem->Load("libEventLib.so")
+TFile f("scint_Bi207_gammas.root"); TTree* T = f.Get("PG4")
+TH1F h("hGammas","gamma energy deposition",2000,0,2000)
+T.Draw("1000*EIoni >> hGammas")
+h.Scale(1./557.33)
+h.GetXaxis()->SetTitle("deposited energy [keV]")
+h.GetYaxis()->SetTitle("counts / keV / 10000 decays")
+TFile fout("Bi207_Gammas.root","RECREATE")
+fout.cd()
+h.Write()
+*/
