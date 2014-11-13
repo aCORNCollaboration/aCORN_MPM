@@ -17,7 +17,7 @@ public:
                                       const double x,
                                       const std::string& k1="runStart",
                                       const std::string& k2="runEnd") const;
-    static ManualInfo MI;	///< static global instance to use
+    static ManualInfo MI;       ///< static global instance to use
 };
 
 /// simple class for cuts from Stringmap

@@ -80,11 +80,11 @@ public:
     TFile* rootOut;             ///< ROOT file output
     TCanvas* defaultCanvas;     ///< canvas for drawing plots
     OutputManager* parent;      ///< parent output manager
-    string basePath;       ///< general output path
-    string plotPath;       ///< specific output path for plots
-    string dataPath;       ///< specific output path for output data
-    string rootPath;       ///< specific output path for ROOT files
-    string name;           ///< name for this subsystem			
+    string basePath;            ///< general output path
+    string plotPath;            ///< specific output path for plots
+    string dataPath;            ///< specific output path for output data
+    string rootPath;            ///< specific output path for ROOT files
+    string name;                ///< name for this subsystem
     bool writeRootOnDestruct;   ///< whether to write ROOT file when destructed
     
     static bool squelchAllPrinting;     ///< whether to cancel all printCanvas output

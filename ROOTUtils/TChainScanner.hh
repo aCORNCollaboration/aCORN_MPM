@@ -26,7 +26,7 @@ public:
     /// load identified "speed scan" point
     virtual void speedload(unsigned int e, bool loadBaskets = true);
     /// load next "speed scan" point
-    virtual bool nextPoint();	
+    virtual bool nextPoint();
     /// get current speed scan point
     unsigned int getCurrentEvent() const { return currentEvent; }
     /// load data for given event number

@@ -95,7 +95,7 @@ void DecayAtom::load(const Stringmap& m) {
     
     pAuger = Iauger/(Iauger+Ikxr);
     IMissing = Iauger+Ikxr-ICEK;
-    if(!Iauger) IMissing = pAuger = 0;	
+    if(!Iauger) IMissing = pAuger = 0;
 }
 
 void DecayAtom::genAuger(vector<NucDecayEvent>& v) {
@@ -191,7 +191,7 @@ double ConversionGamma::getConversionEffic() const {
     double ce = 0;
     for(unsigned int n=0; n<subshells.size(); n++)
         ce += getPVacant(n);
-    return ce;	
+    return ce;
 }
 
 double ConversionGamma::shellAverageE(unsigned int n) const {
@@ -314,7 +314,7 @@ for(vector<Stringmap>::iterator it = augers.begin(); it != augers.end(); it++) {
         e.insert("Z",Z);
         throw(e);
     }
-    getAtom(Z)->load(*it);	
+    getAtom(Z)->load(*it);
 }
 
 // set up beta decays
@@ -451,7 +451,7 @@ void NucDecaySystem::genDecayChain(vector<NucDecayEvent>& v, double* rnd, unsign
                  TransitionBase* T = transOut[n][levelDecays[n].select(rnd)];
     T->run(v, rnd);
     if(rnd) rnd += T->getNDF(); // remove random numbers "consumed" by continuous processes
-	unsigned int nAugerK = T->nVacant(0);
+    unsigned int nAugerK = T->nVacant(0);
     while(nAugerK--)
         getAtom(T->to.Z)->genAuger(v);
     

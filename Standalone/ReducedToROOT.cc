@@ -22,26 +22,26 @@
 // The next 11 or15 bits are the individual PMT energy. The original PIXIE value was a 15-bit number but early versions of the reduced format used only the 11 most significant bits to save some space.
 // The final 4 bits are the time offset (in 10nS units) of this individual PMT relative to the last PMT event in the electron. The actual firing time of this individual PMT can be found from
 // PMT Time = Proton Time - E-P Delay (from field3) - time offset.
- 
- 
+
+
 // Reduce14 (.rd2) fields:
-//	15-digit energy arrival time, or -1 if missing
-//	15-digit discriminator arrival time, or -1 if missing
-//	5-digit proton energy
-//		The proton energy could be missing for three reasons which are distinguished by the energy value
-//		PEnergy=0 the proton was piled up
-//		PEnergy=-1 flag for second and more electrons associated with a single proton.
-//		PEnergy=-2 no energy signal detected, event had only discriminator signals.
-//	1-digit number of proton signals
-//	5-digit time offset between electron and proton energy signal (eTIme = T_p - EPTime)
-//	5-digit time offset between electron and proton discriminator signal (eTime = D_Time - EPTime)
-//	5-digit electron energy
-//	2 digit number of electron PMTs
-//	1 digit number of veto PMTs
+//    15-digit energy arrival time, or -1 if missing
+//    15-digit discriminator arrival time, or -1 if missing
+//    5-digit proton energy
+//        The proton energy could be missing for three reasons which are distinguished by the energy value
+//        PEnergy=0 the proton was piled up
+//        PEnergy=-1 flag for second and more electrons associated with a single proton.
+//        PEnergy=-2 no energy signal detected, event had only discriminator signals.
+//    1-digit number of proton signals
+//    5-digit time offset between electron and proton energy signal (eTIme = T_p - EPTime)
+//    5-digit time offset between electron and proton discriminator signal (eTime = D_Time - EPTime)
+//    5-digit electron energy
+//    2 digit number of electron PMTs
+//    1 digit number of veto PMTs
 //
-//	8-hex-digit bit map of which detectors (0-30) fired.
-//	8-hex-digit bitmap, 31 pile up flags (0-30) and top bit marks events in the dead zone after an electron.
-//	8-hex digit proton index.
+//    8-hex-digit bit map of which detectors (0-30) fired.
+//    8-hex-digit bitmap, 31 pile up flags (0-30) and top bit marks events in the dead zone after an electron.
+//    8-hex digit proton index.
 //
 //      The proton details for energy channels are constructed exactly the same as electron details,
 //      5 bits of channel #, 15 bits of energy, 4 bits of time offset.

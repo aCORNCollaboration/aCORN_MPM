@@ -7,23 +7,23 @@
 /// Base class for a node on a directed graph
 class DirectedGraphNode {
 public:
-	/// constructor
-	DirectedGraphNode() {}
-	/// destructor
-	virtual ~DirectedGraphNode() {}
-	
-	std::set<DirectedGraphNode*> links;	//< other connected nodes
+    /// constructor
+    DirectedGraphNode() {}
+    /// destructor
+    virtual ~DirectedGraphNode() {}
+    
+    std::set<DirectedGraphNode*> links; ///< other connected nodes
 };
 
 /// Base class for a directed graph with an enumerated list of nodes
 class DirectedGraph {
 public:
-	/// constructor
-	DirectedGraph() {}
-	/// destructor
-	virtual ~DirectedGraph() {}
-	
-	vector<DirectedGraphNode*> nodes;	//< enumerated nodes in graph
+    /// constructor
+    DirectedGraph() {}
+    /// destructor
+    virtual ~DirectedGraph() {}
+    
+    vector<DirectedGraphNode*> nodes; ///< enumerated nodes in graph
 };
 
 #endif

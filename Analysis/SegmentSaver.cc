@@ -24,7 +24,7 @@ TH1* SegmentSaver::tryLoad(const std::string& hname) {
 }
 
 TH1* SegmentSaver::registerSavedHist(const std::string& hname, const std::string& title,unsigned int nbins, float xmin, float xmax) {
-    smassert(saveHists.find(hname)==saveHists.end(), "duplicate_name_"+hname);	// don't duplicate names!
+    smassert(saveHists.find(hname)==saveHists.end(), "duplicate_name_"+hname); // don't duplicate names!
     TH1* h = tryLoad(hname);
     if(!h)
         h = registeredTH1F(hname,title,nbins,xmin,xmax);
@@ -33,7 +33,7 @@ TH1* SegmentSaver::registerSavedHist(const std::string& hname, const std::string
 }
 
 TH1* SegmentSaver::registerSavedHist(const std::string& hname, const TH1& hTemplate) {
-    smassert(saveHists.find(hname)==saveHists.end(), "duplicate_name_"+hname);	// don't duplicate names!
+    smassert(saveHists.find(hname)==saveHists.end(), "duplicate_name_"+hname); // don't duplicate names!
     TH1* h = tryLoad(hname);
     if(!h) {
         h = (TH1*)addObject(hTemplate.Clone(hname.c_str()));

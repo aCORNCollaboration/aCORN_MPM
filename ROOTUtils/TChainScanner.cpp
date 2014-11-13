@@ -46,7 +46,7 @@ void TChainScanner::startScan(bool startRandom) {
     }
     if(startRandom) {
         if(!currentEvent) {
-            srand(time(NULL));	// random random seed
+            srand(time(NULL)); // random random seed
             gotoEvent(rand()%Tch->GetEntries());
             printf("Scan Starting at offset %i/%i: ",currentEvent,nEvents);
         } else {

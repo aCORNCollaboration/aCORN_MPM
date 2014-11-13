@@ -142,7 +142,7 @@ void makeGrayscalepalette(bool b2w) {
         cnum[i] = TColor::GetColor(l,l,l);
     }
     gStyle->SetPalette(ncol,cnum);
-    gStyle->SetNumberContours(64);	
+    gStyle->SetNumberContours(64);
 }
 
 void makeRBpalette() {

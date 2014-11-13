@@ -62,7 +62,7 @@ Stringmap graphToStringmap(const TGraph& g) {
     }
     m.insert("x",vtos(xs));
     m.insert("y",vtos(ys));
-    return m;	
+    return m;
 }
 
 TGraphErrors* TH1toTGraph(const TH1& h) {
@@ -387,7 +387,7 @@ vector<TH1F*> sliceTH2(const TH2& h2, AxisDirection d, bool includeOverflow) {
         }
         h1s.push_back(h1);
     }
-    return h1s;	
+    return h1s;
 }
 
 vector<unsigned int> equipartition(const vector<float>& elems, unsigned int n) {

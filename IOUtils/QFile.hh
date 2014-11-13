@@ -52,7 +52,7 @@ public:
     /// convert to RData format
     //RData* toRData() const;
     
-    std::multimap< std::string, string > dat;	//< key-value multimap
+    std::multimap< std::string, string > dat;   ///< key-value multimap
     
 protected:
     
@@ -110,7 +110,7 @@ public:
     /// retrieve sub-key as double with default
     double getDefault(const std::string& k1, const std::string& k2, double d) const;
     /// retrieve all sub-key values as doubles
-    vector<double> retrieveDouble(const std::string& k1, const std::string& k2) const;	
+    vector<double> retrieveDouble(const std::string& k1, const std::string& k2) const;
     /// return number of elements
     unsigned int size() const { return dat.size(); }
     /// transfer all data for given key from other QFile
