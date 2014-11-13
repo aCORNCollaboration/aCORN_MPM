@@ -2,6 +2,7 @@
 #include "Collimator.hh"
 #include "SourceCalPlugin.hh"
 #include "PathUtils.hh"
+#include "strutils.hh"
 
 #include <cmath>
 #include <map>
@@ -88,7 +89,6 @@ public:
     double rho = 1.0;
     double I = 62.5e-6;
     double kB = 0.015;
-    double Emirror = 3.0;     ///< electrostatic mirror energy boost [keV]
     
     /// Bethe formula for energy deposition
     double bethe(double KE) const {
@@ -98,7 +98,7 @@ public:
         return bth>0? bth : 0;
     }
     
-    double EQfromEdep(double Edep) const { return gQ.Eval(Edep+Emirror)/0.945; }
+    double EQfromEdep(double Edep) const { return gQ.Eval(Edep)/0.937; }
     
 protected:
     TGraph gQ;  ///< quenching curve; x=E_dep, y=E_Q
@@ -195,18 +195,31 @@ void gen_calib_spectra(const std::string& sname, TH1*& hInitEnergy, TH1*& hEnerg
 }
 
 // load calibration spectra from file
-void load_calib_spectra(const std::string& sname, TH1*& hInitEnergy, TH1*& hEnergy) {
+void load_calib_spectra(const std::string& sname, TH1*& hInitEnergy, TH1*& hEnergy, OutputManager* OM = NULL) {
     
-    TFile felectron((getEnvSafe("ACORN_MCOUT") + "/aCORN_" + sname + "_e/Plots/aCORN_Scatter.root").c_str(),"READ");
+    //TFile felectron((getEnvSafe("ACORN_MCOUT") + "/aCORN_" + sname + "_e_EM/Plots/aCORN_Scatter.root").c_str(),"READ");
+    TFile felectron((getEnvSafe("PG4_OUTDIR") + "/aCORN_" + sname + "_e/Plots/aCORN_Scatter.root").c_str(),"READ");
     hInitEnergy = (TH1*)felectron.Get("hEnergy0");      // counts / 1e6 decays
     hEnergy = (TH1*)felectron.Get("hEnergy1");          // counts / 1e6 decays
     assert(hEnergy && hInitEnergy);
     
-    TFile fgamma((getEnvSafe("ACORN_MCOUT") + "/aCORN_" + sname + "_gamma/Plots/aCORN_Scatter.root").c_str(),"READ");
+    //TFile fgamma((getEnvSafe("ACORN_MCOUT") + "/aCORN_" + sname + "_gamma_EM/Plots/aCORN_Scatter.root").c_str(),"READ");
+    TFile fgamma((getEnvSafe("PG4_OUTDIR") + "/aCORN_" + sname + "_gamma/Plots/aCORN_Scatter.root").c_str(),"READ");
     TH1* hInitEnergyG = (TH1*)fgamma.Get("hEnergy0");   // counts / 1e6 decays
     TH1* hEnergyG = (TH1*)fgamma.Get("hEnergy1");       // counts / 1e6 decays
     if(hInitEnergyG && hEnergyG) {
-        double gammaScale = 3.5;
+        if(OM) {
+            OM->defaultCanvas->SetLogy(true);
+            hEnergyG->GetYaxis()->SetTitleOffset(1.4);
+            hEnergyG->GetXaxis()->SetTitle("scintillator energy [keV]");
+            hEnergyG->SetTitle("Simulated calibration spectrum");
+            hEnergyG->SetLineColor(4);
+            hEnergyG->Draw("HIST");
+            hEnergy->Draw("HIST SAME");
+            OM->printCanvas("InputEnergy");
+            OM->defaultCanvas->SetLogy(false);
+        }
+        double gammaScale = 1.0;
         hInitEnergy->Add(hInitEnergyG, gammaScale);
         hEnergy->Add(hEnergyG, gammaScale);
     } else {
@@ -227,54 +240,51 @@ int main(int, char**) {
     const std::string& sname = "Bi207";
     
     OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Sim_"+sname+"/");
-
+    gStyle->SetOptStat("");
+    
     TH1* hInitEnergy;
     TH1* hEnergy;
-    //gen_calib_spectra(sname, hInitEnergy, hEnergy);
-    load_calib_spectra(sname, hInitEnergy, hEnergy);
+    TH1* hEnergyGen;
+    load_calib_spectra(sname, hInitEnergy, hEnergy, &OM);
+    gen_calib_spectra(sname, hInitEnergy, hEnergyGen);
     
-    TH1F hSmeared("hSmeared", (sname + " PE-smeared energy").c_str(), 500, 0, 1500);
-    hSmeared.GetXaxis()->SetTitle("Quenched Energy [keV]");
-    hSmeared.GetYaxis()->SetTitle("Counts / 1e6 decays");
-    hSmeared.GetYaxis()->SetTitleOffset(1.4);
-
-    
-    gStyle->SetOptStat("");
-    OM.defaultCanvas->SetLogy(true);
-    hInitEnergy->Draw("HIST");
-    hEnergy->Draw("HIST SAME");
-    OM.printCanvas("Energy");
-    OM.defaultCanvas->SetLogy(false);
+    TH1F* hSmeared[2];
+    for(int i=0; i<2; i++) {
+        hSmeared[i] = new TH1F(("hSmeared_"+itos(i)).c_str(), (sname + " PE-smeared energy").c_str(), 500, 0, 1500);
+        hSmeared[i]->GetXaxis()->SetTitle("Quenched Energy [keV]");
+        hSmeared[i]->GetYaxis()->SetTitle("Counts / 1e6 decays");
+        hSmeared[i]->GetYaxis()->SetTitleOffset(1.4);
+        hSmeared[i]->SetLineColor(4-3*i);
+    }
     
     QuenchCalculator QC;
-    poisson_smear(*hEnergy, hSmeared, 0.22, &QC);
-    hSmeared.SetMaximum(3);
+    poisson_smear(*hEnergy, *hSmeared[0], 0.23, &QC);
+    poisson_smear(*hEnergyGen, *hSmeared[1], 0.23, &QC);
     
-    TF1 fGaus("fGaus","gaus",400,550);
-    hSmeared.Fit(&fGaus,"R");
+    TF1 fGaus("fGaus","gaus",900,1100);
+    TF1 fGausLo("fGausLo","gaus",425,575);
     
-    hSmeared.Draw("HIST");
-    OM.printCanvas("EnergyPE");
+    printf("\n\n*** bare analytical ***\n\n");
+    hSmeared[1]->Fit(&fGausLo,"R");
+    hSmeared[1]->Fit(&fGaus,"R");
+    
+    printf("\n\n*** MC ***\n\n");
+    hSmeared[0]->Fit(&fGausLo,"R");
+    hSmeared[0]->Fit(&fGaus,"R");
+    double sim_height = fGaus.GetParameter(0);
     
     TH1* hdat = loadData();
+    hdat->SetMinimum(0);
+    printf("\n\n*** Data ***\n\n");
+    hdat->Fit(&fGausLo,"R");
+    hdat->Fit(&fGaus,"R");
+    double dat_height = fGaus.GetParameter(0);
     hdat->Draw();
-    hSmeared.Scale(26.);
-    hSmeared.Draw("HIST SAME");
+    for(int i=0; i<2; i++) {
+        hSmeared[i]->Scale(dat_height/sim_height);
+        hSmeared[i]->Draw("HIST SAME");
+    }
     OM.printCanvas("DataComparison");
 
-    
     return 0;
 }
-
-/*
-gSystem->Load("libEventLib.so")
-TFile f("scint_Bi207_gammas.root"); TTree* T = f.Get("PG4")
-TH1F h("hGammas","gamma energy deposition",2000,0,2000)
-T.Draw("1000*EIoni >> hGammas")
-h.Scale(1./557.33)
-h.GetXaxis()->SetTitle("deposited energy [keV]")
-h.GetYaxis()->SetTitle("counts / keV / 10000 decays")
-TFile fout("Bi207_Gammas.root","RECREATE")
-fout.cd()
-h.Write()
-*/

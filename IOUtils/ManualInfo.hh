@@ -7,13 +7,13 @@
 class ManualInfo: public QFile {
 public:
     /// constructor
-    ManualInfo(std::string fname): QFile(fname) {}
+    ManualInfo(string fname): QFile(fname) {}
     
     /// get (double start,double end) pairs for key (or any other named pairs)
-    std::vector< std::pair<double,double> > getRanges(const std::string& key, const std::string& k1="start", const std::string& k2="end") const;
+    vector< std::pair<double,double> > getRanges(const std::string& key, const std::string& k1="start", const std::string& k2="end") const;
     
     /// get matching keys for item in range
-    std::vector<Stringmap> getInRange(const std::string& key,
+    vector<Stringmap> getInRange(const std::string& key,
                                       const double x,
                                       const std::string& k1="runStart",
                                       const std::string& k2="runEnd") const;
@@ -39,10 +39,10 @@ public:
 class CutVariable {
 public:
     /// constructor
-    CutVariable(std::string sn=""): sname(sn) {}
+    CutVariable(string sn=""): sname(sn) {}
     /// check if in range
     inline bool inRange() const { return R.inRange(val); }
-    std::string sname;  ///< sensor name (for pedestal subtraction)
+    string sname;  ///< sensor name (for pedestal subtraction)
     double val;         ///< stored value
     RangeCut R;         ///< cuts range
 };

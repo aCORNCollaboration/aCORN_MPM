@@ -16,7 +16,7 @@ public:
 	/// display error
 	virtual const char* what() const throw();
 	/// string for holding error message
-	mutable std::string msg;
+	mutable string msg;
 };
 
 void smassert(bool b, const std::string& tp = "assert_error", const Stringmap& m = Stringmap());

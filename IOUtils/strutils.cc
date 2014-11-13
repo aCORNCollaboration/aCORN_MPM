@@ -1,21 +1,21 @@
 #include "strutils.hh"
 #include <stdlib.h>
 
-std::string dtos(double d) {
+string dtos(double d) {
 	char c[16];
 	sprintf(c,"%g",d);
 	return std::string(c);
 }
 
-std::string itos(int i) {
+string itos(int i) {
 	char c[32];
 	sprintf(c,"%i",i);
 	return std::string(c);	
 }
 
-std::string itosRN(int i) {
+string itosRN(int i) {
 	if(!i) return "0";
-	std::string s;
+	string s;
 	if(i<0) { s += "-"; i = -i; }
 	while(i>=1000) { s += "M"; i-=1000; }
 	while(i>=900) { s += "CM"; i-=900; }
@@ -33,8 +33,8 @@ std::string itosRN(int i) {
 	return s;
 }
 
-std::string vtos(const double* st, const double* en, std::string sep) {
-	std::string s = "";
+string vtos(const double* st, const double* en, string sep) {
+	string s = "";
 	if(st==en)
 		return s;
 	s = dtos(*st);
@@ -43,10 +43,10 @@ std::string vtos(const double* st, const double* en, std::string sep) {
 	return s;
 }
 
-std::string vtos(const std::vector<double>& ds,std::string sep) { return vtos(&*ds.begin(),&*ds.end(),sep); }
+string vtos(const vector<double>& ds,string sep) { return vtos(&*ds.begin(),&*ds.end(),sep); }
 
-std::string vtos(const float* st, const float* en, std::string sep) {
-	std::string s = "";
+string vtos(const float* st, const float* en, string sep) {
+	string s = "";
 	if(st==en)
 		return s;
 	s = dtos(*st);
@@ -55,10 +55,10 @@ std::string vtos(const float* st, const float* en, std::string sep) {
 	return s;
 }
 
-std::string vtos(const std::vector<float>& ds,std::string sep) { return vtos(&*ds.begin(),&*ds.end(),sep); }
+string vtos(const vector<float>& ds,string sep) { return vtos(&*ds.begin(),&*ds.end(),sep); }
 
-std::string vtos(const int* st, const int* en, std::string sep) {
-	std::string s = "";
+string vtos(const int* st, const int* en, string sep) {
+	string s = "";
 	if(st==en)
 		return s;
 	s = itos(*st);
@@ -67,25 +67,25 @@ std::string vtos(const int* st, const int* en, std::string sep) {
 	return s;
 }
 
-std::string vtos(const std::vector<int>& ds,std::string sep) { return vtos(&*ds.begin(),&*ds.end(),sep); }
+string vtos(const vector<int>& ds,string sep) { return vtos(&*ds.begin(),&*ds.end(),sep); }
 
-std::string ctos(char c) {
+string ctos(char c) {
 	char ch[3];
 	sprintf(ch,"%c",c);
 	return std::string(ch);		
 }
 
-std::string lower(std::string s) {
+string lower(string s) {
 	std::transform(s.begin(), s.end(), s.begin(), (int(*)(int))tolower);
 	return s;
 }
 
-std::string upper(std::string s) {
+string upper(string s) {
 	std::transform(s.begin(), s.end(), s.begin(), (int(*)(int))toupper);
 	return s;
 }
 
-std::string replace(std::string s, char o, char n) {
+string replace(string s, char o, char n) {
 	std::string::size_type found = s.find_first_of(o);
 	while( found != std::string::npos ) {
 		s[found] = n;
@@ -96,8 +96,8 @@ std::string replace(std::string s, char o, char n) {
 
 bool startsWith(const std::string& a, const std::string& b) { return a.substr(0,b.size()) == b; }
 
-std::vector<std::string> split(const std::string& s, const std::string splitchars) {
-	std::vector<std::string> v;
+vector<string> split(const std::string& s, const string splitchars) {
+	vector<string> v;
 	size_t p = 0;
 	while(p<s.size()) {
 		size_t wstart = s.find_first_not_of(splitchars,p);
@@ -111,17 +111,17 @@ std::vector<std::string> split(const std::string& s, const std::string splitchar
 	return v;
 }
 
-std::string join(const std::vector<std::string>& ss, const std::string& sep) {
-	std::string s = "";
+string join(const vector<string>& ss, const std::string& sep) {
+	string s = "";
 	if(!ss.size())
 		return s;
 	s = ss[0];
-	for(std::vector<std::string>::const_iterator it = ss.begin()+1; it < ss.end(); it++)
+	for(vector<string>::const_iterator it = ss.begin()+1; it < ss.end(); it++)
 		s += sep + *it;
 	return s;
 }
 
-std::string strip(const std::string& s, const std::string stripchars) {
+string strip(const std::string& s, const string stripchars) {
 	size_t wstart = s.find_first_not_of(stripchars);
 	if(wstart == std::string::npos)
 		return "";
@@ -129,36 +129,36 @@ std::string strip(const std::string& s, const std::string stripchars) {
 	return s.substr(wstart,wend-wstart+1);
 }
 
-std::vector<double> sToDoubles(const std::string& s, const std::string splitchars) {
-	std::vector<double> v;
-	std::vector<std::string> words = split(s,splitchars);
+vector<double> sToDoubles(const std::string& s, const string splitchars) {
+	vector<double> v;
+	vector<string> words = split(s,splitchars);
 	for(unsigned int i=0; i<words.size(); i++)
 		v.push_back(atof(words[i].c_str()));
 	return v;
 }
 
-std::vector<float> sToFloats(const std::string& s, const std::string splitchars) {
-	std::vector<float> v;
-	std::vector<std::string> words = split(s,splitchars);
+vector<float> sToFloats(const std::string& s, const string splitchars) {
+	vector<float> v;
+	vector<string> words = split(s,splitchars);
 	for(unsigned int i=0; i<words.size(); i++)
 		v.push_back(atof(words[i].c_str()));
 	return v;
 }
 
-std::vector<int> sToInts(const std::string& s, const std::string splitchars) {
-	std::vector<int> v;
-	std::vector<std::string> words = split(s,splitchars);
+vector<int> sToInts(const std::string& s, const string splitchars) {
+	vector<int> v;
+	vector<string> words = split(s,splitchars);
 	for(unsigned int i=0; i<words.size(); i++)
 		v.push_back(atoi(words[i].c_str()));
 	return v;
 }
 
-std::vector< std::vector<float> > readArray(std::ifstream& fin, unsigned int minitems, const std::string splitchars) {
-	std::vector< std::vector<float> > a;
-	std::string s;
+vector< vector<float> > readArray(std::ifstream& fin, unsigned int minitems, const string splitchars) {
+	vector< vector<float> > a;
+	string s;
 	while (fin.good()) {
 		std::getline(fin,s);
-		std::vector<float> v = sToFloats(s,splitchars);
+		vector<float> v = sToFloats(s,splitchars);
 		if(v.size() >= minitems)
 			a.push_back(v);
 	}

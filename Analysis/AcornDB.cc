@@ -21,7 +21,7 @@ AcornDB& AcornDB::ADB() {
 }
 
 AcornDB::AcornDB() {
-    std::string dbname = getEnvSafe("ACORN_DB");
+    string dbname = getEnvSafe("ACORN_DB");
     printf("Opening SQLite3 DB '%s'...\n",dbname.c_str());
     int err = sqlite3_open(dbname.c_str(), &db);
     if(err) {

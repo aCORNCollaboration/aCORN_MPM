@@ -28,7 +28,7 @@ public:
 	virtual ~SQLHelper() { if(res) delete(res); if(db) db->Close(); }
 	
 	/// get name of DB in use
-	std::string getDBName() const { return dbName; }
+	string getDBName() const { return dbName; }
 	
 	bool isNullResult;	//< whether field query returned NULL
 	
@@ -40,7 +40,7 @@ protected:
 	/// use current query string, return first row
 	TSQLRow* getFirst();
 	/// get field as string (with default for NULL)
-	std::string fieldAsString(TSQLRow* row, unsigned int fieldnum=0, const std::string& dflt = "");	
+	string fieldAsString(TSQLRow* row, unsigned int fieldnum=0, const std::string& dflt = "");	
 	/// get field as integer (with default for NULL)
 	int fieldAsInt(TSQLRow* row, unsigned int fieldnum=0, int dflt = 0);
 	/// get field as float (with default for NULL)
@@ -59,10 +59,10 @@ protected:
 protected:	
 	TSQLServer* db;				//< DB server connection
 	TSQLResult* res;			//< result of most recent query
-	std::string dbName;			//< name of DB in use
+	string dbName;			//< name of DB in use
 };
 
 /// convert a stringmap to "(vars,...) VALUES (vals,...)" for DB insert query
-std::string sm2insert(const Stringmap& m);
+string sm2insert(const Stringmap& m);
 
 #endif

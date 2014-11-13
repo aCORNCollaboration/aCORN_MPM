@@ -87,7 +87,7 @@ double MultiGaus::operator() (double* x, double* par) {
 	Double_t s = 0;
 	for(unsigned int i=0; i<npks; i++)
 		s += par[3*i]*exp( -(x[0]-par[3*i+1])*(x[0]-par[3*i+1])/(2*par[3*i+2]*par[3*i+2]) );
-	for(std::vector<corrPeak>::const_iterator it = corrPeaks.begin(); it != corrPeaks.end(); it++) {
+	for(vector<corrPeak>::const_iterator it = corrPeaks.begin(); it != corrPeaks.end(); it++) {
 		unsigned int i = it->mainPeak;
 		s += par[3*i]*it->relHeight*exp( -(x[0]-par[3*i+1]*it->relCenter)*(x[0]-par[3*i+1]*it->relCenter)/(2*par[3*i+2]*par[3*i+2]*it->relWidth) );
 	}

@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
         assert(R.nE+R.nV < NCH_MAX);
         
         // Electron PMT "detail" codes
-        std::vector<Char_t> tps;
+        vector<Char_t> tps;
         R.Max_PMT = -1;
         R.E_Max_PMT = 0;
         int nLeft = R.nE + R.nV + R.nPSig;

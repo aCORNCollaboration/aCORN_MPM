@@ -4,7 +4,7 @@
 
 bool OutputManager::squelchAllPrinting = false;
 
-OutputManager::OutputManager(std::string nm, std::string bp): rootOut(NULL), defaultCanvas(new TCanvas()),
+OutputManager::OutputManager(string nm, string bp): rootOut(NULL), defaultCanvas(new TCanvas()),
 parent(NULL), writeRootOnDestruct(false) {
 	TH1::AddDirectory(kFALSE);
 	// set up output canvas	
@@ -18,7 +18,7 @@ parent(NULL), writeRootOnDestruct(false) {
 	setName(nm);
 }
 
-OutputManager::OutputManager(std::string nm, OutputManager* pnt):
+OutputManager::OutputManager(string nm, OutputManager* pnt):
 rootOut(NULL), defaultCanvas(NULL), parent(pnt), writeRootOnDestruct(false) {
 	TH1::AddDirectory(kFALSE);
 	if(parent)
@@ -26,14 +26,14 @@ rootOut(NULL), defaultCanvas(NULL), parent(pnt), writeRootOnDestruct(false) {
 	setName(nm);
 }
 
-void OutputManager::setName(std::string nm) {
+void OutputManager::setName(string nm) {
 	name = nm;
 	if(parent) {
 		plotPath = dataPath = basePath = rootPath = parent->basePath+"/"+name+"/";
 	}
 }
 
-void OutputManager::warn(WarningLevel l, std::string descrip, Stringmap M) {
+void OutputManager::warn(WarningLevel l, string descrip, Stringmap M) {
 	
 	M.insert("description",descrip);
 	M.insert("subsystem",name);
@@ -61,7 +61,7 @@ void OutputManager::warn(WarningLevel l, std::string descrip, Stringmap M) {
 		qOut.insert("Warning",M);
 }
 
-void OutputManager::write(std::string outName) {
+void OutputManager::write(string outName) {
 	// write text data file
 	if(qOut.size()) {
 		makePath(dataPath+"/"+outName,true);
@@ -92,17 +92,17 @@ void OutputManager::writeROOT() {
 }
 
 
-TH1F* OutputManager::registeredTH1F(std::string hname, std::string htitle, unsigned int nbins, float x0, float x1) {
+TH1F* OutputManager::registeredTH1F(string hname, string htitle, unsigned int nbins, float x0, float x1) {
 	if(rootOut) rootOut->cd();
 	return (TH1F*)addObject(new TH1F(hname.c_str(),htitle.c_str(),nbins,x0,x1));
 }
 
-TH2F* OutputManager::registeredTH2F(std::string hname, std::string htitle, unsigned int nbinsx, float x0, float x1, unsigned int nbinsy, float y0, float y1) {
+TH2F* OutputManager::registeredTH2F(string hname, string htitle, unsigned int nbinsx, float x0, float x1, unsigned int nbinsy, float y0, float y1) {
 	if(rootOut) rootOut->cd();
 	return (TH2F*)addObject(new TH2F(hname.c_str(),htitle.c_str(),nbinsx,x0,x1,nbinsy,y0,y1));
 }
 
-void OutputManager::printCanvas(std::string fname, std::string suffix) const {
+void OutputManager::printCanvas(string fname, string suffix) const {
 	printf("Printing canvas '%s' in '%s'\n",(fname+suffix).c_str(), plotPath.c_str());
 	if(squelchAllPrinting) { printf("Printing squelched!\n"); return; }
 	makePath(plotPath+"/"+fname+suffix,true);

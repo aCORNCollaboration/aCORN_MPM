@@ -20,7 +20,7 @@ SegmentSaver(pnt,nm,inflName), isSimulated(false) {
 }
 
 RunAccumulator::~RunAccumulator() {
-    for(std::map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++)
+    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++)
         delete it->second;
 }
 
@@ -35,19 +35,19 @@ void RunAccumulator::addPlugin(AnalyzerPlugin* AP) {
 }
 
 AnalyzerPlugin* RunAccumulator::getPlugin(const std::string& nm) {
-    std::map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.find(nm);
+    map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.find(nm);
     return it != myPlugins.end() ? it->second : NULL;
 }
 
 void RunAccumulator::fillCoreHists(BaseDataScanner& PDS, double weight) {
-    for(std::map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++)
+    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++)
         it->second->fillCoreHists(PDS,weight);
 }
 
 void RunAccumulator::calculateResults() {
     printf("Calculating results for %s...\n",name.c_str());
     if(isCalculated) printf("*** Warning: repeat calculation!\n");
-                            for(std::map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
+                            for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
                                 printf("... results in '%s' ...\n",it->first.c_str());
     it->second->calculateResults();
                             }
@@ -59,7 +59,7 @@ void RunAccumulator::makePlots() {
     defaultCanvas->cd();
     if(!isCalculated) calculateResults();
                    printf("Generating plots for %s...\n",name.c_str());
-    for(std::map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
+    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
         printf("... plots in '%s' ...\n",it->first.c_str());
         it->second->makePlots();
     }
@@ -71,7 +71,7 @@ void RunAccumulator::compareMCtoData(RunAccumulator& OAdata) {
     if(!isCalculated) calculateResults();
                                                     if(!OAdata.isCalculated) OAdata.calculateResults();
                                                     printf("Comparing MC %s and data %s...\n",name.c_str(),OAdata.name.c_str());
-    for(std::map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
+    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
         AnalyzerPlugin* AP = OAdata.getPlugin(it->second->name);
         if(AP) {
             printf("... comparison in '%s' ...\n",it->first.c_str());
@@ -102,7 +102,7 @@ void RunAccumulator::scaleData(double s) {
     runCounts.scale(s);
 }
 
-void RunAccumulator::write(std::string outName) {
+void RunAccumulator::write(string outName) {
     printf("Writing data to file '%s'...\n",outName.c_str());
     
     // clear previous tallies
@@ -147,11 +147,11 @@ void RunAccumulator::makeOutput(bool doPlots) {
 }
 
 unsigned int RunAccumulator::mergeDir() {
-    std::vector<std::string> fnames = listdir(basePath);
+    vector<string> fnames = listdir(basePath);
     unsigned int nMerged = 0;
-    for(std::vector<std::string>::iterator it = fnames.begin(); it != fnames.end(); it++) {
+    for(vector<string>::iterator it = fnames.begin(); it != fnames.end(); it++) {
         // check whether data directory contains cloneable subdirectories
-        std::string datinfl = basePath+"/"+(*it)+"/"+(*it);
+        string datinfl = basePath+"/"+(*it)+"/"+(*it);
         if(!inflExists(datinfl)) continue;
         SegmentSaver* subRA = makeAnalyzer(*it,datinfl);
         addSegment(*subRA);
@@ -215,7 +215,7 @@ FGBGRegionsHist::~FGBGRegionsHist() {
 }
 
 void FGBGRegionsHist::setTemplate(const TH1& hTemplate) {
-    std::string hname = hTemplate.GetName();
+    string hname = hTemplate.GetName();
     h[false] = myP->registerHist(hname+"_bg",hTemplate);
     h[true]  = myP->registerHist(hname+"_fg",hTemplate);
 }

@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+using std::string;
+using std::vector;
+
 /// class for assembling and scanning a TChain
 class TChainScanner {
 public:
@@ -47,7 +50,7 @@ protected:
     /// "string friendly" SetBranchAddress
     void SetBranchAddress(TTree* T, const std::string& bname, void* bdata);
     
-    std::vector<unsigned int> nnEvents; ///< number of events in each loaded TChain;
+    vector<unsigned int> nnEvents; ///< number of events in each loaded TChain;
     unsigned int nFiles;                ///< get number of loaded files
     bool noEmpty;                       ///< whether to abort on attempt to load empty files
     

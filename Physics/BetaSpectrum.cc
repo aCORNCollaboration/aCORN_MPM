@@ -21,9 +21,9 @@ struct coeff1 {
 };
 
 /// sum coeff3 power series
-double sumCoeffs(const std::vector<coeff1>& coeffs, double x=1.0) {
+double sumCoeffs(const vector<coeff1>& coeffs, double x=1.0) {
 	double s = 0;
-	for(std::vector<coeff1>::const_iterator it = coeffs.begin(); it != coeffs.end(); it++)
+	for(vector<coeff1>::const_iterator it = coeffs.begin(); it != coeffs.end(); it++)
 		s += it->c*pow(x,it->i);
 	return s;
 }
@@ -37,9 +37,9 @@ struct coeff2 {
 };
 
 /// sum coeff3 power series
-double sumCoeffs(const std::vector<coeff2>& coeffs, double x=1.0, double y=1.0) {
+double sumCoeffs(const vector<coeff2>& coeffs, double x=1.0, double y=1.0) {
 	double s = 0;
-	for(std::vector<coeff2>::const_iterator it = coeffs.begin(); it != coeffs.end(); it++)
+	for(vector<coeff2>::const_iterator it = coeffs.begin(); it != coeffs.end(); it++)
 		s += it->c*pow(x,it->i)*pow(y,it->j);
 	return s;
 }
@@ -54,9 +54,9 @@ struct coeff3 {
 };
 
 /// sum coeff3 power series
-double sumCoeffs(const std::vector<coeff3>& coeffs, double x=1.0, double y=1.0, double z=1.0) {
+double sumCoeffs(const vector<coeff3>& coeffs, double x=1.0, double y=1.0, double z=1.0) {
 	double s = 0;
-	for(std::vector<coeff3>::const_iterator it = coeffs.begin(); it != coeffs.end(); it++)
+	for(vector<coeff3>::const_iterator it = coeffs.begin(); it != coeffs.end(); it++)
 		s += it->c*pow(x,it->i)*pow(y,it->j)*pow(z,it->k);
 	return s;
 }
@@ -66,7 +66,7 @@ double WilkinsonGamma(double Z = 1.) { return sqrt(1-(alpha*Z)*(alpha*Z)); }
 
 double WilkinsonF_PowerSeries(double Z, double W, double R) {
 	// set up coeffs
-	static std::vector<coeff3> coeffs;
+	static vector<coeff3> coeffs;
 	if(!coeffs.size()) {
 		coeffs.push_back(coeff3(0,0,0,1.));
 		
@@ -154,10 +154,10 @@ double Bilenkii59_RWM(double W) {
 
 double WilkinsonL0(double Z, double W, double R) {
 	// set up coeffs
-	static std::vector<coeff1> ai[6];
-	static std::vector<coeff1> aminus1;
-	static std::map<double,std::vector<coeff1> > aiZ;
-	static std::map<double,double> aminus1Z;
+	static vector<coeff1> ai[6];
+	static vector<coeff1> aminus1;
+	static map<double,vector<coeff1> > aiZ;
+	static map<double,double> aminus1Z;
 	
 	if(!ai[0].size()) {
 		aminus1.push_back(coeff1(1,0.115));
@@ -211,7 +211,7 @@ double WilkinsonL0(double Z, double W, double R) {
 	}
 	
 	if(!aiZ.count(Z)) {
-		std::vector<coeff1> aiZi;
+		vector<coeff1> aiZi;
 		for(unsigned int i=0; i<6; i++)
 			aiZi.push_back(coeff1(i,sumCoeffs(ai[i],alpha*Z)));
 		aiZ.insert(std::make_pair(Z,aiZi));

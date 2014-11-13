@@ -3,12 +3,12 @@
 #include <math.h>
 
 float_err::float_err(const std::string& s): x(0), err(0) {
-	std::vector<std::string> v = split(s,"~");
+	vector<string> v = split(s,"~");
 	if(v.size()) x = atof(v[0].c_str());
 	if(v.size()>1) err = atof(v[1].c_str());
 }
 
-std::string float_err::toString() const {
+string float_err::toString() const {
 	return dtos(x)+"~"+dtos(err);
 }
 

@@ -25,9 +25,9 @@ public:
     /// add run to data (return whether successful)
     virtual bool addRun(RunID rn);
     /// add list of runs to data; return number successfully added
-    unsigned int addRuns(const std::vector<RunID>& rns);
+    unsigned int addRuns(const vector<RunID>& rns);
     /// return path to run .root file
-    virtual std::string locateRun(RunID) { assert(false); return ""; }
+    virtual string locateRun(RunID) { assert(false); return ""; }
     
     /// speedload, keeping track of currently loaded run number
     virtual void speedload(unsigned int e, bool loadBaskets = true);
@@ -50,7 +50,7 @@ public:
     
 protected:
     
-    std::vector<RunID> runlist;                 ///< list of loaded runs
+    vector<RunID> runlist;                 ///< list of loaded runs
     /// at run load time, figure out run total time
     virtual double _getRunTime(RunID) { return 0; }
 };

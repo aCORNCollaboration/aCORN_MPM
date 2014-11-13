@@ -13,9 +13,9 @@ Stringmap histoToStringmap(const TH1* h) {
     m.insert("nbins",h->GetNbinsX());
     m.insert("name",h->GetName());
     m.insert("title",h->GetTitle());
-    std::vector<float> binEdges;
-    std::vector<float> binConts;
-    std::vector<float> binErrs;
+    vector<float> binEdges;
+    vector<float> binConts;
+    vector<float> binErrs;
     for(int i=0; i<=h->GetNbinsX()+1; i++) {
         binConts.push_back(h->GetBinContent(i));
         binErrs.push_back(h->GetBinError(i));
@@ -29,13 +29,13 @@ Stringmap histoToStringmap(const TH1* h) {
 }
 
 TH1F* stringmapToTH1F(const Stringmap& m) {
-    std::string hName = m.getDefault("name","hFoo");
-    std::string hTitle = m.getDefault("name","hFoo");
+    string hName = m.getDefault("name","hFoo");
+    string hTitle = m.getDefault("name","hFoo");
     unsigned int nBins = (unsigned int)(m.getDefault("nbins",0));
     smassert(nBins >= 1);
-    std::vector<Float_t> binEdges = sToFloats(m.getDefault("binEdges",""));
-    std::vector<float> binConts = sToFloats(m.getDefault("binConts",""));
-    std::vector<float> binErrs = sToFloats(m.getDefault("binErrs",""));
+    vector<Float_t> binEdges = sToFloats(m.getDefault("binEdges",""));
+    vector<float> binConts = sToFloats(m.getDefault("binConts",""));
+    vector<float> binErrs = sToFloats(m.getDefault("binErrs",""));
     smassert(binEdges.size()==nBins+1);
     smassert(binConts.size()==nBins+2);
     smassert(binErrs.size()==nBins+2);
@@ -52,8 +52,8 @@ TH1F* stringmapToTH1F(const Stringmap& m) {
 Stringmap graphToStringmap(const TGraph& g) {
     Stringmap m;
     m.insert("npts",g.GetN());
-    std::vector<float> xs;
-    std::vector<float> ys;
+    vector<float> xs;
+    vector<float> ys;
     double x,y;
     for(int i=0; i<g.GetN(); i++) {
         g.GetPoint(i,x,y);
@@ -152,7 +152,7 @@ TGraph* invertGraph(const TGraph* g) {
     return gi;
 }
 
-TGraph* combine_graphs(const std::vector<TGraph*> gs) {
+TGraph* combine_graphs(const vector<TGraph*> gs) {
     unsigned int npts = 0;
     for(unsigned int n=0; n<gs.size(); n++)
         npts += gs[n]->GetN();
@@ -168,7 +168,7 @@ TGraph* combine_graphs(const std::vector<TGraph*> gs) {
     return g;
 }
 
-TGraphErrors* merge_plots(const std::vector<TGraphErrors*>& pin, const std::vector<int>& toffset) {
+TGraphErrors* merge_plots(const vector<TGraphErrors*>& pin, const vector<int>& toffset) {
     printf("Merging %i graphs...\n",(int)pin.size());
     unsigned int npts = 0;
     for(unsigned int n=0; n<pin.size(); n++)
@@ -188,7 +188,7 @@ TGraphErrors* merge_plots(const std::vector<TGraphErrors*>& pin, const std::vect
     return tg;
 }
 
-void drawTogether(std::vector<TGraphErrors*>& gs, float ymin, float ymax, TCanvas* C, const char* outname, const char* graphTitle) {
+void drawTogether(vector<TGraphErrors*>& gs, float ymin, float ymax, TCanvas* C, const char* outname, const char* graphTitle) {
     if(!gs.size())
         return;
     for(unsigned int t=0; t<gs.size(); t++)
@@ -259,9 +259,9 @@ void transformAxis(TGraph& g, TGraph& T, bool useJacobean) {
 }
 
 TGraphErrors* interpolate(TGraphErrors& tg, float dx) {
-    std::vector<float> xnew;
-    std::vector<float> ynew;
-    std::vector<float> dynew;
+    vector<float> xnew;
+    vector<float> ynew;
+    vector<float> dynew;
     double x0,x1,y,dy0,dy1;
     
     // sort input points by x value
@@ -316,7 +316,7 @@ void fixNaNs(TH1* h) {
     }
 }
 
-std::vector<TH2F*> sliceTH3(const TH3& h3, AxisDirection d) {
+vector<TH2F*> sliceTH3(const TH3& h3, AxisDirection d) {
     smassert(d<=Z_DIRECTION);
     
     const TAxis* Ax1 = d==X_DIRECTION?h3.GetYaxis():h3.GetXaxis();
@@ -326,7 +326,7 @@ std::vector<TH2F*> sliceTH3(const TH3& h3, AxisDirection d) {
     const unsigned int n2 = Ax2->GetNbins();
     const unsigned int n3 = Ax3->GetNbins();
     
-    std::vector<TH2F*> h2s;
+    vector<TH2F*> h2s;
     for(unsigned int z = 0; z <= n3+1; z++) {
         TH2F* h2 = new TH2F((std::string(h3.GetName())+"_"+itos(z)).c_str(),
         h3.GetTitle(),
@@ -358,9 +358,9 @@ std::vector<TH2F*> sliceTH3(const TH3& h3, AxisDirection d) {
     return h2s;
 }
 
-std::vector<TH1F*> sliceTH2(const TH2& h2, AxisDirection d, bool includeOverflow) {
+vector<TH1F*> sliceTH2(const TH2& h2, AxisDirection d, bool includeOverflow) {
     smassert(d==X_DIRECTION || d==Y_DIRECTION);
-    std::vector<TH1F*> h1s;
+    vector<TH1F*> h1s;
     const unsigned int nx = h2.GetNbinsX();
     const unsigned int ny = h2.GetNbinsY();
     const TAxis* axs = d==X_DIRECTION?h2.GetYaxis():h2.GetXaxis();
@@ -390,12 +390,12 @@ std::vector<TH1F*> sliceTH2(const TH2& h2, AxisDirection d, bool includeOverflow
     return h1s;	
 }
 
-std::vector<unsigned int> equipartition(const std::vector<float>& elems, unsigned int n) {
-    std::vector<float> cumlist;
+vector<unsigned int> equipartition(const vector<float>& elems, unsigned int n) {
+    vector<float> cumlist;
     for(unsigned int i=0; i<elems.size(); i++)
         cumlist.push_back(i?cumlist[i-1]+elems[i]:elems[i]);
     
-    std::vector<unsigned int> part;
+    vector<unsigned int> part;
     part.push_back(0);
     for(unsigned int i=1; i<n; i++) {
         double x0 = cumlist.back()*float(i)/float(n);

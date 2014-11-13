@@ -9,10 +9,10 @@ TChainScanner(treeName), totalTime(0) { }
 
 RunSetScanner::~RunSetScanner() { }
 
-unsigned int RunSetScanner::addRuns(const std::vector<RunID>& rns) {
+unsigned int RunSetScanner::addRuns(const vector<RunID>& rns) {
     printf("\n------------------- Assembling %i runs into TChain... ",(int)rns.size()); fflush(stdout);
     unsigned int n = 0;
-    for(std::vector<RunID>::const_iterator it = rns.begin(); it != rns.end(); it++) {
+    for(vector<RunID>::const_iterator it = rns.begin(); it != rns.end(); it++) {
         n+=addRun(*it);
         printf("*"); fflush(stdout);
     }
@@ -42,7 +42,7 @@ void RunSetScanner::speedload(unsigned int e, bool loadBaskets) {
 }
 
 bool RunSetScanner::addRun(RunID r) {
-    std::string f = locateRun(r);
+    string f = locateRun(r);
     if(f.size() && addFile(f)) {
         runlist.push_back(r);
         double rtime = _getRunTime(r);

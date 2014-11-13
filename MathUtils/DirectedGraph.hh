@@ -23,7 +23,7 @@ public:
 	/// destructor
 	virtual ~DirectedGraph() {}
 	
-	std::vector<DirectedGraphNode*> nodes;	//< enumerated nodes in graph
+	vector<DirectedGraphNode*> nodes;	//< enumerated nodes in graph
 };
 
 #endif

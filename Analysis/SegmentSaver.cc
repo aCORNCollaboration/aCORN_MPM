@@ -66,33 +66,33 @@ bool SegmentSaver::inflExists(const std::string& inflName) {
 }
 
 TH1* SegmentSaver::getSavedHist(const std::string& hname) {
-    std::map<std::string,TH1*>::iterator it = saveHists.find(hname);
+    map<std::string,TH1*>::iterator it = saveHists.find(hname);
     smassert(it != saveHists.end());
     return it->second;
 }
 
 const TH1* SegmentSaver::getSavedHist(const std::string& hname) const {
-    std::map<std::string,TH1*>::const_iterator it = saveHists.find(hname);
+    map<std::string,TH1*>::const_iterator it = saveHists.find(hname);
     smassert(it != saveHists.end(),"missing_histogram");
     return it->second;
 }
 
 void SegmentSaver::zeroSavedHists() {
-    for(std::map<std::string,TH1*>::iterator it = saveHists.begin(); it != saveHists.end(); it++)
+    for(map<std::string,TH1*>::iterator it = saveHists.begin(); it != saveHists.end(); it++)
         it->second->Reset();
 }
 
 void SegmentSaver::scaleData(double s) {
     if(s==1.) return;
-             for(std::map<std::string,TH1*>::iterator it = saveHists.begin(); it != saveHists.end(); it++)
+             for(map<std::string,TH1*>::iterator it = saveHists.begin(); it != saveHists.end(); it++)
                  if(it->second->ClassName() != TString("TProfile"))
                      it->second->Scale(s);
 }
 
 bool SegmentSaver::isEquivalent(const SegmentSaver& S) const {
     if(saveHists.size() != S.saveHists.size()) return false;
-             for(std::map<std::string,TH1*>::const_iterator it = saveHists.begin(); it != saveHists.end(); it++) {
-                 std::map<std::string,TH1*>::const_iterator otherit = S.saveHists.find(it->first);
+             for(map<std::string,TH1*>::const_iterator it = saveHists.begin(); it != saveHists.end(); it++) {
+                 map<std::string,TH1*>::const_iterator otherit = S.saveHists.find(it->first);
                  if(otherit == S.saveHists.end()) return false;
              // TODO other checks?
              }
@@ -102,6 +102,6 @@ bool SegmentSaver::isEquivalent(const SegmentSaver& S) const {
 void SegmentSaver::addSegment(const SegmentSaver& S) {
     smassert(isEquivalent(S),"mismatched_histogram");
     // add histograms
-    for(std::map<std::string,TH1*>::const_iterator it = saveHists.begin(); it != saveHists.end(); it++)
+    for(map<std::string,TH1*>::const_iterator it = saveHists.begin(); it != saveHists.end(); it++)
         it->second->Add(S.getSavedHist(it->first));
 }

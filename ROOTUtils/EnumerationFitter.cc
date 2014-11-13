@@ -15,7 +15,7 @@ double EnumerationFitter::Evaluate(double *x, double *p) {
 	return s;
 }
 
-void EnumerationFitter::addTerm(const std::vector<double>& t) {
+void EnumerationFitter::addTerm(const vector<double>& t) {
 	if(fitter) {
 		delete fitter;
 		fitter = NULL;
@@ -37,10 +37,10 @@ TGraphErrors* EnumerationFitter::loadFitFile(const std::string& fname) {
 	}
 	
 	std::ifstream fin(fname.c_str());
-	std::string s;
-	std::vector<double> datenum;
-	std::vector<double> dat;
-	std::vector<double> daterr;
+	string s;
+	vector<double> datenum;
+	vector<double> dat;
+	vector<double> daterr;
 	fterms.clear();
 	if(fitter) {
 		delete fitter;
@@ -53,14 +53,14 @@ TGraphErrors* EnumerationFitter::loadFitFile(const std::string& fname) {
 		s = strip(s);
 		if(!s.size() || s[0]=='#')
 			continue;
-		std::vector<double> v = sToDoubles(s," ,\t");
+		vector<double> v = sToDoubles(s," ,\t");
 		if(v.size() < 2) continue;
 		datenum.push_back(0.5+dat.size());
 		dat.push_back(v[0]);
 		daterr.push_back(v[1]);
 		for(unsigned int i=2; i<v.size(); i++) {
 			while(fterms.size()<i-1)
-				fterms.push_back(std::vector<double>());
+				fterms.push_back(vector<double>());
 			fterms[i-2].push_back(v[i]);
 		}
 	}

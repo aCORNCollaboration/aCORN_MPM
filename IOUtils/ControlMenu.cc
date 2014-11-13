@@ -37,7 +37,7 @@ bool StreamInteractor::menutils_CheckStackSize(unsigned int n) {
 
 InputRequester InputRequester::exitMenu("Exit Menu", &menutils_Exit);
 
-InputRequester::InputRequester(std::string d, void (*f)(StreamInteractor*), StreamInteractor* fObj):
+InputRequester::InputRequester(string d, void (*f)(StreamInteractor*), StreamInteractor* fObj):
 NamedInteractor(d), myFuncObject(fObj), myFunc(f) { }
 
 void InputRequester::doIt() {
@@ -63,7 +63,7 @@ void InputRequester::doIt() {
 				printf(" [%s]",defaultArgs[i].c_str());
 			printf(" > ");
 			assert(fgets(indata,1024,stdin));
-			std::string argin = strip(indata);
+			string argin = strip(indata);
 			if(!argin.size())
 				mystack->push(defaultArgs[i]);
 			else
@@ -88,20 +88,20 @@ void InputRequester::addArg(const std::string& s, const std::string& dflt, const
 	inputFilters.push_back(filter);
 }
 
-void InputRequester::setArgOpts(unsigned int i, std::string s, std::string dflt, NamedInteractor* filter) { 
+void InputRequester::setArgOpts(unsigned int i, string s, string dflt, NamedInteractor* filter) { 
 	assert(i<argNames.size()); 
 	argNames[i] = s;
 	defaultArgs[i] = dflt;
 	inputFilters[i] = filter;
 }
 
-std::string InputRequester::getArgname(unsigned int i) const { 
+string InputRequester::getArgname(unsigned int i) const { 
 	assert(i<argNames.size()); 
 	return argNames[i];
 }
 
-std::string InputRequester::getDescription() {
-	std::string s = name;
+string InputRequester::getDescription() {
+	string s = name;
 	if(argNames.size() > 0) {
 		s += " (";
 		for(unsigned int i=0; i<argNames.size(); i++) {
@@ -128,15 +128,15 @@ bool nameselector_default_softmatch(const std::string& a, const std::string& b) 
 	return lower(a) == lower(b.substr(0,a.size()));
 }
 
-std::string NameSelector::barf_control = "\033_BARF";
-std::string NameSelector::exit_control = "\033_EXIT";
+string NameSelector::barf_control = "\033_BARF";
+string NameSelector::exit_control = "\033_EXIT";
 
-NameSelector::NameSelector(std::string t, std::string promptval, bool persist): InputRequester(t), catchAll(NULL), isPersistent(persist) {
+NameSelector::NameSelector(string t, string promptval, bool persist): InputRequester(t), catchAll(NULL), isPersistent(persist) {
 	InputRequester::addArg(promptval);
 	setSoftmatch();
 }
 
-void NameSelector::addChoice(std::string d, std::string nm, Selector_Option_Flags o, std::string mname, StreamInteractor* action) {
+void NameSelector::addChoice(string d, string nm, Selector_Option_Flags o, string mname, StreamInteractor* action) {
 	if(!nm.size())
 		nm = itos(choiceNames.size()+1);
 	assert(nameMap.find(nm) == nameMap.end());
@@ -151,8 +151,8 @@ void NameSelector::addChoice(std::string d, std::string nm, Selector_Option_Flag
 	actions.push_back(action);
 }
 
-void NameSelector::addSynonym(std::string arg0, std::string syn) {
-	std::map<std::string,unsigned int>::iterator it = nameMap.find(arg0);
+void NameSelector::addSynonym(string arg0, string syn) {
+	map<std::string,unsigned int>::iterator it = nameMap.find(arg0);
 	assert(it != nameMap.end());
 	NameSelector::addChoice(choiceDescrips[it->second],syn,
 			  Selector_Option_Flags(oflags[it->second] | SELECTOR_SYNONYM | SELECTOR_HIDDEN),
@@ -166,8 +166,8 @@ void NameSelector::displayOptions() {
 			printf("%s\t%s\n",choiceNames[i].c_str(),choiceDescrips[i].c_str());
 }		
 
-std::string NameSelector::getDescription() {
-	std::string s = name;
+string NameSelector::getDescription() {
+	string s = name;
 	if(defaultArgs[0].size())
 		s += " = "+defaultArgs[0];
 	return s; 
@@ -190,7 +190,7 @@ void NameSelector::doIt() {
 			InputRequester::doIt();
 			
 			// get argument off stack
-			std::string myArg = popString();
+			string myArg = popString();
 			
 			// break for control sequences
 			if(startsWith(myArg, exit_control) || startsWith(myArg, barf_control) ) {
@@ -205,14 +205,14 @@ void NameSelector::doIt() {
 				continue;
 			
 			// find matching selection name
-			std::map<std::string,unsigned int>::iterator it = nameMap.find(myArg);
+			map<std::string,unsigned int>::iterator it = nameMap.find(myArg);
 			
 			// if no direct match, apply soft matching when available
 			if(it == nameMap.end() && softmatch) {
 				
 				// find soft matches
-				std::vector<std::map<std::string,unsigned int>::iterator> matches;
-				for(std::map<std::string,unsigned int>::iterator i = nameMap.begin(); i != nameMap.end(); i++)
+				vector<map<std::string,unsigned int>::iterator> matches;
+				for(map<std::string,unsigned int>::iterator i = nameMap.begin(); i != nameMap.end(); i++)
 					if(!(oflags[i->second] & SELECTOR_DISABLED) && softmatch(myArg,i->first))
 						matches.push_back(i);
 				
@@ -256,7 +256,7 @@ void NameSelector::doIt() {
 }
 
 
-void OptionsMenu::addChoice(NamedInteractor* M, std::string nm, Selector_Option_Flags o) {
+void OptionsMenu::addChoice(NamedInteractor* M, string nm, Selector_Option_Flags o) {
 	NameSelector::addChoice(M->getDescription(),nm,o,"",M);
 }
 
@@ -265,13 +265,13 @@ void OptionsMenu::addChoice(NamedInteractor* M, std::string nm, Selector_Option_
 
 void menutils_PrintQue(StreamInteractor* S) {
 	printf("[ ");
-	for(std::deque<std::string>::iterator it = S->mydeque->begin(); it != S->mydeque->end(); it++)
+	for(std::deque<string>::iterator it = S->mydeque->begin(); it != S->mydeque->end(); it++)
 		printf("'%s' ",it->c_str());
 	printf("]\n");
 }
 
 void menutils_PrintStack(StreamInteractor* S) {
-	std::stack<std::string> tmp;
+	std::stack<string> tmp;
 	while(S->mystack->size())
 		tmp.push(S->popString());
 	printf("[ ");
@@ -316,8 +316,8 @@ void menutils_ClearStack(StreamInteractor* S) {
 void menutils_Swap(StreamInteractor* S) {
 	if(!S->menutils_CheckStackSize(2))
 		return;
-	std::string a = S->popString();
-	std::string b = S->popString();
+	string a = S->popString();
+	string b = S->popString();
 	S->mystack->push(a);
 	S->mystack->push(b);
 }
@@ -330,7 +330,7 @@ void menutils_Rot(StreamInteractor* S) {
 		return;
 	for(unsigned int i=0; i<n-1; i++)
 		S->mydeque->push_front(S->popString());
-	std::string s = S->popString();
+	string s = S->popString();
 	for(unsigned int i=0; i<n-1; i++)
 		S->mystack->push(S->popStringD());
 	S->mystack->push(s);
@@ -339,9 +339,9 @@ void menutils_Rot(StreamInteractor* S) {
 void menutils_Select(StreamInteractor* S) {
 	if(!S->menutils_CheckStackSize(3))
 		return;
-	std::string c = S->popString();
-	std::string b = S->popString();
-	std::string a = S->popString();
+	string c = S->popString();
+	string b = S->popString();
+	string a = S->popString();
 	if(c == "true" || atof(c.c_str()))
 		S->mystack->push(a);
 	else
@@ -351,7 +351,7 @@ void menutils_Select(StreamInteractor* S) {
 void menutils_Exec(StreamInteractor* S) {
 	if(!S->menutils_CheckStackSize(1))
 		return;
-	std::vector<std::string> v = split(S->popString());
+	vector<string> v = split(S->popString());
 	while(v.size()) {
 		S->mydeque->push_front(v.back());
 		v.pop_back();

@@ -5,6 +5,10 @@
 #include <vector>
 #include <string>
 
+using std::string;
+using std::vector;
+using std::map;
+
 /// wrapper for multimap<std::string,std::string> with useful functions
 class Stringmap {
 public:
@@ -22,25 +26,25 @@ public:
     /// insert key/(double)value
     void insert(const std::string& str, double d);
     /// retrieve key values
-    std::vector<std::string> retrieve(const std::string& str) const;
+    vector<string> retrieve(const std::string& str) const;
     /// get first key value (string) or default
-    std::string getDefault(const std::string& str, const std::string& d) const;
+    string getDefault(const std::string& str, const std::string& d) const;
     /// return number of elements
     unsigned int size() const { return dat.size(); }
     /// return count of entries with key
     unsigned int count(const std::string& str) const { return dat.count(str); }
     /// serialize to a string
-    std::string toString() const;
+    string toString() const;
     
     /// get first key value (double) or default
     double getDefault(const std::string& str, double d) const;
     /// retrieve key values as doubles
-    std::vector<double> retrieveDouble(const std::string& str) const;
+    vector<double> retrieveDouble(const std::string& str) const;
     /// remove a key
     void erase(const std::string& str);
     
     /// display to screen
-    void display(std::string linepfx = "") const;
+    void display(string linepfx = "") const;
     
     /// merge data from another stringmap
     void operator+=(const Stringmap& S) { S.mergeInto(*this); }
@@ -48,7 +52,7 @@ public:
     /// convert to RData format
     //RData* toRData() const;
     
-    std::multimap< std::string, std::string > dat;	//< key-value multimap
+    std::multimap< std::string, string > dat;	//< key-value multimap
     
 protected:
     
@@ -77,7 +81,7 @@ public:
     }
     
     /// display
-    void display(std::string linepfx = "") const { toStringmap().display(linepfx); }
+    void display(string linepfx = "") const { toStringmap().display(linepfx); }
     
 protected:
     Stringmap Sxtra;
@@ -96,26 +100,26 @@ public:
     /// remove a key
     void erase(const std::string& str);
     /// retrieve values for key
-    std::vector<Stringmap> retrieve(const std::string& s) const;
+    vector<Stringmap> retrieve(const std::string& s) const;
     /// retrieve first value for key
     Stringmap getFirst(const std::string& str, const Stringmap& dflt = Stringmap()) const;
     /// retrieve all sub-key values
-    std::vector<std::string> retrieve(const std::string& k1, const std::string& k2) const;
+    vector<string> retrieve(const std::string& k1, const std::string& k2) const;
     /// retreive sub-key with default
-    std::string getDefault(const std::string& k1, const std::string& k2, const std::string& d) const;
+    string getDefault(const std::string& k1, const std::string& k2, const std::string& d) const;
     /// retrieve sub-key as double with default
     double getDefault(const std::string& k1, const std::string& k2, double d) const;
     /// retrieve all sub-key values as doubles
-    std::vector<double> retrieveDouble(const std::string& k1, const std::string& k2) const;	
+    vector<double> retrieveDouble(const std::string& k1, const std::string& k2) const;	
     /// return number of elements
     unsigned int size() const { return dat.size(); }
     /// transfer all data for given key from other QFile
     void transfer(const QFile& Q, const std::string& k);
     
     /// set output file location
-    void setOutfile(std::string fnm) { name = fnm; }
+    void setOutfile(string fnm) { name = fnm; }
     /// commit data to file
-    void commit(std::string outname = "") const;
+    void commit(string outname = "") const;
     /// display to stdout
     void display() const;
     
@@ -123,7 +127,7 @@ public:
     
 protected:
     
-    std::string name;                                   ///< name for this object
+    string name;                                   ///< name for this object
     std::multimap< std::string, Stringmap > dat;        ///< key-value multimap
     
 };

@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     
     if(series < 0) {
         series = -series;
-        std::string wbname = "Series_"+itos(series);
+        string wbname = "Series_"+itos(series);
         WishboneAnalyzer WA(&OM, wbname, OM.basePath+"/"+wbname+"/"+wbname);
         WA.makeOutput();
         return 0;

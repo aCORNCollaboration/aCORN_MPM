@@ -4,13 +4,13 @@
 
 bool yrevsort(std::pair<float,float> a, std::pair<float,float> b) { return (b.second < a.second); }
 
-std::vector<TSpectrumPeak> tspectrumSearch(TH1* hin, float sigma, float thresh) {
+vector<TSpectrumPeak> tspectrumSearch(TH1* hin, float sigma, float thresh) {
 	TSpectrum* TS = new TSpectrum();
 	int npks = TS->Search(hin,sigma,"",thresh);
 	if(npks<0)
 		npks = 0;
 	
-	std::vector<TSpectrumPeak> vx;
+	vector<TSpectrumPeak> vx;
 	return vx;
 }
 
@@ -20,7 +20,7 @@ typedef Double_t TSpectrum_Data_t;
 typedef Float_t TSpectrum_Data_t;
 #endif
 
-std::vector<float> tspectrumSearch(TH1* hin, TH1** hout, float sigma, float thresh) {
+vector<float> tspectrumSearch(TH1* hin, TH1** hout, float sigma, float thresh) {
 	
 	// temporary data arrays
 	unsigned int nbins = hin->GetNbinsX();
@@ -36,8 +36,8 @@ std::vector<float> tspectrumSearch(TH1* hin, TH1** hout, float sigma, float thre
 		npks = 0;
 	
 	// output peak positions vector
-	std::vector<float> vx;
-	std::vector< std::pair<float,float> > fndpks;
+	vector<float> vx;
+	vector< std::pair<float,float> > fndpks;
 	for(int i=0; i<npks; i++) {
 		float binpos = TS->GetPositionX()[i];
 		fndpks.push_back(std::make_pair(binterpolate(hin->GetXaxis(),binpos),datout[int(binpos+0.5)]));
@@ -64,7 +64,7 @@ std::vector<float> tspectrumSearch(TH1* hin, TH1** hout, float sigma, float thre
 	return vx;
 }
 
-std::vector<SpectrumPeak> tspectrumPrefit(TH1* indat, float searchsigma, const std::vector<SpectrumPeak>& expectedPeaks,
+vector<SpectrumPeak> tspectrumPrefit(TH1* indat, float searchsigma, const vector<SpectrumPeak>& expectedPeaks,
 										  TH1*& htout, float pkMin, float pkMax) {
 	
 	// use TSpectrum peak fitting to find initial guesses for peak locations
@@ -73,16 +73,16 @@ std::vector<SpectrumPeak> tspectrumPrefit(TH1* indat, float searchsigma, const s
 		searchsigma *= 2./binsigma;
 		binsigma = 2.;
 	}
-	std::vector<float> tpks0 = tspectrumSearch(indat,&htout,binsigma,10.0);
+	vector<float> tpks0 = tspectrumSearch(indat,&htout,binsigma,10.0);
 	
 	// throw out out-of-range peaks
-	std::vector<float> tpks;
-	for(std::vector<float>::iterator it = tpks0.begin(); it != tpks0.end(); it++)
+	vector<float> tpks;
+	for(vector<float>::iterator it = tpks0.begin(); it != tpks0.end(); it++)
 		if(pkMin <= *it && *it <= pkMax)
 			tpks.push_back(*it);
 	
 	// limit to number of found peaks
-	std::vector<SpectrumPeak> foundPeaks = expectedPeaks;
+	vector<SpectrumPeak> foundPeaks = expectedPeaks;
 	if(tpks.size() < expectedPeaks.size()) {
 		foundPeaks.clear();
 		return foundPeaks;
@@ -92,7 +92,7 @@ std::vector<SpectrumPeak> tspectrumPrefit(TH1* indat, float searchsigma, const s
 	unsigned int npks = foundPeaks.size();
 	
 	// pre-fit the TSpectrum peak-by-peak to estimate MultiGaus parameters
-	std::vector<TF1> tspks;
+	vector<TF1> tspks;
 	for(unsigned int n=0; n<npks; n++) {
 		tspks.push_back(TF1("PeakFit","gaus",tpks[n]-searchsigma,tpks[n]+searchsigma));
 		tspks.back().SetParameter(0,indat->GetBinContent(indat->FindBin(tpks[n])));
@@ -105,7 +105,7 @@ std::vector<SpectrumPeak> tspectrumPrefit(TH1* indat, float searchsigma, const s
 	return foundPeaks;
 }
 
-MultiGaus multiPeakFitter(TH1* indat, const std::vector<SpectrumPeak>& expectedPeaks, float nSigma) {
+MultiGaus multiPeakFitter(TH1* indat, const vector<SpectrumPeak>& expectedPeaks, float nSigma) {
 	unsigned int npks = expectedPeaks.size();
 	MultiGaus mg(npks,"SpectrumFitter",nSigma);	
 	for(unsigned int n=0; n<npks; n++) {
@@ -120,12 +120,12 @@ MultiGaus multiPeakFitter(TH1* indat, const std::vector<SpectrumPeak>& expectedP
 	return mg;
 }
 
-std::vector<SpectrumPeak> fancyMultiFit(TH1* indat, float searchsigma, const std::vector<SpectrumPeak>& expectedPeaks,
+vector<SpectrumPeak> fancyMultiFit(TH1* indat, float searchsigma, const vector<SpectrumPeak>& expectedPeaks,
 										bool bgsubtract, const std::string& drawName, float nSigma, float pkMin, float pkMax) {
 	
 	// use TSpectrum peak fitting to find initial guesses for peak locations
 	TH1* htout;
-	std::vector<SpectrumPeak> foundPeaks = tspectrumPrefit(indat, searchsigma, expectedPeaks, htout, pkMin, pkMax);
+	vector<SpectrumPeak> foundPeaks = tspectrumPrefit(indat, searchsigma, expectedPeaks, htout, pkMin, pkMax);
 	
 	if(bgsubtract) {
 		TH1F* bgspec = (TH1F*)TSpectrum().Background(indat);

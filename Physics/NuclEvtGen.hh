@@ -33,7 +33,7 @@ public:
     void scale(double s);
     
 protected:
-    std::vector<double> cumprob;        ///< cumulative probabilites
+    vector<double> cumprob;        ///< cumulative probabilites
 };
 
 /// generate an isotropic random direction, from optional random in [0,1]^2
@@ -49,13 +49,13 @@ public:
     /// scale probabilities
     void scale(double s) { fluxIn *= s; fluxOut *= s; }
     
-    std::string name;   ///< name for this level
+    string name;   ///< name for this level
     unsigned int A;     ///< nucleus A
     unsigned int Z;     ///< nucleus Z
     unsigned int n;     ///< level number
     double E;           ///< energy
     double hl;          ///< half-life
-    std::string jpi;    ///< spin/parity
+    string jpi;    ///< spin/parity
     double fluxIn;      ///< net flux into level
     double fluxOut;     ///< net flux out of level
 };
@@ -71,7 +71,7 @@ enum DecayType {
 };
 
 /// string name of particle types
-std::string particleName(DecayType t);
+string particleName(DecayType t);
 /// decay type from particle name
 DecayType particleType(const std::string& s);
 
@@ -101,7 +101,7 @@ public:
     /// load Auger data from Stringmap
     void load(const Stringmap& m);
     /// generate Auger K probabilistically
-    void genAuger(std::vector<NucDecayEvent>& v);
+    void genAuger(vector<NucDecayEvent>& v);
     /// display info
     void display(bool verbose = false) const;
     
@@ -125,7 +125,7 @@ public:
     virtual void display(bool verbose = false) const;
     
     /// select transition outcome
-    virtual void run(std::vector<NucDecayEvent>&, double* = NULL) { }
+    virtual void run(vector<NucDecayEvent>&, double* = NULL) { }
     
     /// return number of continuous degrees of freedom needed to specify transition
     virtual unsigned int getNDF() const { return 2; }
@@ -151,7 +151,7 @@ public:
     /// constructor
     ConversionGamma(NucLevel& f, NucLevel& t, const Stringmap& m);
     /// select transition outcome
-    virtual void run(std::vector<NucDecayEvent>& v, double* rnd = NULL);
+    virtual void run(vector<NucDecayEvent>& v, double* rnd = NULL);
     /// display transition line info
     virtual void display(bool verbose = false) const;
     /// get total conversion efficiency
@@ -174,8 +174,8 @@ public:
     
 protected:
     PSelector shells;                   ///< conversion electron shells
-    std::vector<float> shellUncert;     ///< uncertainty on shell selection probability
-    std::vector<PSelector> subshells;   ///< subshell choices for each shell
+    vector<float> shellUncert;     ///< uncertainty on shell selection probability
+    vector<PSelector> subshells;   ///< subshell choices for each shell
 };
 
 /// electron capture transitions
@@ -184,7 +184,7 @@ public:
     /// constructor
     ECapture(NucLevel& f, NucLevel& t): TransitionBase(f,t) {}
     /// select transition outcome
-    virtual void run(std::vector<NucDecayEvent>&, double* rnd = NULL);
+    virtual void run(vector<NucDecayEvent>&, double* rnd = NULL);
     /// display transition line info
     virtual void display(bool verbose = false) const { printf("Ecapture "); TransitionBase::display(verbose); }
     /// get probability of removing an electron from a given shell
@@ -206,7 +206,7 @@ public:
     /// destructor
     ~BetaDecayTrans();
     /// select transition outcome
-    virtual void run(std::vector<NucDecayEvent>& v, double* rnd = NULL);
+    virtual void run(vector<NucDecayEvent>& v, double* rnd = NULL);
     /// display transition line info
     virtual void display(bool verbose = false) const { printf("Beta(%.1f) ",from.E-to.E); TransitionBase::display(verbose); }
     
@@ -241,7 +241,7 @@ public:
     /// display list of atoms
     void displayAtoms(bool verbose = false) const;
     /// generate a chain of decay events starting from level n
-    void genDecayChain(std::vector<NucDecayEvent>& v, double* rnd = NULL, unsigned int n = UINT_MAX);
+    void genDecayChain(vector<NucDecayEvent>& v, double* rnd = NULL, unsigned int n = UINT_MAX);
     /// rescale all probabilities
     void scale(double s);
     
@@ -249,7 +249,7 @@ public:
     unsigned int getNDF(unsigned int n = UINT_MAX) const;
     
     /// LaTeX name for generator
-    std::string fancyname;
+    string fancyname;
     
 protected:
     /// get index for named level
@@ -261,14 +261,14 @@ protected:
     
     BindingEnergyLibrary const&  BEL;                           ///< electron binding energy info
     double tcut;
-    std::vector<NucLevel> levels;                               ///< levels, enumerated
-    std::map<std::string,unsigned int> levelIndex;              ///< energy levels by name
+    vector<NucLevel> levels;                               ///< levels, enumerated
+    map<std::string,unsigned int> levelIndex;              ///< energy levels by name
     PSelector lStart;                                           ///< selector for starting level (for breaking up long decays)
-    std::vector<PSelector> levelDecays;                         ///< probabilities for transitions from each level
-    std::map<unsigned int, DecayAtom*> atoms;                   ///< atom information
-    std::vector<TransitionBase*> transitions;                   ///< transitions, enumerated
-    std::vector< std::vector<TransitionBase*> > transIn;        ///< transitions into each level
-    std::vector< std::vector<TransitionBase*> > transOut;       ///< transitions out of each level
+    vector<PSelector> levelDecays;                         ///< probabilities for transitions from each level
+    map<unsigned int, DecayAtom*> atoms;                   ///< atom information
+    vector<TransitionBase*> transitions;                   ///< transitions, enumerated
+    vector< vector<TransitionBase*> > transIn;        ///< transitions into each level
+    vector< vector<TransitionBase*> > transOut;       ///< transitions out of each level
 };
 
 /// manager for loading decay event generators
@@ -283,13 +283,13 @@ public:
     /// get decay generator by name
     NucDecaySystem& getGenerator(const std::string& nm);
     
-    std::string datpath;        ///< path to data folder
+    string datpath;        ///< path to data folder
     double tcut;                ///< event generator default cutoff time
     BindingEnergyLibrary  BEL;  ///< electron binding energy info
     
 protected:
-    std::map<std::string,NucDecaySystem*> NDs;  ///< loaded decay systems
-    std::set<std::string> cantdothis;           ///< list of decay systems that can't be loaded
+    map<std::string,NucDecaySystem*> NDs;  ///< loaded decay systems
+    std::set<string> cantdothis;           ///< list of decay systems that can't be loaded
 };
 
 /// class for throwing from large list of gammas
@@ -300,9 +300,9 @@ public:
     /// get total cross section
     double getCrossSection() const { return gammaProb.getCumProb(); }
     /// generate cluster of gamma decays
-    void genDecays(std::vector<NucDecayEvent>& v, double n = 1.0);
+    void genDecays(vector<NucDecayEvent>& v, double n = 1.0);
 protected:
-    std::vector<double> gammaE;         ///< gamma energies
+    vector<double> gammaE;         ///< gamma energies
     PSelector gammaProb;                ///< gamma probabilities selector
 };
 
@@ -371,7 +371,7 @@ public:
     /// add a file to the TChain
     virtual int addFile(const std::string& filename);
     /// load next event into vector; return number of primaries
-    unsigned int loadEvt(std::vector<NucDecayEvent>& v);
+    unsigned int loadEvt(vector<NucDecayEvent>& v);
     
     bool firstpass;     ///< whether read is on first pass through data
     

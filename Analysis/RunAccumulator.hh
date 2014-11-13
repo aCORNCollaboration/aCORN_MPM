@@ -26,7 +26,7 @@ public:
     virtual void scaleData(double s);
         
     /// write to QFile
-    virtual void write(std::string outName = "");
+    virtual void write(string outName = "");
         
     /// fill data from a BaseDataScanner
     virtual void loadProcessedData(BaseDataScanner& BDS);
@@ -60,7 +60,7 @@ public:
     TH1* hToRate(TH1* h, int scaleAxes);
     
 protected:
-    std::map<std::string,AnalyzerPlugin*> myPlugins;        ///< analysis plugins
+    map<std::string,AnalyzerPlugin*> myPlugins;        ///< analysis plugins
 };
 
 /// generic analyzer plug-in class
@@ -76,9 +76,9 @@ public:
         /// create or load a stored histogram from template
         TH1* registerHist(const std::string& nm, const TH1& hTemplate);
         /// save canvas image
-        void printCanvas(std::string fname, std::string suffix=".pdf") const { myA->printCanvas(fname,suffix); }
+        void printCanvas(string fname, string suffix=".pdf") const { myA->printCanvas(fname,suffix); }
         
-        std::string name;       ///< plugin name
+        string name;       ///< plugin name
         RunAccumulator* myA;    ///< RunAccumulator with which this plugin is associated
         
         /// virtual routine for filling core histograms from data point

@@ -9,49 +9,52 @@
 #include <cctype>
 #include <algorithm>
 
+using std::string;
+using std::vector;
+
 /// convert a double to a string
-std::string dtos(double d);
+string dtos(double d);
 /// convert an int to a string
-std::string itos(int i);
+string itos(int i);
 /// small integer to roman numerals string
-std::string itosRN(int i);
+string itosRN(int i);
 
 /// convert a vector of doubles to a string list
-std::string vtos(const double* st, const double* en, std::string sep = ",");
+string vtos(const double* st, const double* en, string sep = ",");
 /// convert a vector of doubles to a string list
-std::string vtos(const std::vector<double>& ds,std::string sep = ",");
+string vtos(const vector<double>& ds,string sep = ",");
 /// convert a vector of floats to a string list
-std::string vtos(const float* st, const float* en, std::string sep = ",");
+string vtos(const float* st, const float* en, string sep = ",");
 /// convert a vector of doubles to a string list
-std::string vtos(const std::vector<float>& ds,std::string sep = ",");
+string vtos(const vector<float>& ds,string sep = ",");
 /// convert a vector of ints to a string list
-std::string vtos(const int* st, const int* en, std::string sep = ",");
+string vtos(const int* st, const int* en, string sep = ",");
 /// convert a vector of ints to a string list
-std::string vtos(const std::vector<int>& ds,std::string sep = ",") ;
+string vtos(const vector<int>& ds,string sep = ",") ;
 
 /// convert a char to a string
-std::string ctos(char c);
+string ctos(char c);
 /// convert a string to lowercase
-std::string lower(std::string s);
+string lower(string s);
 /// convert a string to uppercase
-std::string upper(std::string s);
+string upper(string s);
 /// replace all of one character in a string with another
-std::string replace(std::string str, char o, char n);
+string replace(string str, char o, char n);
 /// check whether string a begins with string b
 bool startsWith(const std::string& a, const std::string& b);
 /// split a string into substrings on given split characters
-std::vector<std::string> split(const std::string& str, const std::string splitchars = " \t\r\n");
+vector<string> split(const std::string& str, const string splitchars = " \t\r\n");
 /// join a list of strings into a single string
-std::string join(const std::vector<std::string>& ss, const std::string& sep = " ");
+string join(const vector<string>& ss, const std::string& sep = " ");
 /// strip junk chars off start and end of string
-std::string strip(const std::string& str, const std::string stripchars = " \t\r\n");
+string strip(const std::string& str, const string stripchars = " \t\r\n");
 /// split a string into a vector of doubles
-std::vector<double> sToDoubles(const std::string& str, const std::string splitchars = ", \t\r\n");
+vector<double> sToDoubles(const std::string& str, const string splitchars = ", \t\r\n");
 /// split a string into a vector of floats
-std::vector<float> sToFloats(const std::string& str, const std::string splitchars = ", \t\r\n");
+vector<float> sToFloats(const std::string& str, const string splitchars = ", \t\r\n");
 /// split a string into a vector of ints
-std::vector<int> sToInts(const std::string& str, const std::string splitchars = ", \t\r\n");
+vector<int> sToInts(const std::string& str, const string splitchars = ", \t\r\n");
 /// read in an array from a file
-std::vector< std::vector<float> > readArray(std::ifstream& fin, unsigned int minitems = 1, const std::string splitchars = ", \t\r\n");
+vector< vector<float> > readArray(std::ifstream& fin, unsigned int minitems = 1, const string splitchars = ", \t\r\n");
 
 #endif

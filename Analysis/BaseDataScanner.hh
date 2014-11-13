@@ -66,7 +66,7 @@ public:
     const AcornCalibrator* getCal() const { return currentCal; }
    
 protected:
-    std::map<RunID, AcornCalibrator*> cals;     ///< calibrators for each run
+    map<RunID, AcornCalibrator*> cals;     ///< calibrators for each run
     AcornCalibrator* currentCal;                ///< calibrator for current run
                              
     /// at run load time, figure out run total time

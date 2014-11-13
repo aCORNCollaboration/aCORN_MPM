@@ -30,7 +30,7 @@ public:
     /// get count for given item
     double operator[](const T& itm) const;
     
-    std::map<T,double> counts;  ///< counts per object
+    map<T,double> counts;  ///< counts per object
 };
 
 template<typename T>
@@ -40,21 +40,21 @@ void TagCounter<T>::add(const T& itm, double c) {
 
 template<typename T>
 void TagCounter<T>::operator+=(const TagCounter<T>& c) {
-    for(typename std::map<T,double>::const_iterator it = c.counts.begin(); it != c.counts.end(); it++)
+    for(typename map<T,double>::const_iterator it = c.counts.begin(); it != c.counts.end(); it++)
         add(it->first,it->second);
 }
 
 template<typename T>
 void TagCounter<T>::scale(double s) {
     if(s==1) return;
-    for(typename std::map<T,double>::iterator it = counts.begin(); it != counts.end(); it++)
+    for(typename map<T,double>::iterator it = counts.begin(); it != counts.end(); it++)
         it->second *= s;
 }
 
 template<typename T>
 Stringmap TagCounter<T>::toStringmap() {
     Stringmap m;
-    for(typename std::map<T,double>::const_iterator it = counts.begin(); it != counts.end(); it++) {
+    for(typename map<T,double>::const_iterator it = counts.begin(); it != counts.end(); it++) {
         std::ostringstream s;
         s << (*it).first;
         m.insert(s.str(),dtos(it->second));
@@ -65,14 +65,14 @@ Stringmap TagCounter<T>::toStringmap() {
 template<typename T>
 double TagCounter<T>::total() const {
     double d = 0;
-    for(typename std::map<T,double>::const_iterator it = counts.begin(); it != counts.end(); it++)
+    for(typename map<T,double>::const_iterator it = counts.begin(); it != counts.end(); it++)
         d += it->second;
     return d;
 }
 
 template<typename T>
 double TagCounter<T>::operator[](const T& itm) const {
-    typename std::map<T,double>::const_iterator it = counts.find(itm);
+    typename map<T,double>::const_iterator it = counts.find(itm);
     if(it==counts.end()) return 0;
     return it->second;
 }

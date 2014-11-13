@@ -13,7 +13,7 @@ public:
 	/// destructor
 	~EnumerationFitter() { if(!fitter) delete fitter; }
 	/// add a fit terms set
-	void addTerm(const std::vector<double>& t);
+	void addTerm(const vector<double>& t);
 	/// fit evaluation from sum of terms
 	double Evaluate(double *x, double *p);
 	/// get number of fit parameters
@@ -25,7 +25,7 @@ public:
 	
 protected:
 	
-	std::vector< std::vector<double> > fterms;	//< fit term sets
+	vector< vector<double> > fterms;	//< fit term sets
 	TF1* fitter;								//< fitter based on these terms
 };
 

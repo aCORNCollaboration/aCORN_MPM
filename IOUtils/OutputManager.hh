@@ -17,22 +17,22 @@ public:
     virtual void writeItems() {
         printf("Saving registered objects...");
         fflush(stdout);
-        for(std::vector<TObject*>::iterator i = rootItems.begin(); i != rootItems.end(); i++)
+        for(vector<TObject*>::iterator i = rootItems.begin(); i != rootItems.end(); i++)
             (*i)->Write();
         printf(" Done.\n");
     }
     void clearItems() {
-        for(std::vector<TObject*>::iterator i = rootItems.begin(); i != rootItems.end(); i++)
+        for(vector<TObject*>::iterator i = rootItems.begin(); i != rootItems.end(); i++)
             delete(*i);
         rootItems.clear();
-        for(std::vector<TObject*>::iterator i = deleteItems.begin(); i != deleteItems.end(); i++)
+        for(vector<TObject*>::iterator i = deleteItems.begin(); i != deleteItems.end(); i++)
             delete(*i);
         deleteItems.clear();
     }
     /// register a root object for output (and eventual deletion)
     virtual TObject* addObject(TObject* o, bool noWrite=false) { if(noWrite) deleteItems.push_back(o); else rootItems.push_back(o); return o; }
-    std::vector<TObject*> rootItems;    ///< objects held until deleted
-    std::vector<TObject*> deleteItems;  ///< other objects never written to file
+    vector<TObject*> rootItems;    ///< objects held until deleted
+    vector<TObject*> deleteItems;  ///< other objects never written to file
 };
 
 /// indicator for level of problem with analysis
@@ -47,9 +47,9 @@ enum WarningLevel {
 class OutputManager: public TObjCollector {
 public:
     /// constructor for top-level
-    OutputManager(std::string nm, std::string bp);
+    OutputManager(string nm, string bp);
     /// constructor for nested
-    OutputManager(std::string nm, OutputManager* pnt);
+    OutputManager(string nm, OutputManager* pnt);
     
     /// destructor
     virtual ~OutputManager() {
@@ -60,17 +60,17 @@ public:
     }
     
     /// generate a TH1F registered with this runs output objects list
-    TH1F* registeredTH1F(std::string hname, std::string htitle, unsigned int nbins, float x0, float x1);
+    TH1F* registeredTH1F(string hname, string htitle, unsigned int nbins, float x0, float x1);
     /// generate a TH2F registered with this runs output objects list
-    TH2F* registeredTH2F(std::string hname, std::string htitle, unsigned int nbinsx, float x0, float x1, unsigned int nbinsy, float y0, float y1);
+    TH2F* registeredTH2F(string hname, string htitle, unsigned int nbinsx, float x0, float x1, unsigned int nbinsy, float y0, float y1);
     /// print current canvas
-    virtual void printCanvas(std::string fname, std::string suffix=".pdf") const;
+    virtual void printCanvas(string fname, string suffix=".pdf") const;
     
     /// put a data quality warning in the parent output file
-    void warn(WarningLevel l, std::string descrip, Stringmap M = Stringmap());
+    void warn(WarningLevel l, string descrip, Stringmap M = Stringmap());
     
     /// write output QFile
-    virtual void write(std::string outName = "");
+    virtual void write(string outName = "");
     /// open output ROOT file for writing (useful if output tree is being created and needs a home)
     void openOutfile();
     /// set whether to write ROOT output when destructed
@@ -80,11 +80,11 @@ public:
     TFile* rootOut;             ///< ROOT file output
     TCanvas* defaultCanvas;     ///< canvas for drawing plots
     OutputManager* parent;      ///< parent output manager
-    std::string basePath;       ///< general output path
-    std::string plotPath;       ///< specific output path for plots
-    std::string dataPath;       ///< specific output path for output data
-    std::string rootPath;       ///< specific output path for ROOT files
-    std::string name;           ///< name for this subsystem			
+    string basePath;       ///< general output path
+    string plotPath;       ///< specific output path for plots
+    string dataPath;       ///< specific output path for output data
+    string rootPath;       ///< specific output path for ROOT files
+    string name;           ///< name for this subsystem			
     bool writeRootOnDestruct;   ///< whether to write ROOT file when destructed
     
     static bool squelchAllPrinting;     ///< whether to cancel all printCanvas output
@@ -92,7 +92,7 @@ public:
 protected:
     
     /// set name of this detector
-    virtual void setName(std::string nm);
+    virtual void setName(string nm);
     /// write output ROOT file; WARNING: THIS DELETES ALL REGISTERED ITEMS; do last if you reference these.
     void writeROOT();
 };

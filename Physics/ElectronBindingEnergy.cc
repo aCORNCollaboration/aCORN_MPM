@@ -3,11 +3,11 @@
 #include "SMExcept.hh"
 #include <stdio.h>
 
-const std::string BindingEnergyTable::shellnames = "KLMNOPQRST";
+const string BindingEnergyTable::shellnames = "KLMNOPQRST";
 
 BindingEnergyTable::BindingEnergyTable(const Stringmap& m): Z(m.getDefault("Z",0)), nm(m.getDefault("name","")) {
 	for(unsigned int n=0; n<shellnames.size(); n++) {
-		std::vector<double> v;
+		vector<double> v;
 		for(unsigned int s=1; s<=9; s++) {
 			double b = m.getDefault(ctos(shellnames[n])+(n+s==1?"":itos(s)),0);
 			if(b) v.push_back(b/1000.0);
@@ -18,7 +18,7 @@ BindingEnergyTable::BindingEnergyTable(const Stringmap& m): Z(m.getDefault("Z",0
 	}	
 }
 
-const std::vector<double>& BindingEnergyTable::getShellBinding(unsigned int n) const {
+const vector<double>& BindingEnergyTable::getShellBinding(unsigned int n) const {
 	if(n>=eBinding.size()) {
 		SMExcept e("MissingShellInfo");
 		e.insert("Z",Z);
@@ -30,7 +30,7 @@ const std::vector<double>& BindingEnergyTable::getShellBinding(unsigned int n) c
 }
 
 double BindingEnergyTable::getSubshellBinding(unsigned int n, unsigned int m) const {
-	const std::vector<double>& v = getShellBinding(n);
+	const vector<double>& v = getShellBinding(n);
 	if(m>=v.size()) {
 		SMExcept e("MissingSubshellInfo");
 		e.insert("Z",Z);
@@ -55,18 +55,18 @@ void BindingEnergyTable::display() const {
 //----------------------------------------------
 
 BindingEnergyLibrary::BindingEnergyLibrary(const QFile& Q) {
-	std::vector<Stringmap> v = Q.retrieve("binding");
+	vector<Stringmap> v = Q.retrieve("binding");
 	for(unsigned int i=0; i<v.size(); i++)
 		tables.insert(std::pair<unsigned int,BindingEnergyTable*>(v[i].getDefault("Z",0),new BindingEnergyTable(v[i])));
 }
 
 BindingEnergyLibrary::~BindingEnergyLibrary() {
-	for(std::map<unsigned int,BindingEnergyTable*>::const_iterator it = tables.begin(); it != tables.end(); it++)
+	for(map<unsigned int,BindingEnergyTable*>::const_iterator it = tables.begin(); it != tables.end(); it++)
 		delete(it->second);
 }
 
 const BindingEnergyTable* BindingEnergyLibrary::getBindingTable(unsigned int Z) const {
-	std::map<unsigned int,BindingEnergyTable*>::const_iterator it =  tables.find(Z);
+	map<unsigned int,BindingEnergyTable*>::const_iterator it =  tables.find(Z);
 	if(it==tables.end()) {
 		SMExcept e("MissingElement");
 		e.insert("Z",Z);
@@ -76,7 +76,7 @@ const BindingEnergyTable* BindingEnergyLibrary::getBindingTable(unsigned int Z) 
 }
 
 void BindingEnergyLibrary::display() const {
-	for(std::map<unsigned int,BindingEnergyTable*>::const_iterator it = tables.begin(); it != tables.end(); it++)
+	for(map<unsigned int,BindingEnergyTable*>::const_iterator it = tables.begin(); it != tables.end(); it++)
 		it->second->display();
 }
 

@@ -11,7 +11,7 @@ SQLHelper::SQLHelper(const std::string& dbnm,
 					 unsigned int port,
 					 unsigned int ntries): db(NULL), res(NULL), dbName(dbnm) {
 	
-	std::string dbAddressFull = "mysql://"+dbAddress+":"+itos(port)+"/"+dbnm;
+	string dbAddressFull = "mysql://"+dbAddress+":"+itos(port)+"/"+dbnm;
 	
 	while(!db) {
 		ntries--;
@@ -56,7 +56,7 @@ void SQLHelper::Query() {
 	}
 }
 
-std::string SQLHelper::fieldAsString(TSQLRow* row, unsigned int fieldnum, const std::string& dflt) {
+string SQLHelper::fieldAsString(TSQLRow* row, unsigned int fieldnum, const std::string& dflt) {
 	smassert(row);
 	const char* s = row->GetField(fieldnum);
 	isNullResult = !s;
@@ -66,14 +66,14 @@ std::string SQLHelper::fieldAsString(TSQLRow* row, unsigned int fieldnum, const 
 }
 
 int SQLHelper::fieldAsInt(TSQLRow* row, unsigned int fieldnum, int dflt) {
-	std::string s = fieldAsString(row,fieldnum);
+	string s = fieldAsString(row,fieldnum);
 	if(isNullResult)
 		return dflt;
 	return atoi(s.c_str());
 }
 
 float SQLHelper::fieldAsFloat(TSQLRow* row, unsigned int fieldnum, float dflt) {
-	std::string s = fieldAsString(row,fieldnum);
+	string s = fieldAsString(row,fieldnum);
 	if(isNullResult)
 		return dflt;
 	return atof(s.c_str());
@@ -109,10 +109,10 @@ TSQLRow* SQLHelper::getFirst() {
 	return res->Next();
 }
 
-std::string sm2insert(const Stringmap& m) {
-	std::string svars = "(";
-	std::string svals = "VALUES (";
-	for(std::map<std::string,std::string>::const_iterator it = m.dat.begin(); it != m.dat.end(); it++) {
+string sm2insert(const Stringmap& m) {
+	string svars = "(";
+	string svals = "VALUES (";
+	for(map<std::string,std::string>::const_iterator it = m.dat.begin(); it != m.dat.end(); it++) {
 		if(it != m.dat.begin()) {
 			svars += ",";
 			svals += ",";

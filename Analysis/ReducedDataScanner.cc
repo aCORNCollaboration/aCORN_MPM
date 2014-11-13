@@ -53,7 +53,7 @@ void ReducedDataScanner::setWritepoints(TTree* T) {
     T->Branch("E_Max_PMT", &E_Max_PMT, "E_Max_PMT/S");
 }
 
-std::string ReducedDataScanner::locateRun(RunID r) {
+string ReducedDataScanner::locateRun(RunID r) {
     char fnm[1024];
     sprintf(fnm,"%s/s%ir%04i_red.root", getEnvSafe("ACORN_REDUCED_ROOT").c_str(), r.first, r.second);
     if(fileExists(fnm)) return fnm;

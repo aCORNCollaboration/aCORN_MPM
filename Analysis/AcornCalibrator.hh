@@ -22,8 +22,8 @@ protected:
     double slope;       ///< simple calibration slope
     double intercept;   ///< simple calibration intercept
     
-    std::vector<double> sigPerPE;       ///< energy resolution data
-    std::vector<double> sigPerMeV;      ///< gain calibration data
+    vector<double> sigPerPE;       ///< energy resolution data
+    vector<double> sigPerMeV;      ///< gain calibration data
     double PEPerMeV;                    ///< calibrated total PE per MeV
 };
 

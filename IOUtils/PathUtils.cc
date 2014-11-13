@@ -9,27 +9,27 @@
 #include <errno.h>
 #include <string.h>
 
-bool fileExists(std::string f) {
+bool fileExists(string f) {
 	return !system(("test -r '" + f + "'").c_str());
 }
 
-bool dirExists(std::string d) {
+bool dirExists(string d) {
 	return !system(("test -d '" + d + "'").c_str());
 }
 
-void makePath(std::string p, bool forFile) {
-	std::vector<std::string> pathels = split(p,"/");
+void makePath(string p, bool forFile) {
+	vector<string> pathels = split(p,"/");
 	if(forFile && pathels.size())
 		pathels.pop_back();
 	if(!pathels.size())
 		return;
-	std::string thepath;
+	string thepath;
 	if(p[0]=='/')
 		thepath += "/";
 	for(unsigned int i=0; i<pathels.size(); i++) {
 		thepath += pathels[i] + "/";
 		if(!dirExists(thepath)) {
-			std::string cmd = "mkdir -p '"+thepath+"'";
+			string cmd = "mkdir -p '"+thepath+"'";
 			int err = system(cmd.c_str());
 			if(err || !dirExists(thepath)) {
 				SMExcept e("badPath");
@@ -51,8 +51,8 @@ double fileAge(const std::string& fname) {
 	return timenow - attrib.st_mtime;
 }
 
-std::vector<std::string> listdir(const std::string& dir, bool includeHidden) {
-	std::vector<std::string> dirs;
+vector<string> listdir(const std::string& dir, bool includeHidden) {
+	vector<string> dirs;
 	dirent* entry;
 	DIR* dp = opendir(dir.c_str());
 	if (dp == NULL)
@@ -65,7 +65,7 @@ std::vector<std::string> listdir(const std::string& dir, bool includeHidden) {
 	return dirs;
 }
 
-std::string getEnvSafe(const std::string& v, const std::string& dflt) {
+string getEnvSafe(const std::string& v, const std::string& dflt) {
 	const char* envv = getenv(v.c_str());
 	if(!envv) {
 		if(dflt == "FAIL_IF_MISSING") {

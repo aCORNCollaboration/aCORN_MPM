@@ -19,7 +19,8 @@ SourceCalPlugin::SourceCalPlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"SourceC
 }
 
 void SourceCalPlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
-    if(PDS.Pos.r2() > 0.5*0.5) return;
+    if(PDS.Pos.r2() > 0.5*0.5) return;  // position cut... background exclusion
+    if(PDS.nV > 0) return;              // omit backscatter events
     hEnergy->Fill(PDS.E_recon, weight);
     hEnergyRecal->Fill(PDS.getCal()->calEnergy(PDS.E_PMT + N_V_PMT),weight);
     if(850 < PDS.E_recon && PDS.E_recon < 1200) {

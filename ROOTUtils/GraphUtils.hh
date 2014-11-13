@@ -34,13 +34,13 @@ TH1F* cumulativeHist(const TH1F& h, bool normalize = false);
 TGraph* invertGraph(const TGraph* g);
 
 /// combine a list of TGraphs
-TGraph* combine_graphs(const std::vector<TGraph*> gs);
+TGraph* combine_graphs(const vector<TGraph*> gs);
 
 /// merge a list of TGrapherrors into a larger TGraphError, offsetting x values by given offsets
-TGraphErrors* merge_plots(const std::vector<TGraphErrors*>& pin, const std::vector<int>& toffset);
+TGraphErrors* merge_plots(const vector<TGraphErrors*>& pin, const vector<int>& toffset);
 
 /// draw several graphs on the same canvas
-void drawTogether(std::vector<TGraphErrors*>& gs, float ymin, float ymax, TCanvas* C, const char* outname, const char* graphTitle);
+void drawTogether(vector<TGraphErrors*>& gs, float ymin, float ymax, TCanvas* C, const char* outname, const char* graphTitle);
 
 /// find transform curve to match two histograms
 TGraph* matchHistoShapes(const TH1F& h1, const TH1F& h2);
@@ -67,13 +67,13 @@ double invCDF(TH1* h, double p);
 void fixNaNs(TH1* h);
 	
 /// slice a TH3 into a stack of TH2Fs
-std::vector<TH2F*> sliceTH3(const TH3& h3, AxisDirection d = Z_DIRECTION);
+vector<TH2F*> sliceTH3(const TH3& h3, AxisDirection d = Z_DIRECTION);
 
 /// slice a TH2 into a stack of TH1Fs
-std::vector<TH1F*> sliceTH2(const TH2& h2, AxisDirection d, bool includeOverflow = false);
+vector<TH1F*> sliceTH2(const TH2& h2, AxisDirection d, bool includeOverflow = false);
 
 /// split a list of counts into approximately equal segments
-std::vector<unsigned int> equipartition(const std::vector<float>& elems, unsigned int n);
+vector<unsigned int> equipartition(const vector<float>& elems, unsigned int n);
 
 /// project a TH2 onto an arbitrary line
 TH1* projectTH2(const TH2& h, double nb, double cx, double cy);
