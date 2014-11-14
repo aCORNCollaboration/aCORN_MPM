@@ -1,4 +1,5 @@
 #include "MultiGaus.hh"
+#include "SMExcept.hh"
 
 MultiGaus::~MultiGaus() { 
     delete(iguess);
@@ -25,6 +26,22 @@ double MultiGaus::getParError(unsigned int n) const {
 
 float_err MultiGaus::getPar(unsigned int n) const {
     return float_err(getParameter(n),getParError(n));
+}
+
+void MultiGaus::fitEstimate(TH1* h, unsigned int n) {
+    if(n>=npks) {
+        for(unsigned int i=0; i<npks; i++) fitEstimate(h,i);
+        return;
+    }
+    TF1 fGaus("fGausEst", "gaus", iguess[3*n+1]-iguess[3*n+2], iguess[3*n+1]+iguess[3*n+2]);
+    h->Fit(&fGaus,"QNR");
+    for(int i=0; i<3; i++) iguess[3*n+i] = fGaus.GetParameter(i);
+}
+
+void MultiGaus::setCenterSigma(unsigned int n, double c, double s) {
+    if(n>=npks) return;
+    setParameter(3*n+1, c);
+    setParameter(3*n+2, s);
 }
 
 TF1* MultiGaus::getFitter() {
@@ -58,6 +75,14 @@ void MultiGaus::fit(TH1* h, bool draw) {
     }
 }
 
+void MultiGaus::display() const {
+    for(unsigned int i=0; i<npks; i++) {
+        printf("[%u]\tc,s = %g(%g) +- %g(%g)\th = %g(%g)\n", i,
+            getParameter(3*i+1), getParError(3*i+1),
+            getParameter(3*i+2), getParError(3*i+2),
+            getParameter(3*i+0), getParError(3*i+0));
+    }
+}
 
 void MultiGaus::addCorrelated(unsigned int n, double relCenter, double relHeight, double relWidth) {
     smassert(n<npks);

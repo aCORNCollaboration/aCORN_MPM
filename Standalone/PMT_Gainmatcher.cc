@@ -74,38 +74,65 @@ void PluginInterpolator::interpolate(RunAccumulator* RA) const {
     }
 }
 
+
+
+class SourceRunSubtracter: public OutputManager, public PluginInterpolator {
+public:
+    SourceRunSubtracter(): OutputManager("Source_Calibrations",getEnvSafe("ACORN_SUMMARY")) {
+        gStyle->SetOptStat("");
+        defaultCanvas->SetLogy(true);
+        defaultCanvas->SetLeftMargin(0.14);
+    }
+    
+    void addBackgroundSegment(const vector<RunID>& rns) {
+        SourceCalAnalyzer* SCAbg = new SourceCalAnalyzer(this);
+        ReducedDataScanner Rb(false);
+        Rb.addRuns(rns);
+        SCAbg->loadProcessedData(Rb);
+        rundat.push_back(SCAbg);
+    }
+    
+    void analyzeForeground(const vector<RunID>& rns, const string& snm) {
+        printf("Loading foreground data...\n");
+        ReducedDataScanner Rf(false);
+        Rf.addRuns(rns);
+        SourceCalAnalyzer SCAfg(this);
+        SCAfg.loadProcessedData(Rf);
+        SCAfg.name += "_"+snm;
+        SCAfg.mySourceCalPlugin->srcName = snm;
+        
+        printf("Interpolating background region...\n");
+        SourceCalAnalyzer* SCAInterp = dynamic_cast<SourceCalAnalyzer*>(SCAfg.makeAnalyzer("interp_bg_"+snm, ""));
+        SCAInterp->addSegment(SCAfg);
+        interpolate(SCAInterp);
+        
+        SCAfg.mySourceCalPlugin->bgSubtrPlots(*SCAInterp->mySourceCalPlugin);
+        SCAfg.setWriteRoot(true);
+    }
+
+};
+
+
 void bg_subtraction_study() {
     
-    OutputManager OM("Bi_PMT_Gain",getEnvSafe("ACORN_SUMMARY"));
-    gStyle->SetOptStat("");
-    OM.defaultCanvas->SetLogy(true);
-    OM.defaultCanvas->SetLeftMargin(0.14);
+    SourceRunSubtracter SRS;
     
     printf("Generating background estimate...\n");
-    PluginInterpolator PI;
-    SourceCalAnalyzer* SCAbg[3];
+
     for(unsigned int i=0; i<3; i++) {
-        SCAbg[i] = new SourceCalAnalyzer(&OM);
-        ReducedDataScanner Rb(false);
-        for(int j=0; j<4; j++) Rb.addRun(RunID(1326+2*i,j));
-        SCAbg[i]->loadProcessedData(Rb);
-        PI.rundat.push_back(SCAbg[i]);
+        vector<RunID> bgruns;
+        for(int j=0; j<4; j++) bgruns.push_back(RunID(1326+2*i,j));
+        SRS.addBackgroundSegment(bgruns);
     }
-    PI.fit();
-       
-    printf("Loading foreground data...\n");
-    ReducedDataScanner Rf(false);
-    for(int j=0; j<12; j++) Rf.addRun(RunID(1327,j));
-    SourceCalAnalyzer SCAfg(&OM);
-    SCAfg.loadProcessedData(Rf);
+    SRS.fit();
     
-    printf("Interpolating background region...\n");
-    SourceCalAnalyzer* SCAInterp = dynamic_cast<SourceCalAnalyzer*>(SCAfg.makeAnalyzer("interp_bg",""));
-    SCAInterp->addSegment(SCAfg);
-    PI.interpolate(SCAInterp);
+    vector<RunID> fgruns;
+    for(int j=0; j<12; j++) fgruns.push_back(RunID(1327,j));
+    SRS.analyzeForeground(fgruns,"Bi207");
     
-    SCAfg.mySourceCalPlugin->bgSubtrPlots(*SCAInterp->mySourceCalPlugin);
-    SCAfg.setWriteRoot(true);
+    fgruns.clear();
+    for(int j=0; j<10; j++) fgruns.push_back(RunID(1329,j));
+    SRS.analyzeForeground(fgruns,"Sn113");
 }
 
 int main(int, char**) {

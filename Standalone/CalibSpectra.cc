@@ -3,6 +3,7 @@
 #include "SourceCalPlugin.hh"
 #include "PathUtils.hh"
 #include "strutils.hh"
+#include "MultiGaus.hh"
 
 #include <cmath>
 #include <map>
@@ -16,6 +17,20 @@ using namespace ROOT::Math;
 using std::vector;
 using std::pair;
 using std::map;
+
+/// fitter appropriate for source type
+MultiGaus* getFitter(const std::string& sname) {
+    MultiGaus* m = NULL;
+    if(sname == "Bi207") {
+        m = new MultiGaus(2,sname,1.5);
+        m->setCenterSigma(0, 500, 75);
+        m->setCenterSigma(1, 1000, 100);
+    } else if(sname == "Sn113") {
+        m = new MultiGaus(1, sname, 1.5);
+        m->setCenterSigma(0, 375, 50);
+    }
+    return m;
+}
 
 /// simple calculations for electron survival through collimator
 class ElectronSurvival {
@@ -195,7 +210,7 @@ void gen_calib_spectra(const std::string& sname, TH1*& hInitEnergy, TH1*& hEnerg
 }
 
 // load calibration spectra from file
-void load_calib_spectra(const std::string& sname, TH1*& hInitEnergy, TH1*& hEnergy, OutputManager* OM = NULL) {
+void load_calib_spectra(const string& sname, TH1*& hInitEnergy, TH1*& hEnergy, OutputManager* OM = NULL) {
     
     //TFile felectron((getEnvSafe("ACORN_MCOUT") + "/aCORN_" + sname + "_e_EM/Plots/aCORN_Scatter.root").c_str(),"READ");
     TFile felectron((getEnvSafe("PG4_OUTDIR") + "/aCORN_" + sname + "_e/Plots/aCORN_Scatter.root").c_str(),"READ");
@@ -228,16 +243,16 @@ void load_calib_spectra(const std::string& sname, TH1*& hInitEnergy, TH1*& hEner
 }
 
 // load data spectrum
-TH1* loadData() {
-    TFile f((getEnvSafe("ACORN_SUMMARY")+"SourceCal/SourceCal.root").c_str(),"READ");
+TH1* loadData(const string& snm) {
+    TFile f((getEnvSafe("ACORN_SUMMARY")+"SourceCal/SourceCal_"+snm+".root").c_str(),"READ");
     TH1* hdat = (TH1*)f.Get("hEnergy_Rate");
     assert(hdat);
     return hdat;
 }
 
-int main(int, char**) {
+int main(int argc, char** argv) {
     
-    const std::string& sname = "Bi207";
+    const string& sname = (argc>1)? argv[1] : "Bi207";
     
     OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Sim_"+sname+"/");
     gStyle->SetOptStat("");
@@ -250,7 +265,7 @@ int main(int, char**) {
     
     TH1F* hSmeared[2];
     for(int i=0; i<2; i++) {
-        hSmeared[i] = new TH1F(("hSmeared_"+itos(i)).c_str(), (sname + " PE-smeared energy").c_str(), 500, 0, 1500);
+        hSmeared[i] = new TH1F(("hSmeared_"+itos(i)).c_str(), (sname + " PE-smeared energy").c_str(), 500, 0, 2000);
         hSmeared[i]->GetXaxis()->SetTitle("Quenched Energy [keV]");
         hSmeared[i]->GetYaxis()->SetTitle("Counts / 1e6 decays");
         hSmeared[i]->GetYaxis()->SetTitleOffset(1.4);
@@ -258,27 +273,28 @@ int main(int, char**) {
     }
     
     QuenchCalculator QC;
-    poisson_smear(*hEnergy, *hSmeared[0], 0.23, &QC);
-    poisson_smear(*hEnergyGen, *hSmeared[1], 0.23, &QC);
+    poisson_smear(*hEnergy, *hSmeared[0], 0.30, &QC);
+    poisson_smear(*hEnergyGen, *hSmeared[1], 0.30, &QC);
     
-    TF1 fGaus("fGaus","gaus",900,1100);
-    TF1 fGausLo("fGausLo","gaus",425,575);
+    MultiGaus* mg = getFitter(sname);
+    mg->fitEstimate(hSmeared[1]);
     
-    printf("\n\n*** bare analytical ***\n\n");
-    hSmeared[1]->Fit(&fGausLo,"R");
-    hSmeared[1]->Fit(&fGaus,"R");
+    printf("\n\n*** bare analytical ***\n");
+    for(int i=0; i<3; i++) mg->fit(hSmeared[1], i==2);
+    mg->display();
     
-    printf("\n\n*** MC ***\n\n");
-    hSmeared[0]->Fit(&fGausLo,"R");
-    hSmeared[0]->Fit(&fGaus,"R");
-    double sim_height = fGaus.GetParameter(0);
+    printf("\n\n*** MC ***\n");
+    for(int i=0; i<3; i++) mg->fit(hSmeared[0], i==2);
+    mg->display();
+    double sim_height = mg->getParameter(3*(mg->npks-1));
     
-    TH1* hdat = loadData();
+    printf("\n\n*** Data ***\n");
+    TH1* hdat = loadData(sname);
     hdat->SetMinimum(0);
-    printf("\n\n*** Data ***\n\n");
-    hdat->Fit(&fGausLo,"R");
-    hdat->Fit(&fGaus,"R");
-    double dat_height = fGaus.GetParameter(0);
+    for(int i=0; i<3; i++) mg->fit(hdat, i==2);
+    mg->display();
+    double dat_height = mg->getParameter(3*(mg->npks-1));
+    hdat->GetXaxis()->SetRangeUser(0, sname == "Bi207"? 1400 : 500);
     hdat->Draw();
     for(int i=0; i<2; i++) {
         hSmeared[i]->Scale(dat_height/sim_height);
@@ -286,5 +302,7 @@ int main(int, char**) {
     }
     OM.printCanvas("DataComparison");
 
+    printf("\n\nDone.\n");
+    
     return 0;
 }

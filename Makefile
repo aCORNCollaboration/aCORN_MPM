@@ -43,7 +43,7 @@ IOUtils = ControlMenu.o OutputManager.o PathUtils.o QFile.o SMExcept.o strutils.
 
 Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o aSpectrum.o Collimator.o
 
-ROOTUtils = GraphUtils.o GraphicsUtils.o TChainScanner.o HistogramSequenceFitter.o
+ROOTUtils = GraphUtils.o GraphicsUtils.o TChainScanner.o HistogramSequenceFitter.o MultiGaus.o
 
 Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o AcornCalibrator.o AcornDB.o \
 	SegmentSaver.o RunAccumulator.o SourceCalPlugin.o WishbonePlugin.o Positioner.o
