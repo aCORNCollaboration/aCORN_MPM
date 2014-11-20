@@ -9,14 +9,10 @@ SHELL = /bin/sh
 .SUFFIXES:
 .SUFFIXES: .c .cc .cpp .o
 	 
-# compiler command to use
-CC = cc
-CXX = g++
-
-CFLAGS = -O3
+# compiler flags
 CXXFLAGS = -O3 --std=c++11 -fPIC `root-config --cflags` -I. -pedantic -Wall -Wextra \
 	-I${MPMUTILS}/GeneralUtils/ -I${MPMUTILS}/ROOTUtils/ \
-	-IIOUtils -IROOTUtils -IBaseTypes -IMathUtils -ICalibration -IAnalysis -IStudies -IPhysics
+	-IIOUtils -IROOTUtils -IBaseTypes -ICalibration -IAnalysis -IStudies -IPhysics
 LDFLAGS =  -L. -L${MPMUTILS}/GeneralUtils/ -L${MPMUTILS}/ROOTUtils/ \
 	-laCORN_MPM -lMPMGeneralUtils -lMPMROOTUtils -lSpectrum -lMLP `root-config --libs` -lMathMore
 
