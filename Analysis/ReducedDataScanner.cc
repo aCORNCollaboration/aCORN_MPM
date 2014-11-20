@@ -1,6 +1,6 @@
 #include "ReducedDataScanner.hh"
 #include "PathUtils.hh"
-#include "strutils.hh"
+#include "StringManip.hh"
 #include <stdio.h>
 
 void ReducedDataScanner::setReadpoints(TTree* T) {

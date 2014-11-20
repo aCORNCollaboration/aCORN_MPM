@@ -15,8 +15,10 @@ CXX = g++
 
 CFLAGS = -O3
 CXXFLAGS = -O3 --std=c++11 -fPIC `root-config --cflags` -I. -pedantic -Wall -Wextra \
+	-I${MPMUTILS}/GeneralUtils/ -I${MPMUTILS}/ROOTUtils/ \
 	-IIOUtils -IROOTUtils -IBaseTypes -IMathUtils -ICalibration -IAnalysis -IStudies -IPhysics
-LDFLAGS =  -L. -laCORN_MPM -lSpectrum -lMLP `root-config --libs` -lMathMore
+LDFLAGS =  -L. -L${MPMUTILS}/GeneralUtils/ -L${MPMUTILS}/ROOTUtils/ \
+	-laCORN_MPM -lMPMGeneralUtils -lMPMROOTUtils -lSpectrum -lMLP `root-config --libs` -lMathMore
 
 ifdef PROFILER_COMPILE
 	CXXFLAGS += -pg
@@ -37,18 +39,16 @@ endif
 
 VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/:BaseTypes/:Analysis/
 
-BaseTypes = TagCounter.o
+IOUtils = sqlite3.o
 
-IOUtils = ControlMenu.o OutputManager.o PathUtils.o QFile.o SMExcept.o strutils.o sqlite3.o
+Physics = BetaSpectrum.o ElectronBindingEnergy.o NuclEvtGen.o aSpectrum.o Collimator.o
 
-Physics = BetaSpectrum.o ElectronBindingEnergy.o FloatErr.o NuclEvtGen.o aSpectrum.o Collimator.o
-
-ROOTUtils = GraphUtils.o GraphicsUtils.o TChainScanner.o HistogramSequenceFitter.o MultiGaus.o
+ROOTUtils = GraphUtils.o GraphicsUtils.o HistogramSequenceFitter.o MultiGaus.o
 
 Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o AcornCalibrator.o AcornDB.o \
-	SegmentSaver.o RunAccumulator.o SourceCalPlugin.o WishbonePlugin.o Positioner.o
+	RunAccumulator.o SourceCalPlugin.o WishbonePlugin.o Positioner.o
 
-objects = $(BaseTypes) $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis)
+objects = $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis)
 
 
 all: libaCORN_MPM.a

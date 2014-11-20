@@ -13,7 +13,7 @@ SourceCalPlugin::SourceCalPlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"SourceC
     
     for(unsigned int i=0; i<N_E_PMT; i++) {
     //for(unsigned int i=9; i<11; i++) {
-        hPMTSig[i] = registerHist("hPMTSig_"+itos(i), "PMT " + itos(i+1) + " signal", 200, 0, 15);
+        hPMTSig[i] = registerHist("hPMTSig_"+to_str(i), "PMT " + to_str(i+1) + " signal", 200, 0, 15);
         hPMTSig[i]->GetXaxis()->SetTitle("ADC channels [#times 10^{3}]");
     }
 }
@@ -87,7 +87,7 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     fPois.SetParameter(0,1000/257.);
     fPois.SetParameter(2,257.);
     fPois.SetLineColor(1);
-    hEnergyRate->Fit(&fPois,"R");
+    hEnergyRate->Fit(&fPois,"RN");
     printf("Original energy: %g PE/MeV\n",fPois.GetParameter(2)/0.9948);
     
     hEnergyRate->Draw();
@@ -114,7 +114,7 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
         fPoisR.SetParameter(0,1000/257.);
         fPoisR.SetParameter(2,257.);
         fPoisR.SetLineColor(1);
-        hEnergyRecalRate->Fit(&fPoisR,"R");
+        hEnergyRecalRate->Fit(&fPoisR,"RN");
         printf("Recalibrated energy: %g PE/MeV\n",fPoisR.GetParameter(2)/0.9948);
     }
     
@@ -152,7 +152,7 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
         hPMTRateBG->Draw("Same");
         L.Draw();
         L2.Draw();
-        myA->printCanvas("Signal_"+itos(i+1));
+        myA->printCanvas("Signal_"+to_str(i+1));
     }
     
     double total_PE = 0;

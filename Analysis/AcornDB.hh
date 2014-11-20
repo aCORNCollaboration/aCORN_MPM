@@ -2,6 +2,7 @@
 #define ACORNDB_HH
 
 #include "Enums.hh"
+#include "CalPeak.hh"
 #include "sqlite3.h"
 #include <stdlib.h>
 #include <vector>
@@ -29,6 +30,9 @@ public:
     void loadPMTcal(RunID start, RunID end, int n, double sigPerPE, double sigPerMeV);
     /// get PMT gain calibration parameters
     void getPMTcal(RunID rn, vector<double>& sigPerPE, vector<double>& sigPerMeV);
+    
+    /// upload peak data, optionally deleting prior matches
+    void uploadPeak(const CalPeak& pk, bool replace = true);
     
 protected:
     /// Constructor

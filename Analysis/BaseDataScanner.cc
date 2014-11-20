@@ -35,7 +35,7 @@ void BaseDataScanner::calibrate() {
     T_e2d *= NS_PER_CLOCK;
     
     assert(currentCal);
-    E_recon = currentCal->calEnergy(E_e);
+    E_recon = currentCal->calPMTSum(E_e);
     
     for(unsigned int i=0; i<N_E_PMT; i++) L_PMT[i] = E_PMT[N_V_PMT+i];
     Pos.calcPos(L_PMT);

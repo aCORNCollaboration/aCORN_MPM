@@ -2,7 +2,7 @@
 #include "ReducedDataScanner.hh"
 #include "OutputManager.hh"
 #include "PathUtils.hh"
-#include "strutils.hh"
+#include "StringManip.hh"
 #include "HistogramSequenceFitter.hh"
 
 #include <TStyle.h>

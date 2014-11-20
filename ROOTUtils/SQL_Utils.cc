@@ -1,7 +1,7 @@
 #include "SQL_Utils.hh"
 #include <stdlib.h>
 #include <unistd.h>
-#include "strutils.hh"
+#include "StringManip.hh"
 #include "SMExcept.hh"
 
 SQLHelper::SQLHelper(const std::string& dbnm,
@@ -11,7 +11,7 @@ SQLHelper::SQLHelper(const std::string& dbnm,
                      unsigned int port,
                      unsigned int ntries): db(NULL), res(NULL), dbName(dbnm) {
                          
-    string dbAddressFull = "mysql://"+dbAddress+":"+itos(port)+"/"+dbnm;
+    string dbAddressFull = "mysql://"+dbAddress+":"+to_str(port)+"/"+dbnm;
     while(!db) {
         ntries--;
         db = TSQLServer::Connect(dbAddressFull.c_str(),dbUser.c_str(),dbPass.c_str());

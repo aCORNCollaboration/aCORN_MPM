@@ -2,8 +2,9 @@
 #include "Collimator.hh"
 #include "SourceCalPlugin.hh"
 #include "PathUtils.hh"
-#include "strutils.hh"
+#include "StringManip.hh"
 #include "MultiGaus.hh"
+#include "AcornDB.hh"
 
 #include <cmath>
 #include <map>
@@ -30,6 +31,17 @@ MultiGaus* getFitter(const std::string& sname) {
         m->setCenterSigma(0, 375, 50);
     }
     return m;
+}
+
+CalPeak mgToPeak(MultiGaus* mg, unsigned int n, const std::string& sname) {
+    CalPeak pk;
+    pk.pktype = sname + "_" + to_str(n);
+    if(mg) {
+        pk.height = mg->getPar(3*n+0);
+        pk.center = mg->getPar(3*n+1);
+        pk.sigma = mg->getPar(3*n+2);
+    }
+    return pk;
 }
 
 /// simple calculations for electron survival through collimator
@@ -250,9 +262,20 @@ TH1* loadData(const string& snm) {
     return hdat;
 }
 
+double srcPlotRange(const string& sn) {
+    return sn == "Bi207"? 1400 : sn == "Sn113"? 500 : 1000;
+}
+
+double srcPlotMax(const string& sn) {
+    return sn == "Bi207"? 100 : sn == "Sn113"? 500 : 1000;
+}
+
 int main(int argc, char** argv) {
     
     const string& sname = (argc>1)? argv[1] : "Bi207";
+    const int series = (sname=="Bi207"?1327:1329);
+    
+    AcornCalibrator rcal(RunID(series,0));
     
     OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Sim_"+sname+"/");
     gStyle->SetOptStat("");
@@ -265,7 +288,7 @@ int main(int argc, char** argv) {
     
     TH1F* hSmeared[2];
     for(int i=0; i<2; i++) {
-        hSmeared[i] = new TH1F(("hSmeared_"+itos(i)).c_str(), (sname + " PE-smeared energy").c_str(), 500, 0, 2000);
+        hSmeared[i] = new TH1F(("hSmeared_"+to_str(i)).c_str(), (sname + " PE-smeared energy").c_str(), 500, 0, 2000);
         hSmeared[i]->GetXaxis()->SetTitle("Quenched Energy [keV]");
         hSmeared[i]->GetYaxis()->SetTitle("Counts / 1e6 decays");
         hSmeared[i]->GetYaxis()->SetTitleOffset(1.4);
@@ -273,28 +296,45 @@ int main(int argc, char** argv) {
     }
     
     QuenchCalculator QC;
-    poisson_smear(*hEnergy, *hSmeared[0], 0.30, &QC);
-    poisson_smear(*hEnergyGen, *hSmeared[1], 0.30, &QC);
+    poisson_smear(*hEnergy, *hSmeared[0], 0.35, &QC);
+    poisson_smear(*hEnergyGen, *hSmeared[1], 0.35, &QC);
     
     MultiGaus* mg = getFitter(sname);
     mg->fitEstimate(hSmeared[1]);
     
     printf("\n\n*** bare analytical ***\n");
-    for(int i=0; i<3; i++) mg->fit(hSmeared[1], i==2);
+    for(int i=0; i<3; i++) mg->fit(hSmeared[1], false);
     mg->display();
     
     printf("\n\n*** MC ***\n");
-    for(int i=0; i<3; i++) mg->fit(hSmeared[0], i==2);
+    for(int i=0; i<3; i++) mg->fit(hSmeared[0], false);
     mg->display();
     double sim_height = mg->getParameter(3*(mg->npks-1));
+    for(unsigned int i=0; i<mg->npks; i++) {
+        CalPeak pk = mgToPeak(mg, i, sname);
+        pk.dttype = "MC";
+        pk.series = series;
+        AcornDB::ADB().uploadPeak(pk);
+    }
     
     printf("\n\n*** Data ***\n");
     TH1* hdat = loadData(sname);
     hdat->SetMinimum(0);
-    for(int i=0; i<3; i++) mg->fit(hdat, i==2);
+    for(int i=0; i<3; i++) mg->fit(hdat, false);
     mg->display();
+    for(unsigned int i=0; i<mg->npks; i++) {
+        CalPeak pk = mgToPeak(mg, i, sname);
+        pk.dttype = "E_sum";
+        pk.series = series;
+        AcornDB::ADB().uploadPeak(pk);
+        
+        rcal.invcalPMTSum(pk);
+        pk.dttype = "ADC_sum";
+        AcornDB::ADB().uploadPeak(pk);
+    }
     double dat_height = mg->getParameter(3*(mg->npks-1));
-    hdat->GetXaxis()->SetRangeUser(0, sname == "Bi207"? 1400 : 500);
+    hdat->GetXaxis()->SetRangeUser(0, srcPlotRange(sname));
+    hdat->SetMaximum(srcPlotMax(sname));
     hdat->Draw();
     for(int i=0; i<2; i++) {
         hSmeared[i]->Scale(dat_height/sim_height);

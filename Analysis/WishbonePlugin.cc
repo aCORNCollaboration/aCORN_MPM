@@ -1,6 +1,6 @@
 #include "WishbonePlugin.hh"
 #include "GraphicsUtils.hh"
-#include "strutils.hh"
+#include "StringManip.hh"
 #include <TStyle.h>
 #include <TColor.h>
 
@@ -11,7 +11,7 @@ double TH2Slicer::projSlice(double y0, double y1, TH1*& projOut) {
     int b0 = A->FindBin(y0);
     int b1 = A->FindBin(y1);
     
-    TH1D* hProj = h->ProjectionX(("_slice_"+itos(pcount++)).c_str(), b0, b1, "e");
+    TH1D* hProj = h->ProjectionX(("_slice_"+to_str(pcount++)).c_str(), b0, b1, "e");
     if(projOut) {
         projOut->Add(hProj);
         delete hProj;

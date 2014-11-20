@@ -44,11 +44,20 @@ CREATE TABLE pmt_gaincal (
 );
 CREATE UNIQUE INDEX idx_pmt_gaincal ON pmt_gaincal(start_s, end_s, pmt);
 
+-- Calibrate weighted (PE) sum
+CREATE TABLE pmt_wsumcal (
+    start_s INTEGER,    -- start series+run                  
+    end_s INTEGER,      -- end series+run
+    calcurve INTEGER,   -- calibration curve (rowid from named_object)
+    PEperMeV REAL       -- calibrated effective energy resolution
+);
+CREATE UNIQUE INDEX idx_pmt_wsumcal ON pmt_wsumcal(start_s, end_s);
+
 -- Generic named objects (use rowid as key on other collections)
 CREATE TABLE named_object (
-    type TEXT,          -- object type
-    name TEXT,          -- object name
-    descrip TEXT        -- object description
+    type TEXT,          -- object type (specifies relation to other tables)
+    name TEXT,          -- object name (short identifier)
+    descrip TEXT        -- object description (more verbose information)
 );
 CREATE INDEX idx_named_object ON named_object(type);
 
@@ -61,3 +70,18 @@ CREATE TABLE graph_points (
     dy REAL
 );
 CREATE INDEX idx_graph_points ON graph_points(graph_id);
+
+-- Calibration fit peaks
+CREATE TABLE calib_peaks (
+    series INTEGER,     -- data series fit
+    pktype TEXT,        -- type of peak
+    dttype TEXT,        -- type of data
+    center REAL,        -- peak center
+    sigma REAL,         -- peak width
+    height REAL,        -- peak height
+    dcenter REAL,       -- peak center uncertainty
+    dsigma REAL,        -- peak width uncertainty
+    dheight REAL,       -- peak height uncertainty
+    xidx INTEGER        -- extra data index
+);
+CREATE INDEX idx_calib_peaks ON calib_peaks(series);

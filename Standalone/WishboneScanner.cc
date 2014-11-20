@@ -3,7 +3,7 @@
 #include "PathUtils.hh"
 #include "OutputManager.hh"
 #include "AcornDB.hh"
-#include "strutils.hh"
+#include "StringManip.hh"
 
 #include <stdio.h>
 #include <TStyle.h>
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     
     if(series < 0) {
         series = -series;
-        string wbname = "Series_"+itos(series);
+        string wbname = "Series_"+to_str(series);
         WishboneAnalyzer WA(&OM, wbname, OM.basePath+"/"+wbname+"/"+wbname);
         WA.makeOutput();
         return 0;
@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
         return 0;
     }
     
-    WishboneAnalyzer WA(&OM, "/Series_"+itos(series));
+    WishboneAnalyzer WA(&OM, "/Series_"+to_str(series));
     
     WA.loadProcessedData(RDS);
     WA.makeOutput();

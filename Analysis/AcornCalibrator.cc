@@ -10,15 +10,29 @@ AcornCalibrator::AcornCalibrator(RunID r): rn(r) {
     
     PEPerMeV = 0;
     for(size_t i=0; i<N_E_PMT; i++) PEPerMeV += sigPerMeV[i] / sigPerPE[i];
-    printf(" (%.1f PE/MeV).\n",PEPerMeV);
+    printf(" (%.1f PE/MeV; %g + %g*s).\n",PEPerMeV,intercept,slope);
 }
 
-double AcornCalibrator::calEnergy(double ADC) const {
-    return slope*ADC + intercept;
-}
-
-double AcornCalibrator::calEnergy(const Short_t* ADC) const {
+double AcornCalibrator::wsum(const Short_t* ADC) const {
     double npe = 0;
     for(size_t i=0; i<N_E_PMT; i++) npe += ADC[i] / sigPerPE[i];
-    return 1000 * npe / PEPerMeV;
+    return npe;
+}
+
+void AcornCalibrator::invcalPMTSum(CalPeak& pk) const {
+    double s =  invcalPMTSum(pk.center.x);
+    double d = dEds(s);
+    pk.center.x = s;
+    pk.center.err /= d;
+    pk.sigma = (1/d)*pk.sigma;
+    pk.height = d*pk.height;
+}
+
+void AcornCalibrator::invcalWSum(CalPeak& pk) const {
+    double w =  invcalWSum(pk.center.x);
+    double d = dEdw(w);
+    pk.center.x = w;
+    pk.center.err /= d;
+    pk.sigma = (1/d)*pk.sigma;
+    pk.height = d*pk.height;
 }

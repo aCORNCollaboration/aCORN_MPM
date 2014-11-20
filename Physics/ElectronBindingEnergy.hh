@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 
+using std::map;
+
 /// table of electron binding energies
 class BindingEnergyTable {
 public:

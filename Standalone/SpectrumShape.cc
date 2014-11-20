@@ -1,7 +1,7 @@
 #include "aSpectrum.hh"
 #include "Collimator.hh"
 #include "GraphicsUtils.hh"
-#include "strutils.hh"
+#include "StringManip.hh"
 #include "PathUtils.hh"
 #include "OutputManager.hh"
 
@@ -87,7 +87,7 @@ int main(int, char**) {
     TH1F* haCorn[2][2];
     for(int i=0; i<2; i++) {
         for(int j=0; j<2; j++) {
-            haCorn[i][j] = OM.registeredTH1F("haCorn_"+itos(i)+"_"+itos(j), "asymmetry beta spectrum", 200,0,800);
+            haCorn[i][j] = OM.registeredTH1F("haCorn_"+to_str(i)+"_"+to_str(j), "asymmetry beta spectrum", 200,0,800);
             haCorn[i][j]->SetLineColor(2+2*i);
         }
     }

@@ -7,6 +7,8 @@
 #include <vector>
 #include <map>
 
+using std::map;
+
 /// hyperbolic sine
 double my_sinh(double x) { return (exp(x)-exp(-x))*0.5; }
 

@@ -1,5 +1,5 @@
 #include "GraphicsUtils.hh"
-#include "strutils.hh"
+#include "StringManip.hh"
 #include "SMExcept.hh"
 #include <algorithm>
 

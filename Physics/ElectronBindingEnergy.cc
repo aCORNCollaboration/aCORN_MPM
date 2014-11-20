@@ -1,5 +1,5 @@
 #include "ElectronBindingEnergy.hh"
-#include "strutils.hh"
+#include "StringManip.hh"
 #include "SMExcept.hh"
 #include <stdio.h>
 
@@ -9,7 +9,7 @@ BindingEnergyTable::BindingEnergyTable(const Stringmap& m): Z(m.getDefault("Z",0
     for(unsigned int n=0; n<shellnames.size(); n++) {
         vector<double> v;
         for(unsigned int s=1; s<=9; s++) {
-            double b = m.getDefault(ctos(shellnames[n])+(n+s==1?"":itos(s)),0);
+            double b = m.getDefault(ctos(shellnames[n])+(n+s==1?"":to_str(s)),0);
             if(b) v.push_back(b/1000.0);
             else break;
         }

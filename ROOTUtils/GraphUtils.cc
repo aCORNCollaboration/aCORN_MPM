@@ -1,5 +1,5 @@
 #include "GraphUtils.hh"
-#include "strutils.hh"
+#include "StringManip.hh"
 #include "SMExcept.hh"
 #include <math.h> 
 #include <TROOT.h>
@@ -33,9 +33,9 @@ TH1F* stringmapToTH1F(const Stringmap& m) {
     string hTitle = m.getDefault("name","hFoo");
     unsigned int nBins = (unsigned int)(m.getDefault("nbins",0));
     smassert(nBins >= 1);
-    vector<Float_t> binEdges = sToFloats(m.getDefault("binEdges",""));
-    vector<float> binConts = sToFloats(m.getDefault("binConts",""));
-    vector<float> binErrs = sToFloats(m.getDefault("binErrs",""));
+    vector<double> binEdges = sToDoubles(m.getDefault("binEdges",""));
+    vector<double> binConts = sToDoubles(m.getDefault("binConts",""));
+    vector<double> binErrs = sToDoubles(m.getDefault("binErrs",""));
     smassert(binEdges.size()==nBins+1);
     smassert(binConts.size()==nBins+2);
     smassert(binErrs.size()==nBins+2);
@@ -328,7 +328,7 @@ vector<TH2F*> sliceTH3(const TH3& h3, AxisDirection d) {
     
     vector<TH2F*> h2s;
     for(unsigned int z = 0; z <= n3+1; z++) {
-        TH2F* h2 = new TH2F((std::string(h3.GetName())+"_"+itos(z)).c_str(),
+        TH2F* h2 = new TH2F((std::string(h3.GetName())+"_"+to_str(z)).c_str(),
         h3.GetTitle(),
         n1,
         Ax1->GetBinLowEdge(1),
@@ -369,7 +369,7 @@ vector<TH1F*> sliceTH2(const TH2& h2, AxisDirection d, bool includeOverflow) {
     
     for(unsigned int z = 0; z <= nz+1; z++) {
         if(!includeOverflow && (z==0 || z==nz+1)) continue;
-        TH1F* h1 = new TH1F((std::string(h2.GetName())+"_"+itos(z)).c_str(),
+        TH1F* h1 = new TH1F((std::string(h2.GetName())+"_"+to_str(z)).c_str(),
         h2.GetTitle(),
         nn,
         axs->GetBinLowEdge(1),

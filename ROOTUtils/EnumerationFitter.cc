@@ -1,6 +1,6 @@
 #include "EnumerationFitter.hh"
 #include "SMExcept.hh"
-#include "strutils.hh"
+#include "StringManip.hh"
 #include "PathUtils.hh"
 
 
