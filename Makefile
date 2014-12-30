@@ -11,10 +11,10 @@ SHELL = /bin/sh
 	 
 # compiler flags
 CXXFLAGS = -O3 --std=c++11 -fPIC `root-config --cflags` -I. -pedantic -Wall -Wextra \
-	-I${MPMUTILS}/GeneralUtils/ -I${MPMUTILS}/ROOTUtils/ \
+	-I${MPMUTILS}/GeneralUtils/ -I${MPMUTILS}/Matrix/ -I${MPMUTILS}/ROOTUtils/ \
 	-IIOUtils -IROOTUtils -IBaseTypes -ICalibration -IAnalysis -IStudies -IPhysics
 LDFLAGS =  -L. -L${MPMUTILS}/GeneralUtils/ -L${MPMUTILS}/ROOTUtils/ \
-	-laCORN_MPM -lMPMGeneralUtils -lMPMROOTUtils -lSpectrum -lMLP `root-config --libs` -lMathMore
+	-laCORN_MPM -lMPMROOTUtils -lMPMGeneralUtils -lSpectrum -lMLP `root-config --libs` -lMathMore
 
 ifdef PROFILER_COMPILE
 	CXXFLAGS += -pg
