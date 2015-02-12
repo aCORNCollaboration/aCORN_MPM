@@ -42,7 +42,7 @@ Physics = BetaSpectrum.o ElectronBindingEnergy.o NuclEvtGen.o aSpectrum.o Collim
 ROOTUtils = GraphUtils.o GraphicsUtils.o HistogramSequenceFitter.o MultiGaus.o
 
 Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o AcornCalibrator.o AcornDB.o \
-	RunAccumulator.o SourceCalPlugin.o WishbonePlugin.o Positioner.o
+	RunAccumulator.o SourceCalPlugin.o WishbonePlugin.o Positioner.o PMTsPlugin.o
 
 objects = $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis)
 
@@ -56,7 +56,7 @@ libaCORN_MPM.a: $(objects)
 % : %.cc libaCORN_MPM.a
 	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) -o $@
 
-StandaloneObjs = ReducedToROOT PMT_Gainmatcher
+StandaloneObjs = BetaSpectrometerScanner ReducedToROOT PMT_Gainmatcher WishboneScanner
 
 standalone: $(StandaloneObjs)
 

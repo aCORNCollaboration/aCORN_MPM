@@ -10,13 +10,16 @@ public:
     ReducedDataScanner(bool fp): BaseDataScanner("RedEvt",fp) {}
     
     /// return path to run .root file
-    virtual string locateRun(RunID r);
+    virtual string locateRun(RunID r) const;
     
     /// set TChain branch data readpoints
     virtual void setReadpoints(TTree* T);
     
     /// set TTree write points
     void setWritepoints(TTree* T);
+    
+    /// locate runs for specified series on disk
+    vector<RunID> findSeriesRuns(int s) const;
 };
 
 #endif

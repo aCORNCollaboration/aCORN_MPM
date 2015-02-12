@@ -58,6 +58,6 @@ void BaseDataScanner::nFiredModule() {
     }
 }
 
-void BaseDataScanner::display() const {
+void BaseDataScanner::displayEvt() const {
     std::cout << "E_p = " << E_p << "\tE_p_0 = " << E_p_0 << "\tE_e = " << E_e << "\tT_p = " << T_p << "\n";
 }

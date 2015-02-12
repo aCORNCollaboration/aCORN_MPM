@@ -53,7 +53,7 @@ void ReducedDataScanner::setWritepoints(TTree* T) {
     T->Branch("E_Max_PMT", &E_Max_PMT, "E_Max_PMT/S");
 }
 
-string ReducedDataScanner::locateRun(RunID r) {
+string ReducedDataScanner::locateRun(RunID r) const {
     char fnm[1024];
     sprintf(fnm,"%s/s%ir%04i_red.root", getEnvSafe("ACORN_REDUCED_ROOT").c_str(), r.first, r.second);
     if(fileExists(fnm)) return fnm;
@@ -63,3 +63,20 @@ string ReducedDataScanner::locateRun(RunID r) {
     if(fileExists(fnm)) return fnm;
     return "";
 }
+
+vector<RunID> ReducedDataScanner::findSeriesRuns(int s) const {
+    vector<RunID> v;
+    unsigned int nmissing = 0;
+    RunID rn;
+    rn.first = s;
+    rn.second = 0;
+    while(nmissing < 10) {
+        if(locateRun(rn).size()) {
+            v.push_back(rn);
+            nmissing = 0;
+        } else nmissing++;
+        rn.second++;
+    }
+    return v;
+}
+

@@ -24,24 +24,19 @@ void RunSetScanner::display() {
     printf("RunSetScanner: %i runs, %i events\n",getnFiles(),nEvents);
 }
 
+void RunSetScanner::nextTreeLoaded() {
+    assert((size_t)Tch->GetTreeNumber() < runlist.size());
+    evtRun = runlist[Tch->GetTreeNumber()];
+    loadNewRun(evtRun);
+}
+
 void RunSetScanner::speedload(unsigned int e, bool loadBaskets) {
-    if(e < noffset || e-noffset >= nLocalEvents) {
-        if(loadBaskets) Tch->GetTree()->DropBaskets();
-        Tch->GetEvent(e);
-        if(loadBaskets) Tch->GetTree()->LoadBaskets();
-        nLocalEvents = Tch->GetTree()->GetEntries();
-        noffset = Tch->GetChainOffset();
-        assert((size_t)Tch->GetTreeNumber() < runlist.size());
-        evtRun = runlist[Tch->GetTreeNumber()];
-        loadNewRun(evtRun);
-    } else {
-        Tch->GetEvent(e);
-    }
-    // Tch->GetTree()->GetEvent(e-noffset);
+    TChainScanner::speedload(e,loadBaskets);
     calibrate();
 }
 
 bool RunSetScanner::addRun(RunID r) {
+    Tch->SetMaxVirtualSize(100000); // need this to prevent bad_alloc error on big files
     string f = locateRun(r);
     if(f.size() && addFile(f)) {
         runlist.push_back(r);

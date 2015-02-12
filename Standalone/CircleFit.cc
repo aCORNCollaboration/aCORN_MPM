@@ -41,9 +41,13 @@ public:
             rs[i] = sqrt(cs[i]*cs[i]+ss[i]*ss[i]);
             cs[i] /= rs[i];
             ss[i] /= rs[i];
-            rfits[i] = 1./sqrt((iSigma(0,0)*cs[i]+iSigma(0,1)*ss[i])*cs[i] + (iSigma(1,0)*cs[i]+iSigma(1,1)*ss[i])*ss[i]);
+            double r2e = (iSigma(0,0)*cs[i]+iSigma(0,1)*ss[i])*cs[i] + (iSigma(1,0)*cs[i]+iSigma(1,1)*ss[i])*ss[i];
+            rfits[i] = 1./sqrt(r2e);
+            if(!(r2e > 0)) rfits[i] = 0;
             s_err += pow(rs[i]-rfits[i],2);
         }
+        //cout << params[0] << "\t" <<  params[1] << "\t" <<  params[2] << "\t" <<  params[4] << "\t" <<  s_err << "\n";
+        assert(s_err == s_err);
         return s_err/xs.size();
     }
     
@@ -103,13 +107,16 @@ void do_circle_fit(const string& fbase) {
         vector<double> pts = sToDoubles(*it,",");
         vector<string> wds = split(*it,",");
         if(pts.size() >= 12) {
-            if(wds[9] == "Crosshair")
-                for(int i=0; i<2; i++) cxhx[i] = pts[10+i]/60.;
+            if(wds[9] == "Crosshair") {
+                if(pts.size()<18) for(int i=0; i<2; i++) cxhx[i] = pts[10+i]/60.;
+                else for(int i=0; i<2; i++) cxhx[i] = pts[16+i]/60.;
+                cxhx[1] = 90*60-cxhx[1];
+            }
         }
         if(pts.size() < 10 || !pts[7]) continue;
         cout << pts.size() << ") '" << strip(*it) << "':\t" << pts[7] << "\t" << pts[8] << "\n";
         QM.xs.push_back(pts[7]/60.);
-        QM.ys.push_back(pts[8]/60.);
+        QM.ys.push_back(90*60-pts[8]/60.);
     }
     
     // Choose method upon creation between:
@@ -125,8 +132,8 @@ void do_circle_fit(const string& fbase) {
     ROOT::Math::Functor f(&QM,&CircleMin::circleMin, nvar);
     double x0, y0, r0;
     QM.initGuess(x0,y0,r0);
-    double variable[nvar] = {x0, y0, r0*r0, 0.01*r0*r0, r0*r0 };
-    double step[nvar] = {r0/100., r0/100., variable[2]/100., variable[2]/100., variable[2]/100.};
+    double variable[nvar] = {x0, y0, r0*r0, 0.001*r0*r0, r0*r0 };
+    double step[nvar] = {r0/10., r0/10., variable[2]/10., variable[2]/10., variable[2]/10.};
     cout << "Initial guess: x = " << x0 << " y = " << y0 << " r = " << r0 << "\n";
     min.SetFunction(f);
     
@@ -150,13 +157,13 @@ void do_circle_fit(const string& fbase) {
     TGraph* g = QM.ptsGraph();
     g->SetTitle("theodolite circle fit");
     g->GetXaxis()->SetTitle("horizontal [arcmin]");
-    g->GetYaxis()->SetTitle("vertical [arcmin]");
+    g->GetYaxis()->SetTitle("90#circ-vertical [arcmin]");
     g->GetYaxis()->SetTitleOffset(1.5);
     g->Draw("A*");
     
     TGraph gCirc(100);
     double rr = sqrt(0.5*(xs[2]+xs[4]));
-    if(abs(xs[2]-xs[4]) < 0.1*rr) {
+    if(fabs(rr-sqrt(xs[2])) < 0.05*rr) {
         for(int i=0; i<100; i++) {
             double th = i*2*M_PI/99.;
             gCirc.SetPoint(i, xs[0]+rr*cos(th), xs[1]+rr*sin(th));
@@ -189,11 +196,11 @@ void do_circle_fit(const string& fbase) {
     TMarker mCenter(xs[0],xs[1],2);
     mCenter.SetMarkerColor(2);
     mCenter.Draw();
-    printf("Center at\tH = %s\tV = %s\n",m2dms(xs[0]).c_str(),m2dms(xs[1]).c_str());
+    printf("Center at\tH = %s\tV = %s\n",m2dms(xs[0]).c_str(),m2dms(90*60-xs[1]).c_str());
 
     char lbl[1024];
     sprintf(lbl,"#splitline{Center (%s, %s), RMS %.2f'}{r_{xx} = %.2f'; r_{yy} = %.2f'; r_{xy} = %.2f}",
-            m2dms(xs[0],true).c_str(),m2dms(xs[1],true).c_str(), rms, sqrt(xs[2]), sqrt(xs[4]), sqrt(fabs(xs[3])));
+            m2dms(xs[0],true).c_str(),m2dms(90*60-xs[1],true).c_str(), rms, sqrt(xs[2]), sqrt(xs[4]), sqrt(fabs(xs[3])));
     TLatex L(xs[0]-0.7*rr,xs[1]+0.25*rr,lbl);
     L.SetTextSize(0.03);
     L.Draw();
@@ -203,19 +210,19 @@ void do_circle_fit(const string& fbase) {
         TMarker* mCx = new TMarker(cxhx[0],cxhx[1],5);
         mCx->SetMarkerColor(4);
         mCx->Draw();
-        sprintf(lbl,"Crosshair offset: (%.2f', %.2f')", cxhx[0]-xs[0], cxhx[1]-xs[1]);
+        sprintf(lbl,"Crosshair offset: (%.2f', %.2f')", cxhx[0]-xs[0], xs[1]-cxhx[1]);
         TLatex* L2 = new TLatex(xs[0]-0.6*rr,xs[1]-0.4*rr,lbl);
         L2->SetTextSize(0.03);
         L2->Draw();
-        printf("Crosshair at\tH = %s\tV = %s\n",m2dms(cxhx[0]).c_str(),m2dms(cxhx[1]).c_str());
+        printf("Crosshair at\tH = %s\tV = %s\n",m2dms(cxhx[0]).c_str(),m2dms(90*60-cxhx[1]).c_str());
     }
     
     gPad->SetCanvasSize(300,300);
     gPad->Print((fbase+".pdf").c_str());
 }
 
-int main(int, char**) {
-    string basedir = "/home/mpmendenhall/Documents/aCORN/201501_Alignment";
+int main(int argc, char** argv) {
+    string basedir = (argc>1)?argv[1]:"/home/mpmendenhall/Documents/aCORN/20150112_Alignment";
     vector<string> fnames = listdir(basedir);
     for(auto it = fnames.begin(); it != fnames.end(); it++) {
         if(split(*it," ")[0] != "Finding" || split(*it,".").back() != "csv") continue;

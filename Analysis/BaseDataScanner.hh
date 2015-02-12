@@ -58,8 +58,8 @@ public:
     virtual void loadNewRun(RunID r);
     /// calibrations after loading event
     virtual void calibrate();
-    /// display current event
-    virtual void display() const;
+    /// print info about current event
+    virtual void displayEvt() const;
     
     double physicsWeight;       ///< simulated event spectrum re-weighting factor
    

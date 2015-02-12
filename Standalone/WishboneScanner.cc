@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
     }
     
     WishboneAnalyzer WA(&OM, "/Series_"+to_str(series));
-    
+        
     WA.loadProcessedData(RDS);
     WA.makeOutput();
     

@@ -123,6 +123,7 @@ void RunAccumulator::loadProcessedData(BaseDataScanner& PDS) {
         return;
     PDS.startScan();
     unsigned int nScanned = 0;
+
     while(PDS.nextPoint()) {
         nScanned++;
         //if(PDS.withCals)
@@ -133,6 +134,7 @@ void RunAccumulator::loadProcessedData(BaseDataScanner& PDS) {
         //}
         fillCoreHists(PDS,PDS.physicsWeight);
     }
+    
     runTimes += PDS.runTimes;
     runCounts += PDS.runCounts;
     printf("\tscanned %i points\n",nScanned);

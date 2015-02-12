@@ -27,10 +27,12 @@ public:
     /// add list of runs to data; return number successfully added
     unsigned int addRuns(const vector<RunID>& rns);
     /// return path to run .root file
-    virtual string locateRun(RunID) { assert(false); return ""; }
+    virtual string locateRun(RunID) const { assert(false); return ""; }
     
     /// speedload, keeping track of currently loaded run number
     virtual void speedload(unsigned int e, bool loadBaskets = true);
+    /// update calibrations when next TTree loaded
+    virtual void nextTreeLoaded();
     ///  subclass this for calibrations after loading event
     virtual void calibrate() { }
     /// subclass this for routines when new run is loaded
@@ -42,6 +44,8 @@ public:
     
     /// print info about this scanner
     virtual void display();
+    /// print info about current event
+    virtual void displayEvt() const { }
     
     RunID evtRun;                       ///< run ID for current event
     double totalTime;                   ///< combined length of runs in seconds
