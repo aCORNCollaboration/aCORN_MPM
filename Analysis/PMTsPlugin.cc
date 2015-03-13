@@ -15,6 +15,9 @@ PMTsPlugin::PMTsPlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"PMTs") {
     hNETemplate.GetXaxis()->SetTitle("Electron energy [keV]");
     hNE = (TH2*)registerHist("hNE",hNETemplate);
     
+    hEETime =  registerHist("hEETime","Electron event timing difference", 999, 0, 10);
+    hEETime->GetXaxis()->SetTitle("time difference [#mus]");
+    
     TH2F hPSTemplate("hChanSpecT","PMT Spectra", 200, 0, 20., NCH_MAX, -0.5, NCH_MAX-0.5);
     hPSTemplate.GetXaxis()->SetTitle("raw signal (#times 10^{3})");
     hPSTemplate.GetYaxis()->SetTitle("detector channel number");
@@ -31,6 +34,13 @@ void PMTsPlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
             if(i<N_V_PMT) vetosum += PDS.E_PMT[i];
         }
     }
+    
+    //if(PDS.E_p == 0) hEETime->Fill((PDS.T_p - prev_e_time)/1000);
+    //prev_e_time = PDS.T_p;
+    
+    if(PDS.E_p <= 0) hEETime->Fill( (PDS.T_e2p - prev_e_time)/1000 );
+    prev_e_time = PDS.T_e2p;
+    
     //if(vetosum) hVetoSum.fill(PDS.T_e2p, vetosum/1000., weight);
     
     hEnergy->Fill(PDS.E_recon, weight);
@@ -39,6 +49,10 @@ void PMTsPlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
 
 void PMTsPlugin::makePlots() {
     gStyle->SetPalette(1);
+    
+    hEETime->Draw("HIST");
+    gPad->SetLogy(true);
+    myA->printCanvas("hEETime");
     
     TH2* hNERate = (TH2*)myA->hToRate(hNE,0);
     hNERate->SetMinimum(0.01);

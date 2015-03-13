@@ -20,6 +20,11 @@ public:
     TH1* hEnergy;               ///< event energy spectrum
     TH2* hChanSpec;             ///< individual PMTs spectrum distribution
     TH2* hNE;                   ///< number of main PMTs triggered vs. total event energy
+    TH1* hEETime;               ///< timing between electron events
+    
+protected:
+    
+    double prev_e_time;         ///< time of previous electron event
 };
 
 /// Analyzer with wishbone plugin

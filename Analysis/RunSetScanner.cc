@@ -30,8 +30,8 @@ void RunSetScanner::nextTreeLoaded() {
     loadNewRun(evtRun);
 }
 
-void RunSetScanner::speedload(unsigned int e, bool loadBaskets) {
-    TChainScanner::speedload(e,loadBaskets);
+void RunSetScanner::speedload(unsigned int e) {
+    TChainScanner::speedload(e);
     calibrate();
 }
 

@@ -39,7 +39,7 @@ IOUtils = sqlite3.o
 
 Physics = BetaSpectrum.o ElectronBindingEnergy.o NuclEvtGen.o aSpectrum.o Collimator.o
 
-ROOTUtils = GraphUtils.o GraphicsUtils.o HistogramSequenceFitter.o MultiGaus.o
+ROOTUtils = HistogramSequenceFitter.o
 
 Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o AcornCalibrator.o AcornDB.o \
 	RunAccumulator.o SourceCalPlugin.o WishbonePlugin.o Positioner.o PMTsPlugin.o

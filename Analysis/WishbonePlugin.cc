@@ -1,5 +1,6 @@
 #include "WishbonePlugin.hh"
 #include "GraphicsUtils.hh"
+#include "GraphUtils.hh"
 #include "StringManip.hh"
 #include <TStyle.h>
 #include <TColor.h>
@@ -255,6 +256,9 @@ void WishbonePlugin::makePlots() {
     drawVLine(E_p_lo/1000., myA->defaultCanvas, 2);
     drawVLine(E_p_hi/1000., myA->defaultCanvas, 2);
     myA->printCanvas("ProtonSignal");
+    Double_t int_err;
+    double prate = integralAndError(hProtonSignal.hRates[false], E_p_lo/1000., E_p_hi/1000., int_err, "width");
+    printf("Proton peak rate: %.3f(%.3f) Hz\n", prate, int_err);
     
     myA->defaultCanvas->SetLogy(false);
     
@@ -273,13 +277,20 @@ void WishbonePlugin::makePlots() {
     hWishboneEProj[true]->Scale(1./nrebin);
     hWishboneEProj[false]->Rebin(nrebin);
     hWishboneEProj[false]->Scale(1./nrebin);
-    hWishboneEProj[true]->SetMinimum(-0.2);
-    hWishboneEProj[true]->SetMaximum(2);
-    hWishboneEProj[true]->Draw();
-    hWishboneEProj[false]->Draw("Same");
+    //hWishboneEProj[true]->SetMinimum(-0.2);
+    //hWishboneEProj[false]->SetMaximum(100);
+    hWishboneEProj[false]->Scale(1./(prate*1.75e-6));
+    hWishboneEProj[false]->GetYaxis()->SetTitle("Background rate [Hz/MeV]");
+    hWishboneEProj[false]->GetYaxis()->SetTitleOffset(1.4);
+    myA->defaultCanvas->SetLogy(true);
+    hWishboneEProj[false]->Draw();
+    //hWishboneEProj[false]->Draw("Same");
     drawHLine(0., myA->defaultCanvas, 1);
     myA->printCanvas("WishboneEnergy");
     
+    double bgrate = integralAndError(hWishboneEProj[false], 1., 1599., int_err, "width")/1000;
+    printf("Total background singles rate %g Hz\n",bgrate);
+           
     hWishboneTProj->SetMinimum(0);
     hWishboneTProj->SetMaximum(5);
     hWishboneTProj->Draw("E0");

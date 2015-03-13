@@ -22,7 +22,7 @@ void BaseDataScanner::loadNewRun(RunID rn) {
 double BaseDataScanner::_getRunTime(RunID) {
     int nback = 1;
     T_p = 0;
-    while(T_p <= 0) speedload(nEvents-(nback++),false);
+    while(T_p <= 0) speedload(nEvents-(nback++));
     //std::cout << rn << " Run time " << T_p << " ns" << "\n";
     return T_p/1.e9;
 }

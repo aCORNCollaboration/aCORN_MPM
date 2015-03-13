@@ -19,6 +19,7 @@ int main(int argc, char** argv) {
     
     gStyle->SetOptStat("");
     
+    // series 0: merge all wishbone data into run total
     if(series == 0) {
         printf("Merging series data...\n");
         OutputManager OM("Wishbone", "/home/mpmendenhall/Data/");
@@ -29,6 +30,7 @@ int main(int argc, char** argv) {
     
     OutputManager OM("Wishbone", getEnvSafe("ACORN_WISHBONE"));
     
+    // negative series number: re-process output plots
     if(series < 0) {
         series = -series;
         string wbname = "Series_"+to_str(series);

@@ -30,7 +30,7 @@ public:
     virtual string locateRun(RunID) const { assert(false); return ""; }
     
     /// speedload, keeping track of currently loaded run number
-    virtual void speedload(unsigned int e, bool loadBaskets = true);
+    virtual void speedload(unsigned int e);
     /// update calibrations when next TTree loaded
     virtual void nextTreeLoaded();
     ///  subclass this for calibrations after loading event
