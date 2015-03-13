@@ -3,13 +3,13 @@
 
 #include "Enums.hh"
 #include "CalPeak.hh"
-#include "sqlite3.h"
+#include "SQLite_Helper.hh"
 #include <stdlib.h>
 #include <vector>
 
 using std::vector;
 
-class AcornDB {
+class AcornDB: protected SQLite_Helper {
 public:
     /// get singleton instance
     static AcornDB& ADB();
@@ -37,15 +37,8 @@ public:
 protected:
     /// Constructor
     AcornDB();
-    /// Destructor
-    ~AcornDB();
     
-    /// set up query for use
-    int setQuery(const char* qry, sqlite3_stmt*& stmt);
-    
-    sqlite3* db = NULL;         ///< database connection
     static AcornDB* myDB;       ///< static singleton instance
-    vector<sqlite3_stmt*> statements;    ///< prepared statements awaiting deletion
 };
 
 

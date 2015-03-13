@@ -5,50 +5,14 @@
 #include <string.h>
 #include <stdio.h>
 
-void errorLogCallback(void*, int iErrCode, const char* zMsg){
-    fprintf(stderr, "SQL error (%d): %s\n", iErrCode, zMsg);
-}
-
-
 AcornDB* AcornDB::myDB = NULL;
 
 AcornDB& AcornDB::ADB() {
-    if(!AcornDB::myDB) {
-        sqlite3_config(SQLITE_CONFIG_LOG, &errorLogCallback, NULL);
-        myDB = new AcornDB();
-    }
+    if(!myDB) myDB = new AcornDB();
     return *myDB;
 }
 
-AcornDB::AcornDB() {
-    string dbname = getEnvSafe("ACORN_DB");
-    printf("Opening SQLite3 DB '%s'...\n",dbname.c_str());
-    int err = sqlite3_open(dbname.c_str(), &db);
-    if(err) {
-        SMExcept e("failed_db_open");
-        e.insert("dbname",dbname);
-        e.insert("message",sqlite3_errmsg(db));
-        sqlite3_close(db);
-        db = NULL;
-        throw e;
-    }
-}
-
-AcornDB::~AcornDB() {
-    if(db) {
-        for(auto it = statements.begin(); it != statements.end(); it++) sqlite3_finalize(*it);
-        sqlite3_close(db);
-    }
-}
-
-int AcornDB::setQuery(const char* qry, sqlite3_stmt*& stmt) {
-    int rc = sqlite3_prepare_v2(db, qry, strlen(qry), &stmt, NULL);
-    if(rc != SQLITE_OK) {
-        SMExcept e("failed_query");
-        e.insert("message",sqlite3_errmsg(db));
-        throw(e);
-    }
-    return rc;
+AcornDB::AcornDB(): SQLite_Helper(getEnvSafe("ACORN_DB")) {
 }
 
 int combo_runid(RunID rn) { return 10000*rn.first + rn.second; }

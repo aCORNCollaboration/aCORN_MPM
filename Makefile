@@ -33,13 +33,13 @@ endif
 # things to build
 #
 
-VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/:BaseTypes/:Analysis/
+VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/:BaseTypes/:Analysis/:${MPMUTILS}/GeneralUtils/
 
 IOUtils = sqlite3.o
 
 Physics = BetaSpectrum.o ElectronBindingEnergy.o NuclEvtGen.o aSpectrum.o Collimator.o
 
-ROOTUtils = 
+ROOTUtils = SQLite_Helper.o
 
 Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o AcornCalibrator.o AcornDB.o \
 	RunAccumulator.o SourceCalPlugin.o WishbonePlugin.o Positioner.o PMTsPlugin.o PluginInterpolator.o
