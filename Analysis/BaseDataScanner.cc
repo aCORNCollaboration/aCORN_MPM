@@ -13,10 +13,11 @@ void BaseDataScanner::makeFlags() {
 
 void BaseDataScanner::loadNewRun(RunID rn) {
     auto it = cals.find(rn);
-    if(it == cals.end())
+    if(it == cals.end()) {
         currentCal = cals[rn] = new AcornCalibrator(rn);
-    else
+    } else {
         currentCal = it->second;
+    }
 }
 
 double BaseDataScanner::_getRunTime(RunID) {

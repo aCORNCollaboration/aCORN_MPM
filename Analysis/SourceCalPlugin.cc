@@ -157,7 +157,7 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
         myA->printCanvas(hname);
         hnames.push_back(myA->plotPath + "/" + hname + ".pdf");
     }
-    combo_pdf(hnames,myA->plotPath + "/PMT_Signal.pdf");
+    combo_pdf(hnames,myA->plotPath + "/PMT_Signal_"+srcName+".pdf");
     
     double total_PE = 0;
     printf("PMT response, Channels per PE:\n");

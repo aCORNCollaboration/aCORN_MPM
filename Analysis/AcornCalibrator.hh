@@ -34,6 +34,9 @@ public:
     /// Individual-PMT optimal sum calibration
     double calEnergy(const Short_t* ADC) const { return calWSum(wsum(ADC)); }
     
+    /// whether PMT is in outer ring
+    static bool isOuter(size_t i);
+    
 protected:
     RunID rn;                   ///< Run ID being calibrated
     
@@ -43,6 +46,10 @@ protected:
     vector<double> sigPerPE;    ///< energy resolution data
     vector<double> sigPerMeV;   ///< gain calibration data
     double PEPerMeV;            ///< calibrated total PE per MeV
+    bool ignoreOuter = false;   ///< ignore outer PMT ring in PMT sums
+    
+    /// set "ignore outer PMTs" mode
+    void setIgnoreOuter(bool ig);
 };
 
 #endif

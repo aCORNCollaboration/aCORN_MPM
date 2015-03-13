@@ -8,14 +8,31 @@ AcornCalibrator::AcornCalibrator(RunID r): rn(r) {
     AcornDB::ADB().getPMTSumCal(rn, slope, intercept);
     AcornDB::ADB().getPMTcal(rn, sigPerPE, sigPerMeV);
     
+    setIgnoreOuter(false);
+}
+
+void AcornCalibrator::setIgnoreOuter(bool ig) {
+    ignoreOuter = ig;
+    
     PEPerMeV = 0;
-    for(size_t i=0; i<N_E_PMT; i++) PEPerMeV += sigPerMeV[i] / sigPerPE[i];
+    for(size_t i=0; i<N_E_PMT; i++) {
+        if(ignoreOuter && isOuter(i)) continue;
+        PEPerMeV += sigPerMeV[i] / sigPerPE[i];
+    }
     printf(" (%.1f PE/MeV; %g + %g*s).\n",PEPerMeV,intercept,slope);
+}
+
+bool AcornCalibrator::isOuter(size_t i) {
+    if(i<=3 || i >= 15) return true;
+    return i==6 || i==7 || i==11 || i==12;
 }
 
 double AcornCalibrator::wsum(const Short_t* ADC) const {
     double npe = 0;
-    for(size_t i=0; i<N_E_PMT; i++) npe += ADC[i] / sigPerPE[i];
+    for(size_t i=0; i<N_E_PMT; i++) {
+        if(ignoreOuter && isOuter(i)) continue;
+        npe += ADC[i] / sigPerPE[i];
+    }
     return npe;
 }
 

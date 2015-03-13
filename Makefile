@@ -39,10 +39,10 @@ IOUtils = sqlite3.o
 
 Physics = BetaSpectrum.o ElectronBindingEnergy.o NuclEvtGen.o aSpectrum.o Collimator.o
 
-ROOTUtils = HistogramSequenceFitter.o
+ROOTUtils = 
 
 Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o AcornCalibrator.o AcornDB.o \
-	RunAccumulator.o SourceCalPlugin.o WishbonePlugin.o Positioner.o PMTsPlugin.o
+	RunAccumulator.o SourceCalPlugin.o WishbonePlugin.o Positioner.o PMTsPlugin.o PluginInterpolator.o
 
 objects = $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis)
 
