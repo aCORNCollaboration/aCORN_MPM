@@ -1,5 +1,6 @@
 #include "SourceCalPlugin.hh"
 #include "AcornDB.hh"
+#include "PathUtils.hh"
 #include <TMath.h>
 #include <TF1.h>
 #include <TLatex.h>
@@ -128,7 +129,7 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     
     double pmt_res[N_E_PMT];
     double pmt_n0[N_E_PMT];
-    //for(unsigned int i=9; i<11; i++) {
+    vector<string> hnames;
     for(unsigned int i=0; i<N_E_PMT; i++) {
         TH1* hPMTRate = myA->hToRate(hPMTSig[i],1);
         hPMTRate->GetYaxis()->SetTitle("event rate [mHz/channel]");
@@ -152,8 +153,11 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
         hPMTRateBG->Draw("Same");
         L.Draw();
         L2.Draw();
-        myA->printCanvas("Signal_"+to_str(i+1));
+        string hname = "PMT_Signal_"+to_str(i+1);
+        myA->printCanvas(hname);
+        hnames.push_back(myA->plotPath + "/" + hname + ".pdf");
     }
+    combo_pdf(hnames,myA->plotPath + "/PMT_Signal.pdf");
     
     double total_PE = 0;
     printf("PMT response, Channels per PE:\n");

@@ -1,9 +1,12 @@
+// Comparisons between simulations and source calibration data from PMT_Gainmatcher
+
 #include "NuclEvtGen.hh"
 #include "Collimator.hh"
 #include "SourceCalPlugin.hh"
 #include "PathUtils.hh"
 #include "StringManip.hh"
 #include "MultiGaus.hh"
+#include "GraphUtils.hh"
 #include "AcornDB.hh"
 
 #include <cmath>
@@ -143,18 +146,6 @@ protected:
     }
 };
 
-/// Fill histogram preserving *average* value interpolated between bins
-void fill_interp(TH1* h, double x, double w = 1.0) {
-    TAxis* Ax = h->GetXaxis();
-    int b0 = Ax->FindBin(x);
-    double c0 = Ax->GetBinCenter(b0);
-    int b1 = x > c0? b0+1 : b0-1;
-    double c1 = Ax->GetBinCenter(b1);
-    double a = (c1-x)/(c1-c0);
-    h->Fill(c0, a*w);
-    h->Fill(c1, (1-a)*w);
-}
-
 /// Fill all probabilistic combinations of energies
 void fill_e_combos(double E0, double p0, pair<double,double>* ee, size_t n, TH1* h) {
     if(!n) { if(E0) fill_interp(h,E0,p0); }
@@ -256,7 +247,7 @@ void load_calib_spectra(const string& sname, TH1*& hInitEnergy, TH1*& hEnergy, O
 
 // load data spectrum
 TH1* loadData(const string& snm) {
-    TFile f((getEnvSafe("ACORN_SUMMARY")+"SourceCal/SourceCal_"+snm+".root").c_str(),"READ");
+    TFile f((getEnvSafe("ACORN_SUMMARY")+"/SourceCal/SourceCal_"+snm+".root").c_str(),"READ");
     TH1* hdat = (TH1*)f.Get("hEnergy_Rate");
     assert(hdat);
     return hdat;
