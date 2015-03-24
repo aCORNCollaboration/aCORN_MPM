@@ -1,4 +1,4 @@
-#include "ManualInfo.hh"
+#include "RangeConfigFile.hh"
 #include "SMExcept.hh"
 #include "PathUtils.hh"
 #include <cfloat>
@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <stdio.h>
 
-ManualInfo ManualInfo::MI(getEnvSafe("UCNA_AUX")+"/ManualInfo.txt");
+RangeConfigFile RangeConfigFile::MI(getEnvSafe("UCNA_AUX")+"/RangeConfigFile.txt");
 
 struct rangeSorter {
     rangeSorter(const std::string& key1, const std::string& key2): k1(key1), k2(key2) {}
@@ -16,14 +16,14 @@ struct rangeSorter {
     }
 };
 
-vector< std::pair<double,double> > ManualInfo::getRanges(const std::string& key, const std::string& k1, const std::string& k2) const {
+vector< std::pair<double,double> > RangeConfigFile::getRanges(const std::string& key, const std::string& k1, const std::string& k2) const {
     vector< std::pair<double,double> > v;
     for(std::multimap<std::string,Stringmap>::const_iterator it = dat.lower_bound(key); it != dat.upper_bound(key); it++)
         v.push_back(std::make_pair(it->second.getDefault(k1,0.),it->second.getDefault(k2,0.)));
     return v;
 }
 
-vector<Stringmap> ManualInfo::getInRange(const std::string& key,
+vector<Stringmap> RangeConfigFile::getInRange(const std::string& key,
                                               const double x,
                                               const std::string& k1,
                                               const std::string& k2) const {
@@ -39,7 +39,7 @@ vector<Stringmap> ManualInfo::getInRange(const std::string& key,
 RangeCut::RangeCut(const Stringmap& m): start(m.getDefault("start",0.0)), end(m.getDefault("end",0.0)) {}
                                               
 Stringmap loadCut(RunNum rn, const std::string& cutName) {
-    vector<Stringmap> v = ManualInfo::MI.getInRange(cutName,rn);
+    vector<Stringmap> v = RangeConfigFile::MI.getInRange(cutName,rn);
     if(!v.size()) {
         SMExcept e("missingCut");
         e.insert("cutName",cutName);

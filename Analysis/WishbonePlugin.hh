@@ -2,7 +2,7 @@
 #define WISHBONEPLUGIN_HH
 
 #include "RunAccumulator.hh"
-#include "ManualInfo.hh"
+#include "RangeConfigFile.hh"
 
 #include <vector>
 #include <utility>

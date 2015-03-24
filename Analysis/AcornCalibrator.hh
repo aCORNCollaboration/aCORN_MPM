@@ -3,7 +3,7 @@
 
 #include "Enums.hh"
 #include "CalPeak.hh"
-#include "ManualInfo.hh"
+#include "RangeConfigFile.hh"
 
 /// Calibrator and associated information class for aCORN data
 class AcornCalibrator {

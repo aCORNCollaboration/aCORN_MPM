@@ -1,13 +1,13 @@
-#ifndef MANUALINFO_HH
-#define MANUALINFO_HH
+#ifndef RANGECONFIGFILE_HH
+#define RANGECONFIGFILE_HH
 
 #include "QFile.hh"
 
 /// class for looking up manually-stored miscellaneous analysis info
-class ManualInfo: public QFile {
+class RangeConfigFile: public QFile {
 public:
     /// constructor
-    ManualInfo(string fname): QFile(fname) {}
+    RangeConfigFile(string fname): QFile(fname) {}
     
     /// get (double start,double end) pairs for key (or any other named pairs)
     vector< std::pair<double,double> > getRanges(const std::string& key, const std::string& k1="start", const std::string& k2="end") const;
@@ -17,7 +17,7 @@ public:
                                       const double x,
                                       const std::string& k1="runStart",
                                       const std::string& k2="runEnd") const;
-    static ManualInfo MI;       ///< static global instance to use
+    static RangeConfigFile MI;       ///< static global instance to use
 };
 
 /// simple class for cuts from Stringmap
