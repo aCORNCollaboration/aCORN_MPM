@@ -93,6 +93,20 @@ void AcornDB::getPMTcal(RunID rn, vector<double>& sigPerPE, vector<double>& sigP
     sqlite3_reset(stmt);
 }
 
+TGraphErrors* AcornDB::getRecal(RunID rn) {
+    static const char* qry = "SELECT graph_ID FROM wishbone_recal WHERE start_s <= ?1 AND ?1 <= end_s ORDER BY end_s-start_s ASC";
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
+    
+    sqlite3_bind_int(stmt, 1, combo_runid(rn));
+    sqlite3_int64 gid = 0;
+    if(sqlite3_step(stmt) == SQLITE_ROW) gid = sqlite3_column_int64(stmt, 0);
+    sqlite3_reset(stmt);
+    
+    if(!gid) return NULL;
+    return getGraph(gid);
+}
+
 void AcornDB::uploadPeak(const CalPeak& pk, bool replace) {
     static const char* dqry = "DELETE FROM calib_peaks WHERE series = ?1 AND pktype = ?2 AND dttype = ?3";
     static sqlite3_stmt* dstmt = NULL;
@@ -121,4 +135,84 @@ void AcornDB::uploadPeak(const CalPeak& pk, bool replace) {
     sqlite3_bind_double(istmt, 9, pk.height.err);
     sqlite3_step(istmt);
     sqlite3_reset(istmt);
+}
+
+TGraphErrors* AcornDB::getGraph(sqlite3_int64 gID) {
+    static const char* qry = "SELECT x,dx,y,dy FROM graph_points WHERE graph_id = ?1";    
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
+    
+    TGraphErrors* g = new TGraphErrors();
+    
+    sqlite3_bind_int64(stmt, 1, gID);
+    int idx = 0;
+    while(sqlite3_step(stmt) == SQLITE_ROW) {
+        g->SetPoint(idx, sqlite3_column_double(stmt, 0), sqlite3_column_double(stmt, 2));
+        g->SetPointError(idx, sqlite3_column_double(stmt, 1), sqlite3_column_double(stmt, 3));
+        idx++;
+    }
+    sqlite3_reset(stmt);
+
+    return g;
+}
+
+sqlite3_int64 AcornDB::createNamed(const string& tp, const string& name, const string& descrip) {
+    static const char* qry = "INSERT INTO named_object(type, name, descrip) VALUES (?1, ?2, ?3)";
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
+    
+    sqlite3_bind_text(stmt, 1, tp.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, name.c_str(), -1, SQLITE_STATIC); 
+    sqlite3_bind_text(stmt, 3, descrip.c_str(), -1, SQLITE_STATIC); 
+    sqlite3_step(stmt);
+    sqlite3_reset(stmt);
+    
+    return sqlite3_last_insert_rowid(db);
+}
+
+sqlite3_int64 AcornDB::uploadGraph(const TGraph* g, const string& name, const string& descrip) {
+    if(!g) return 0;
+    sqlite3_int64 gid = createNamed("graph",name,descrip);
+    printf("Uploading graph '%s' [%s] with ID %lli\n", name.c_str(), descrip.c_str(), gid);
+    
+    static const char* qry = "INSERT INTO graph_points(graph_id,x,dx,y,dy) VALUES (?1, ?2, ?3, ?4, ?5)";
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
+
+    double x,y,dx,dy;
+    dx = dy = 0;
+    const TGraphErrors* ge = dynamic_cast<const TGraphErrors*>(g);
+    beginTransaction();
+    for(int i=0; i<g->GetN(); i++) {
+        g->GetPoint(i,x,y);
+        if(ge) { 
+            dx = ge->GetErrorX(i);
+            dy = ge->GetErrorY(i);
+        }
+        sqlite3_bind_int64(stmt, 1, gid);
+        sqlite3_bind_double(stmt, 2, x);
+        sqlite3_bind_double(stmt, 3, dx);
+        sqlite3_bind_double(stmt, 4, y);
+        sqlite3_bind_double(stmt, 5, dy);
+        sqlite3_step(stmt);
+        sqlite3_reset(stmt);
+    }
+    endTransaction();
+    
+    return gid;
+}
+
+sqlite3_int64 AcornDB::uploadRecal(const TGraph* g, RunID r0, RunID r1) {
+    static const char* qry = "INSERT INTO wishbone_recal(start_s, end_s, graph_ID) VALUES (?1, ?2, ?3)";
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
+    
+    sqlite3_int64 gid = uploadGraph(g, "energyRecal", "Energy re-calibration curve for " + to_str(r0) + " -- " + to_str(r1));
+    sqlite3_bind_int(stmt, 1, combo_runid(r0));
+    sqlite3_bind_int(stmt, 2, combo_runid(r1));
+    sqlite3_bind_int64(stmt, 3, gid); 
+    sqlite3_step(stmt);
+    sqlite3_reset(stmt);
+    
+    return gid;
 }

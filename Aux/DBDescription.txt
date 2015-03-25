@@ -26,6 +26,14 @@ CREATE TABLE pmt_sum_cal (
 );
 CREATE UNIQUE INDEX idx_pmt_sum_cal ON pmt_sum_cal(start_s, end_s);
 
+-- wishbone data re-calibration curve
+CREATE TABLE wishbone_recal (
+    start_s INTEGER,    -- start series+run
+    end_s INTEGER,      -- end series+run
+    graph_ID INTEGER    -- rowid from named_object for energy correction graph
+);
+CREATE UNIQUE INDEX idx_wishbone_recal ON wishbone_recal(start_s, end_s);
+
 -- analyzed run timing data
 CREATE TABLE run_timing (
     run INTEGER PRIMARY KEY,    -- series+run

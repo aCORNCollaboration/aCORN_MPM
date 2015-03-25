@@ -4,6 +4,7 @@
 #include "Enums.hh"
 #include "CalPeak.hh"
 #include "RangeConfigFile.hh"
+#include <TGraph.h>
 
 /// Calibrator and associated information class for aCORN data
 class AcornCalibrator {
@@ -13,6 +14,8 @@ public:
     
     /// Calibrate electron energy from PMT sum
     double calPMTSum(double ADC) const { return slope*ADC + intercept; }
+    /// Calibrate wishbone run PMT sum
+    double calWishboneSum(double ADC) const;
     /// Invert PMT sum calibration
     double invcalPMTSum(double E) const { return (E-intercept)/slope; }
     /// calibration derivative
@@ -42,6 +45,7 @@ protected:
     
     double slope;               ///< simple calibration slope
     double intercept;           ///< simple calibration intercept
+    TGraph* gRecal = NULL;      ///< final energy recalibration curve for wishbone
     
     vector<double> sigPerPE;    ///< energy resolution data
     vector<double> sigPerMeV;   ///< gain calibration data

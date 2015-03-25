@@ -4,7 +4,7 @@ import os
 from optparse import OptionParser
 
 def get_series_list():
-    md = open("/home/mpmendenhall/Documents/aCORN/MetaData_06102014.csv").readlines()[10:]
+    md = open("/home/mpmendenhall/Documents/aCORN/Reference/MetaData_06102014.csv").readlines()[10:]
     md = [l.split(",") for l in md]
     nprev = ""
     slist = []

@@ -7,6 +7,7 @@ AcornCalibrator::AcornCalibrator(RunID r): rn(r) {
     
     AcornDB::ADB().getPMTSumCal(rn, slope, intercept);
     AcornDB::ADB().getPMTcal(rn, sigPerPE, sigPerMeV);
+    gRecal = AcornDB::ADB().getRecal(rn);
     
     setIgnoreOuter(false);
 }
@@ -19,7 +20,7 @@ void AcornCalibrator::setIgnoreOuter(bool ig) {
         if(ignoreOuter && isOuter(i)) continue;
         PEPerMeV += sigPerMeV[i] / sigPerPE[i];
     }
-    printf(" (%.1f PE/MeV; %g + %g*s).\n",PEPerMeV,intercept,slope);
+    printf(" (%.1f PE/MeV; %g + %g*s%s).\n",PEPerMeV,intercept,slope,gRecal?" +Recal":"");
 }
 
 bool AcornCalibrator::isOuter(size_t i) {
@@ -52,4 +53,9 @@ void AcornCalibrator::invcalWSum(CalPeak& pk) const {
     pk.center.err /= d;
     pk.sigma = (1/d)*pk.sigma;
     pk.height = d*pk.height;
+}
+
+double AcornCalibrator::calWishboneSum(double ADC) const {
+    if(!gRecal) return calPMTSum(ADC);
+    return gRecal->Eval(slope*ADC) + intercept;
 }
