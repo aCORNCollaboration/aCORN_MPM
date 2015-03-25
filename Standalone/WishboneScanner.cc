@@ -21,9 +21,9 @@ int main(int argc, char** argv) {
     
     // series 0: merge all wishbone data into run total
     if(series == 0) {
-        printf("Merging series data...\n");
-        OutputManager OM("Wishbone", "/home/mpmendenhall/Data/");
-        WishboneAnalyzer WA(&OM,"aCORN_Wishbone");
+        OutputManager OM("Wishbone", dropLast("/"+strip(getEnvSafe("ACORN_WISHBONE"),"/"),"/"));
+        WishboneAnalyzer WA(&OM,"Wishbone");
+        printf("Merging series data in '%s'...\n", WA.basePath.c_str());
         WA.mergeDir();
         return 0;
     }

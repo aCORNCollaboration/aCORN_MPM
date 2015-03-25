@@ -58,11 +58,13 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     initRegions(hVetoSum);
     hVetoSum.setTemplate(hVetoSumTemplate);
     
-    unsigned int nEnBins = 800;
+    unsigned int nEnBins = 400;
     double E0 = 0;
     double E1 = 1600;
+    double timeBin = 0.02; // time bin width, microseconds
     
-    TH2F hTemplate("hTemplate","aCORN Wishbone", nEnBins, E0, E1, 1001, -0.005, 10.005);
+    // note 5ns shift in time axis bins, to avoid bin boundaries at 10ns+/-error unit boundaries.
+    TH2F hTemplate("hTemplate","aCORN Wishbone", nEnBins, E0, E1, 10/timeBin + 1, - 0.005, 10. + timeBin - 0.005);
     hTemplate.GetXaxis()->SetTitle("Electron energy [keV]");
     hTemplate.GetYaxis()->SetTitle("Proton TOF [#mus]");
     hTemplate.GetYaxis()->SetTitleOffset(1.4);
@@ -184,8 +186,8 @@ void WishbonePlugin::makePlots() {
     bool isCombined = myA->runTimes.nTags() > 1000;
     
     if(!isCombined) {
-        hWishboneBGSub->Rebin2D(4,4);
-        hWishboneBGSub->Scale(1./16.);
+        hWishboneBGSub->Rebin2D(2,2);
+        hWishboneBGSub->Scale(1./8.);
     }
     hWishboneBGSub->SetMinimum(-5.);
     hWishboneBGSub->SetMaximum(5.);
@@ -272,19 +274,16 @@ void WishbonePlugin::makePlots() {
     hVetoSum.hRates[true]->Draw("Same");
     myA->printCanvas("VetoSum");
     
-    int nrebin = 4;
-    hWishboneEProj[true]->Rebin(nrebin);
-    hWishboneEProj[true]->Scale(1./nrebin);
-    hWishboneEProj[false]->Rebin(nrebin);
-    hWishboneEProj[false]->Scale(1./nrebin);
-    //hWishboneEProj[true]->SetMinimum(-0.2);
-    //hWishboneEProj[false]->SetMaximum(100);
-    hWishboneEProj[false]->Scale(1./(prate*1.75e-6));
+    int nrebin = 2;
+    for(int i=0; i<2; i++) {
+        hWishboneEProj[i]->Rebin(nrebin);
+        hWishboneEProj[i]->Scale(1./nrebin);
+    }
+    hWishboneEProj[true]->SetMinimum(-0.2);
     hWishboneEProj[false]->GetYaxis()->SetTitle("Background rate [Hz/MeV]");
     hWishboneEProj[false]->GetYaxis()->SetTitleOffset(1.4);
-    myA->defaultCanvas->SetLogy(true);
-    hWishboneEProj[false]->Draw();
-    //hWishboneEProj[false]->Draw("Same");
+    hWishboneEProj[true]->Draw();
+    hWishboneEProj[false]->Draw("Same");
     drawHLine(0., myA->defaultCanvas, 1);
     myA->printCanvas("WishboneEnergy");
     
