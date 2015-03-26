@@ -1,4 +1,5 @@
 #include "WishbonePlugin.hh"
+#include "WishboneFit.hh"
 #include "GraphicsUtils.hh"
 #include "GraphUtils.hh"
 #include "StringManip.hh"
@@ -298,4 +299,10 @@ void WishbonePlugin::makePlots() {
     drawVLine(T_p_min/1000., myA->defaultCanvas, 4);
     drawVLine(T_p_max/1000., myA->defaultCanvas, 4);
     myA->printCanvas("WishboneTime");
+    
+    if(isCombined) {
+        GausWishboneFit GWF("WishboneFit",myA);
+        GWF.setWishbone(hWishboneBGSub);
+        GWF.doIt();
+    }
 }

@@ -41,8 +41,8 @@ Physics = BetaSpectrum.o ElectronBindingEnergy.o NuclEvtGen.o aSpectrum.o Collim
 
 ROOTUtils = SQLite_Helper.o
 
-Analysis = RunSetScanner.o BaseDataScanner.o ReducedDataScanner.o AcornCalibrator.o AcornDB.o \
-	RunAccumulator.o SourceCalPlugin.o WishbonePlugin.o Positioner.o PMTsPlugin.o PluginInterpolator.o
+Analysis = AcornCalibrator.o AcornDB.o BaseDataScanner.o Positioner.o PMTsPlugin.o PluginInterpolator.o \
+	ReducedDataScanner.o RunAccumulator.o RunSetScanner.o SourceCalPlugin.o WishboneFit.o WishbonePlugin.o
 
 objects = $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis)
 
