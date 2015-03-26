@@ -7,6 +7,7 @@
 #include "LinHistCombo.hh"
 #include "OutputManager.hh"
 #include "MultiGaus.hh"
+#include "SplineFit.hh"
 
 /// Base class for wishbone plot analysis
 class WishboneFit: public OutputManager {
@@ -55,8 +56,8 @@ public:
     /// perform overall fitting / asymmetry extraction routine
     virtual void doIt();
     
-    TGraph tau0, tau1;          ///< wishbone arm central timing
-    double sigma;               ///< wishbone arm timing width [us]
+    SplineFit tau[2];   ///< wishbone arm central timing [us]
+    SplineFit sigma[2]; ///< wishbone arm timing width [us]
 protected:
     /// 2-peak gaussian fit to a single slice
     void fitSliceGaus(int b);

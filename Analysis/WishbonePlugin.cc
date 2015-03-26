@@ -153,6 +153,7 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
 }
 
 void WishbonePlugin::calculateResults() {
+    hWishbone->Sumw2();
     hWishboneEProj[false] = hWishboneEProj[true] = NULL;
     TH2Slicer wbs(hWishbone);
     double tfg = wbs.projSlice(T_p_lo/1000., T_p_hi/1000., hWishboneEProj[true]);
@@ -188,7 +189,7 @@ void WishbonePlugin::makePlots() {
     
     if(!isCombined) {
         hWishboneBGSub->Rebin2D(2,2);
-        hWishboneBGSub->Scale(1./8.);
+        hWishboneBGSub->Scale(1./4.);
     }
     hWishboneBGSub->SetMinimum(-5.);
     hWishboneBGSub->SetMaximum(5.);

@@ -67,6 +67,8 @@ void WishboneFit::doIt() {
     for(int b=b0; b<=b1; b++) {
         fitScale(b);
         hSlices[b]->GetXaxis()->SetRangeUser(2,5);
+        hSlices[b]->SetMinimum(-0.2);
+        if(hSlices[b]->GetMaximum() < 1.2) hSlices[b]->SetMaximum(1.2);
         hSlices[b]->Draw();
         comboFitter.getFitter()->Draw("Same");
         string hname = "Slice_"+to_str(b);
@@ -80,74 +82,99 @@ void WishboneFit::doIt() {
 //////////////////
 
 GausWishboneFit::GausWishboneFit(const string& n, OutputManager* pnt):
-WishboneFit(n,pnt), MultiGaus(2,"GausWishbone",2), sigma(0.0825) {
+WishboneFit(n,pnt), MultiGaus(2,"GausWishbone",2) {
     /// initial guess timing
-    const size_t npts = 5;
-    const double Es[npts] =  {0,   200,  400, 600,  800};
-    const double t0s[npts] = {3.3, 3.25, 3.2, 3.2, 3.2};
-    const double t1s[npts] = {4.1, 3.95, 3.7, 3.4, 3.2};
+    const size_t npts = 12;
+    const double Es[npts] =  {20,   40,   70,   100,  200,  300,  400,  500,  550, 600, 650,  700};
+    const double t0s[npts] = {3.3,  3.3,  3.3,  3.25, 3.25, 3.2,  3.2,  3.2,  3.2, 3.2, 3.2,  3.2};
+    const double t1s[npts] = {4.1,  4.0,  4.0,  4.0,  3.95, 3.8,  3.7,  3.5,  3.5, 3.4, 3.4,  3.2};
     
     for(size_t i=0; i<npts; i++) {
-        tau0.SetPoint(i, Es[i], t0s[i]);
-        tau1.SetPoint(i, Es[i], t1s[i]);
+        for(int j=0; j<2; j++) {
+            tau[j].mySpline.SetPoint(i, Es[i], (j?t1s:t0s)[i]);
+            sigma[j].mySpline.SetPoint(i, Es[i], 0.083);
+        }
     }
 }
 
 double GausWishboneFit::shapeW(bool upper, double E, double t) const {
-    double t0 = upper? tau1.Eval(E) : tau0.Eval(E);
-    return exp(-(t-t0)*(t-t0)/(2*sigma*sigma))/(sigma*sqrt(2*M_PI));
+    double t0 = tau[upper].mySpline.Eval(E);
+    double s0 = sigma[upper].mySpline.Eval(E);
+    return exp(-(t-t0)*(t-t0)/(2*s0*s0))/(s0*sqrt(2*M_PI));
 }
 
 void GausWishboneFit::fitSliceGaus(int b) {
     double E = binE(b);
-    setCenterSigma(0,tau0.Eval(E),sigma);
-    setCenterSigma(1,tau1.Eval(E),sigma);
+    for(int i=0; i<2; i++)
+        setCenterSigma(i, tau[i].mySpline.Eval(E), sigma[i].mySpline.Eval(E));
     fit(hSlices[b],false);
 }
 
 void GausWishboneFit::doIt() {
     printf("Gaussian wishbone slice fits...\n");
     int nbins = hWishbone->GetXaxis()->FindBin(700);
-    TGraphErrors tau0fine(nbins);
-    TGraphErrors tau1fine(nbins);
-    TGraphErrors sigma0fine(nbins);
-    TGraphErrors sigma1fine(nbins);
+    TGraphErrors taufine[2];
+    TGraphErrors sigmafine[2];
     for(int b=1; b<=nbins; b++) {
         fitSliceGaus(b);
         double E = binE(b);
-        tau0fine.SetPoint(b-1, E, getParameter(1));
-        tau0fine.SetPointError(b-1, 0, getParError(1));
-        sigma0fine.SetPoint(b-1, E, getParameter(2));
-        sigma0fine.SetPointError(b-1, 0, getParError(2));
-        tau1fine.SetPoint(b-1, E, getParameter(4));
-        tau1fine.SetPointError(b-1, 0, getParError(4));
-        sigma1fine.SetPoint(b-1, E, getParameter(5));
-        sigma1fine.SetPointError(b-1, 0, getParError(5));
+        for(int i=0; i<2; i++) {
+            taufine[i].SetPoint(b-1, E, getParameter(1+3*i));
+            taufine[i].SetPointError(b-1, 0, getParError(1+3*i));
+            sigmafine[i].SetPoint(b-1, E, getParameter(2+3*i));
+            sigmafine[i].SetPointError(b-1, 0, getParError(2+3*i));
+        }
     }
     
-    tau1fine.SetTitle("Wishbone timing");
-    tau0fine.SetLineColor(4);
-    tau1fine.SetLineColor(2);
-    sigma0fine.SetLineColor(4);
-    sigma1fine.SetLineColor(2);
+    // spline fit timing adjustment
+    for(int i=0; i<2; i++) {
+        TF1* fTau = tau[i].getFitter(&taufine[i]);
+        taufine[i].Fit(fTau,"RN");
+        tau[i].updateSpline();
+        
+        TF1* fSigma = sigma[i].getFitter(&sigmafine[i]);
+        sigmafine[i].Fit(fSigma,"RN");
+        sigma[i].updateSpline();
+    }
     
-    tau1fine.SetMinimum(3);
-    tau1fine.SetMaximum(4.5);
-    tau1fine.Draw("AP");
-    tau1fine.GetXaxis()->SetTitle("energy [keV]");
-    tau1fine.GetYaxis()->SetTitle("proton TOF [#mus]");
-    tau1fine.GetYaxis()->SetTitleOffset(1.4);
-    tau0fine.Draw("P");
+    // plot setup
+    for(int i=0; i<2; i++) {
+        taufine[i].SetTitle("Wishbone timing");
+        taufine[i].SetLineColor(4-2*i);
+        sigmafine[i].SetLineColor(4-2*i);
+        taufine[i].SetMinimum(3);
+        taufine[i].SetMaximum(4.5);
+        sigmafine[i].SetMinimum(0);
+        sigmafine[i].SetMaximum(0.2);
+    }
+    taufine[1].Draw("AP");
+    taufine[1].GetXaxis()->SetTitle("energy [keV]");
+    taufine[1].GetYaxis()->SetTitle("proton TOF [#mus]");
+    taufine[1].GetYaxis()->SetTitleOffset(1.4);
+    taufine[0].Draw("P");
+    //
+    for(int i=0; i<2; i++) {
+        tau[i].mySpline.SetLineColor(6);
+        tau[i].mySpline.SetLineWidth(2);
+        tau[i].mySpline.Draw("PC");
+    }
+    //
     printCanvas("TauFine");
     
-    sigma0fine.SetMinimum(0);
-    sigma0fine.SetMaximum(0.2);
-    sigma0fine.Draw("AP");
-    sigma0fine.SetTitle("Wishbone timing spread");
-    sigma0fine.GetXaxis()->SetTitle("energy [keV]");
-    sigma0fine.GetYaxis()->SetTitle("proton TOF #sigma [#mus]");
-    sigma0fine.GetYaxis()->SetTitleOffset(1.4);
-    sigma1fine.Draw("P");
+   
+    sigmafine[0].Draw("AP");
+    sigmafine[0].SetTitle("Wishbone timing spread");
+    sigmafine[0].GetXaxis()->SetTitle("energy [keV]");
+    sigmafine[0].GetYaxis()->SetTitle("proton TOF #sigma [#mus]");
+    sigmafine[0].GetYaxis()->SetTitleOffset(1.4);
+    sigmafine[1].Draw("P");
+    //
+    for(int i=0; i<2; i++) {
+        sigma[i].mySpline.SetLineColor(6);
+        sigma[i].mySpline.SetLineWidth(2);
+        sigma[i].mySpline.Draw("PC");
+    }
+    //
     printCanvas("SigmaFine");
     
     WishboneFit::doIt();
