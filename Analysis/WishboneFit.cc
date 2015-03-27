@@ -1,9 +1,14 @@
 #include "WishboneFit.hh"
 #include "GraphUtils.hh"
+#include "GraphicsUtils.hh"
 #include "PathUtils.hh"
 #include "StringManip.hh"
 #include <cassert>
 #include <TF2.h>
+#include <TMath.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_roots.h>
 
 WishboneFit::WishboneFit(const string& n, OutputManager* pnt): OutputManager(n,pnt) {
     sliceArms[0] = sliceArms[1] = NULL;
@@ -16,8 +21,11 @@ void WishboneFit::setWishbone(TH2* h) {
     // form slices
     for(auto it = hSlices.begin(); it != hSlices.end(); it++) delete *it;
     hSlices = sliceTH2(*hWishbone, X_DIRECTION, true);
-    for(int i=0; i<=hWishbone->GetNbinsX()+1; i++)
+    for(int i=0; i<=hWishbone->GetNbinsX()+1; i++) {
         hSlices[i]->SetTitle(("Wishbone Slice " + to_str(binE(i)) + " keV").c_str());
+        hSlices[i]->GetYaxis()->SetTitle("rate [Hz/MeV/#mus]");
+        hSlices[i]->GetYaxis()->SetTitleOffset(1.35);
+    }
     
     // set up arm profiles
     // TODO comboFitter.Clear();
@@ -38,11 +46,11 @@ void WishboneFit::calcArms(double E) {
 
 double WishboneFit::fitScale(int bin) {
     assert(hWishbone);
-    double E = hWishbone->GetXaxis()->GetBinCenter(bin);
+    double E = binE(bin);
     calcArms(E);
     
-    double t0 = 2.8;
-    double t1 = 4.5;
+    double t0, t1;
+    getComboFitRange(E,t0,t1);
     comboFitter.Fit(hSlices[bin], t0, t1);
     for(int i=0; i<2; i++) C[i][bin] = comboFitter.coeffs[i];
     
@@ -58,7 +66,7 @@ double WishboneFit::fitScale(int bin) {
     return chisq;
 }
 
-void WishboneFit::doIt() {
+void WishboneFit::fitModel() {
     if(!hWishbone) return;
     
     int b0 = hWishbone->GetXaxis()->FindBin(20);
@@ -66,16 +74,67 @@ void WishboneFit::doIt() {
     vector<string> hnames;
     for(int b=b0; b<=b1; b++) {
         fitScale(b);
+        double cx = calcCrossover(b);
+        gt0.SetPoint(b,binE(b),cx);
+                     
         hSlices[b]->GetXaxis()->SetRangeUser(2,5);
         hSlices[b]->SetMinimum(-0.2);
         if(hSlices[b]->GetMaximum() < 1.2) hSlices[b]->SetMaximum(1.2);
         hSlices[b]->Draw();
+        drawVLine(cx,defaultCanvas,6);
         comboFitter.getFitter()->Draw("Same");
         string hname = "Slice_"+to_str(b);
         printCanvas(hname);
         hnames.push_back(plotPath + "/" + hname + ".pdf");
     }
     combo_pdf(hnames,plotPath + "/Slices.pdf");
+}
+
+void WishboneFit::getComboFitRange(double, double& t0, double& t1) const {
+    t0 = 2.8;
+    t1 = 4.5;
+}
+
+double WishboneFit::tailBalance(int b, double t) const {
+    double E = binE(b);
+    double tails = -C[0][b]*(intShapeW(0, E, 10) - intShapeW(0, E, t));
+    tails += C[1][b]*(intShapeW(1, E, t) - intShapeW(1, E, 0));
+    return tails;
+}
+
+double wishbone_tails(double t, void* params) {
+    WishboneFit* WBF = (WishboneFit*)params;
+    return WBF->tailBalance(WBF->currentBin, t);
+}
+
+double WishboneFit::calcCrossover(int b) {
+    currentBin = b;
+    double E = binE(b);
+    if(C[0][b] <= 0 || C[1][b] <= 0) return 0;
+    
+    double r = 0;
+    double x_lo, x_hi;
+    getComboFitRange(E, x_lo, x_hi);
+    
+    gsl_function F;
+    F.function = &wishbone_tails;
+    F.params = this;
+    gsl_root_fsolver* s = gsl_root_fsolver_alloc(gsl_root_fsolver_brent);
+    gsl_root_fsolver_set (s, &F, x_lo, x_hi);
+        
+    int iter = 0, max_iter = 100;
+    int status;
+    do {
+        iter++;
+        status = gsl_root_fsolver_iterate(s);
+        r = gsl_root_fsolver_root(s);
+        x_lo = gsl_root_fsolver_x_lower(s);
+        x_hi = gsl_root_fsolver_x_upper(s);
+        status = gsl_root_test_interval(x_lo, x_hi, 0, 0.0001);
+    } while (status == GSL_CONTINUE && iter < max_iter);
+    gsl_root_fsolver_free(s);
+    
+    return r;
 }
 
 //////////////////
@@ -103,6 +162,13 @@ double GausWishboneFit::shapeW(bool upper, double E, double t) const {
     return exp(-(t-t0)*(t-t0)/(2*s0*s0))/(s0*sqrt(2*M_PI));
 }
 
+double GausWishboneFit::intShapeW(bool upper, double E, double t) const {
+    double t0 = tau[upper].mySpline.Eval(E);
+    double s0 = sigma[upper].mySpline.Eval(E);
+    return TMath::Erf( (t-t0)/s0 );
+}
+
+
 void GausWishboneFit::fitSliceGaus(int b) {
     double E = binE(b);
     for(int i=0; i<2; i++)
@@ -110,7 +176,7 @@ void GausWishboneFit::fitSliceGaus(int b) {
     fit(hSlices[b],false);
 }
 
-void GausWishboneFit::doIt() {
+void GausWishboneFit::fitModel() {
     printf("Gaussian wishbone slice fits...\n");
     int nbins = hWishbone->GetXaxis()->FindBin(700);
     TGraphErrors taufine[2];
@@ -137,6 +203,8 @@ void GausWishboneFit::doIt() {
         sigma[i].updateSpline();
     }
     
+    WishboneFit::fitModel();
+    
     // plot setup
     for(int i=0; i<2; i++) {
         taufine[i].SetTitle("Wishbone timing");
@@ -152,6 +220,8 @@ void GausWishboneFit::doIt() {
     taufine[1].GetYaxis()->SetTitle("proton TOF [#mus]");
     taufine[1].GetYaxis()->SetTitleOffset(1.4);
     taufine[0].Draw("P");
+    gt0.SetMarkerStyle(6);
+    gt0.Draw("P");
     //
     for(int i=0; i<2; i++) {
         tau[i].mySpline.SetLineColor(6);
@@ -161,7 +231,6 @@ void GausWishboneFit::doIt() {
     //
     printCanvas("TauFine");
     
-   
     sigmafine[0].Draw("AP");
     sigmafine[0].SetTitle("Wishbone timing spread");
     sigmafine[0].GetXaxis()->SetTitle("energy [keV]");
@@ -177,5 +246,10 @@ void GausWishboneFit::doIt() {
     //
     printCanvas("SigmaFine");
     
-    WishboneFit::doIt();
+    
+}
+
+void GausWishboneFit::getComboFitRange(double E, double& t0, double& t1) const {
+    t0 = 2.8;
+    t1 = tau[1].mySpline.Eval(E)+0.5;
 }

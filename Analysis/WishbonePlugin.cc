@@ -176,11 +176,11 @@ void WishbonePlugin::calculateResults() {
     
     hWishboneTProj = hWishbone->ProjectionY("_tproj", 0, -1, "e");
     hWishboneTProj->SetTitle("Wishbone time of flight projection");
-    hWishboneTProj->Scale(1./myA->runTimes.total()/hWishboneTProj->GetBinWidth(1));
+    normalize_to_bin_width(hWishboneTProj, 1./myA->runTimes.total());
     hWishboneTProj->GetYaxis()->SetTitle("event rate [Hz/#mus]");
     hWishboneTProj->GetYaxis()->SetTitleOffset(1.45);
     
-    hWishboneBGSub->Scale(s0/hWishboneTProj->GetBinWidth(1));
+    hWishboneBGSub->Scale(s0/hWishboneTProj->GetBinWidth(1)); // [mHz/keV/us]
 }
 
 void WishbonePlugin::makePlots() {
@@ -304,6 +304,6 @@ void WishbonePlugin::makePlots() {
     if(isCombined) {
         GausWishboneFit GWF("WishboneFit",myA);
         GWF.setWishbone(hWishboneBGSub);
-        GWF.doIt();
+        GWF.fitModel();
     }
 }

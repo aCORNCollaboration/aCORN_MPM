@@ -63,8 +63,8 @@ public:
     double T_p_max = 9500;      ///< maximum TOF for background analysis [ns]
     
     TH1* hWishboneEProj[2];     ///< Wishbone energy spectrum, background and background-subtracted
-    TH1* hWishboneTProj;        ///< Wishbone time-axis projection
-    TH2* hWishboneBGSub;        ///< Background-subtracted wishbone
+    TH1* hWishboneTProj;        ///< Wishbone time-axis projection [Hz/us]
+    TH2* hWishboneBGSub;        ///< Background-subtracted wishbone [mHz/keV/us]
 
 protected:
     /// initialize foreground/background regions
