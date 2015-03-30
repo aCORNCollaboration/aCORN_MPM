@@ -167,7 +167,7 @@ void WishbonePlugin::calculateResults() {
     hWishboneEProj[false]->Scale(s0*tfg/tbg);
     hWishboneEProj[true]->Add(hWishboneEProj[false],-1.0);
     
-    hWishboneEProj[true]->GetYaxis()->SetTitle("rate [mHz/keV]");
+    hWishboneEProj[true]->GetYaxis()->SetTitle("rate [Hz/MeV]");
     hWishboneEProj[true]->GetYaxis()->SetTitleOffset(1.45);
     hWishboneEProj[true]->SetTitle("aCORN electron spectrum");
     hWishboneEProj[false]->SetTitle("aCORN electron spectrum background");
@@ -180,7 +180,8 @@ void WishbonePlugin::calculateResults() {
     hWishboneTProj->GetYaxis()->SetTitle("event rate [Hz/#mus]");
     hWishboneTProj->GetYaxis()->SetTitleOffset(1.45);
     
-    hWishboneBGSub->Scale(s0/hWishboneTProj->GetBinWidth(1)); // [mHz/keV/us]
+    hWishboneBGSub->Scale(s0/hWishboneTProj->GetBinWidth(1));
+    hWishboneBGSub->GetZaxis()->SetTitle("rate [Hz/MeV/#mus]");
 }
 
 void WishbonePlugin::makePlots() {
@@ -191,8 +192,11 @@ void WishbonePlugin::makePlots() {
         hWishboneBGSub->Rebin2D(2,2);
         hWishboneBGSub->Scale(1./4.);
     }
-    hWishboneBGSub->SetMinimum(-5.);
-    hWishboneBGSub->SetMaximum(5.);
+    myA->defaultCanvas->SetRightMargin(0.13);
+    hWishboneBGSub->SetMinimum(-3.);
+    hWishboneBGSub->SetMaximum(3.);
+    hWishboneBGSub->GetXaxis()->SetRangeUser(0,1000);
+    hWishboneBGSub->GetYaxis()->SetRangeUser(2,5);
     makeRBpalette();
     hWishboneBGSub->Draw("Col Z");
     drawHLine(T_p_lo/1000., myA->defaultCanvas, 2);

@@ -16,7 +16,7 @@ public:
     /// constructor
     WeightBins() { }
     /// add content
-    void fill(int b, double x, double dx2, double w = 1) { xs[b] += w*x; dx2s[b] += w*dx2; ws[b] += w; }
+    void fill(int b, double x, double dx2, double w = 1) { xs[b] += w*x; dx2s[b] += w*w*dx2; ws[b] += w; }
     /// fill content into histogram by bin
     void intoHist(TH1* h);
     map<int,double> xs, dx2s, ws;

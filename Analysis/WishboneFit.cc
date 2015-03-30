@@ -34,7 +34,6 @@ void WishboneFit::setWishbone(TH2* h) {
     hSlices = sliceTH2(*hWishbone, X_DIRECTION, true);
     for(int i=0; i<=hWishbone->GetNbinsX()+1; i++) {
         hSlices[i]->SetTitle(("Wishbone Slice " + to_str(binE(i)) + " keV").c_str());
-        hSlices[i]->GetYaxis()->SetTitle("rate [Hz/MeV/#mus]");
         hSlices[i]->GetYaxis()->SetTitleOffset(1.35);
     }
     
@@ -95,7 +94,8 @@ void WishboneFit::fitModel() {
     int b1 = hWishbone->GetXaxis()->FindBin(750);
     TF1* cf = comboFitter.getFitter();
     cf->SetNpx(300);
-
+    defaultCanvas->SetRightMargin(0.04);
+    
     vector<string> hnames;
     for(int b=b0; b<=b1; b++) {
         fitScale(b);
@@ -164,6 +164,8 @@ double WishboneFit::calcCrossover(int b) {
 }
 
 void WishboneFit::extractAsymmetry() {
+    TGraphErrors modelN[2];
+    TGraphErrors dataN[2];
     TGraphErrors modelA;
     TGraphErrors dataA;
     TGraph dtSens;
@@ -176,10 +178,14 @@ void WishboneFit::extractAsymmetry() {
         double tm = gt0.Eval(E);
         if(!(armTime(0,E) < tm && tm < armTime(1,E))) continue;
         
-        double n0 = intShapeW(0, E, 10) - intShapeW(0, E, 0);
-        double n1 = intShapeW(1, E, 10) - intShapeW(1, E, 0);
+        double n0 = intShapeW(0, E);
+        double n1 = intShapeW(1, E);
         double amm = C[0][b]*n0;
         double amp = C[1][b]*n1;
+        modelN[0].SetPoint(npts, E, amm);
+        modelN[1].SetPoint(npts, E, amp);
+        modelN[0].SetPointError(npts, 0, dC[0][b]*n0);
+        modelN[1].SetPointError(npts, 0, dC[1][b]*n0);
         double am = (amp-amm)/(amp+amm);
         double dam = sqrt(dC[0][b]*dC[0][b]*n0*n0 + dC[1][b]*dC[1][b]*n1*n1)/(amm+amp);
         modelA.SetPoint(npts, E, 100*am);
@@ -188,18 +194,47 @@ void WishboneFit::extractAsymmetry() {
         double t0,t1;
         getComboFitRange(E, t0, t1);
         double dadm, dadp;
-        double adm = integralAndError(hSlices[b],t0,tm,dadm,"interpolate");
-        double adp = integralAndError(hSlices[b],tm,t1,dadp,"interpolate");
+        double adm = integralAndErrorInterp(hSlices[b],t0,tm,dadm,true);
+        double adp = integralAndErrorInterp(hSlices[b],tm,t1,dadp,true);
+        dataN[0].SetPoint(npts, E, adm);
+        dataN[1].SetPoint(npts, E, adp);
+        dataN[0].SetPointError(npts, 0, dadm);
+        dataN[1].SetPointError(npts, 0, dadp);
         double ad = (adp-adm)/(adp+adm);
         double dad = sqrt(dadm*dadm + dadp*dadp)/(adm+adp);
         dataA.SetPoint(npts, E, 100*ad);
         dataA.SetPointError(npts, 0, 100*dad);
         
         double sens = 2*modelFit(b,tm)/(amm+amp);
-        dtSens.SetPoint(npts, E, 100*sens/10);
+        dtSens.SetPoint(npts, E, 100*sens/20);
         
         npts++;
     }
+    
+    for(int i=0; i<2; i++) {
+        modelN[i].SetMarkerStyle(24+3*i);
+        modelN[i].SetMarkerSize(0.2);
+        modelN[i].SetMarkerColor(4);
+        modelN[i].SetLineColor(4);
+        dataN[i].SetMarkerStyle(24+3*i);
+        dataN[i].SetMarkerSize(0.2);
+        dataN[i].SetMarkerColor(2);
+        dataN[i].SetLineColor(2);
+    }
+    
+    defaultCanvas->SetRightMargin(0.04);
+    
+    modelN[0].Draw("AP");
+    modelN[0].SetTitle("aCORN wishbone counts");
+    modelN[0].GetXaxis()->SetTitle("energy [keV]");
+    modelN[0].GetXaxis()->SetRangeUser(0,600);
+    modelN[0].GetYaxis()->SetTitle("rate [Hz/MeV]");
+    modelN[0].GetYaxis()->SetTitleOffset(1.35);
+    modelN[1].Draw("P");
+    dataN[0].Draw("P");
+    dataN[1].Draw("P");
+    printCanvas("WishboneCounts");
+    
     modelA.SetMinimum(0);
     modelA.SetMaximum(20);
     modelA.SetMarkerColor(4);
@@ -230,25 +265,27 @@ void WishboneFit::calcGapFill() {
         hWishbone->GetBinXYZ(i,binx,biny,binz);
         if(binx == 0 || binx > hWishbone->GetNbinsX() || biny == 0 || biny > hWishbone->GetNbinsY()) continue;
         double E = binE(binx);
+        double dE = hWishbone->GetXaxis()->GetBinWidth(binx);
         double t = hWishbone->GetYaxis()->GetBinCenter(biny);
+        double dt = hWishbone->GetYaxis()->GetBinWidth(biny);
         if(t < armTime(false, E) || t > armTime(true, E)) continue;
         double zexp = modelFit(binx,t);
         if(zexp > 0.05) continue;
         double z = hWishbone->GetBinContent(i) - zexp;
         double dz = hWishbone->GetBinError(i);
-        wbx.fill(binx, z, dz*dz);
-        if(E>100) wby.fill(biny, z, dz*dz);
+        wbx.fill(binx, z, dz*dz, 1000*dt);
+        if(E>100) wby.fill(biny, z, dz*dz, dE);
     }
     
     TH1F* fillx = axisHist(*hWishbone, "hWishboneFill_E", X_DIRECTION);
     fillx->SetTitle("Wishbone inter-arm fill");
-    fillx->GetYaxis()->SetTitle("rate [Hz/MeV]");
+    fillx->GetYaxis()->SetTitle("rate [mHz/MeV]");
     fillx->GetYaxis()->SetTitleOffset(1.35);
     fillx->GetXaxis()->SetRangeUser(0,600);
-    fillx->SetMaximum(1);
+    fillx->SetMaximum(50);
     
     TH1F* filly = axisHist(*hWishbone, "hWishboneFill_t", Y_DIRECTION);
-    filly->GetYaxis()->SetTitle("rate [Hz/#mus]");
+    filly->GetYaxis()->SetTitle("rate [mHz/#mus]");
     filly->SetTitle("Wishbone inter-arm fill");
     filly->GetYaxis()->SetTitleOffset(1.35);
     filly->GetXaxis()->SetRangeUser(3,4);
@@ -292,7 +329,7 @@ double GausWishboneFit::shapeW(bool upper, double E, double t) const {
 double GausWishboneFit::intShapeW(bool upper, double E, double t) const {
     double t0 = tau[upper].mySpline.Eval(E);
     double s0 = sigma[upper].mySpline.Eval(E);
-    return TMath::Erf( (t-t0)/s0 );
+    return (1+TMath::Erf( (t-t0)/s0 ))*0.5;
 }
 
 
@@ -333,6 +370,7 @@ void GausWishboneFit::fitModel() {
     WishboneFit::fitModel();
     
     // plot setup
+    defaultCanvas->SetRightMargin(0.04);
     for(int i=0; i<2; i++) {
         taufine[i].SetTitle("Wishbone timing");
         taufine[i].SetLineColor(4-2*i);

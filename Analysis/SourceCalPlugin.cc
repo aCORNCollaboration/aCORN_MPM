@@ -67,7 +67,7 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     
     TH1* hEnergyRate = myA->hToRate(hEnergy,1);
     hEnergyRate->Scale(1000);
-    hEnergyRate->GetYaxis()->SetTitle("event rate [mHz/keV]");
+    hEnergyRate->GetYaxis()->SetTitle("event rate [Hz/MeV]");
     hEnergyRate->GetYaxis()->SetTitleOffset(1.4);
     hEnergyRate->SetLineColor(2);
     TH1* hEnergyRateBG = bg.myA->hToRate(bg.hEnergy,1);
@@ -100,7 +100,7 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     
     TH1* hEnergyRecalRate = myA->hToRate(hEnergyRecal,1);
     hEnergyRecalRate->Scale(1000);
-    hEnergyRecalRate->GetYaxis()->SetTitle("event rate [mHz/keV]");
+    hEnergyRecalRate->GetYaxis()->SetTitle("event rate [Hz/MeV]");
     hEnergyRecalRate->GetYaxis()->SetTitleOffset(1.4);
     hEnergyRecalRate->SetLineColor(2);
     TH1* hEnergyRecalRateBG = bg.myA->hToRate(bg.hEnergyRecal,1);
