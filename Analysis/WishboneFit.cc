@@ -10,6 +10,17 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
 
+void WeightBins::intoHist(TH1* h) {
+    for(auto it = xs.begin(); it != xs.end(); it++)
+        h->SetBinContent(it->first, it->second);
+    for(auto it = dx2s.begin(); it != dx2s.end(); it++)
+        h->SetBinError(it->first, sqrt(it->second));
+}
+
+/////////////////////
+/////////////////////
+/////////////////////
+
 WishboneFit::WishboneFit(const string& n, OutputManager* pnt): OutputManager(n,pnt) {
     sliceArms[0] = sliceArms[1] = NULL;
 }
@@ -35,6 +46,8 @@ void WishboneFit::setWishbone(TH2* h) {
         comboFitter.addTerm(sliceArms[i]);
         C[i].clear();
         C[i].resize(hSlices.size());
+        dC[i].clear();
+        dC[i].resize(hSlices.size());
     }
 }
 
@@ -52,7 +65,10 @@ double WishboneFit::fitScale(int bin) {
     double t0, t1;
     getComboFitRange(E,t0,t1);
     comboFitter.Fit(hSlices[bin], t0, t1);
-    for(int i=0; i<2; i++) C[i][bin] = comboFitter.coeffs[i];
+    for(int i=0; i<2; i++) {
+        C[i][bin] = comboFitter.coeffs[i];
+        dC[i][bin] = comboFitter.dcoeffs[i];
+    }
     
     // calculate residuals chi^2
     const TAxis* AX = hSlices[bin]->GetXaxis();
@@ -66,11 +82,20 @@ double WishboneFit::fitScale(int bin) {
     return chisq;
 }
 
+double WishboneFit::modelFit(int b, double t) const {
+    if(b < 0 || b >= (int)hSlices.size()) return 0;
+    double E = binE(b);
+    return C[0][b]*shapeW(0,E,t) + C[1][b]*shapeW(1,E,t);
+}
+
 void WishboneFit::fitModel() {
     if(!hWishbone) return;
     
     int b0 = hWishbone->GetXaxis()->FindBin(20);
     int b1 = hWishbone->GetXaxis()->FindBin(750);
+    TF1* cf = comboFitter.getFitter();
+    cf->SetNpx(300);
+
     vector<string> hnames;
     for(int b=b0; b<=b1; b++) {
         fitScale(b);
@@ -82,7 +107,7 @@ void WishboneFit::fitModel() {
         if(hSlices[b]->GetMaximum() < 1.2) hSlices[b]->SetMaximum(1.2);
         hSlices[b]->Draw();
         drawVLine(cx,defaultCanvas,6);
-        comboFitter.getFitter()->Draw("Same");
+        cf->Draw("Same");
         string hname = "Slice_"+to_str(b);
         printCanvas(hname);
         hnames.push_back(plotPath + "/" + hname + ".pdf");
@@ -115,7 +140,8 @@ double WishboneFit::calcCrossover(int b) {
     double r = 0;
     double x_lo, x_hi;
     getComboFitRange(E, x_lo, x_hi);
-    
+    if(tailBalance(b,x_lo) >= 0 || tailBalance(b,x_hi) <= 0) return 0;
+       
     gsl_function F;
     F.function = &wishbone_tails;
     F.params = this;
@@ -135,6 +161,107 @@ double WishboneFit::calcCrossover(int b) {
     gsl_root_fsolver_free(s);
     
     return r;
+}
+
+void WishboneFit::extractAsymmetry() {
+    TGraphErrors modelA;
+    TGraphErrors dataA;
+    TGraph dtSens;
+    int npts = 0;
+    
+    for(int b=1; b<(int)hSlices.size(); b++) {
+        if(C[0][b] <= 0 || C[1][b] <= 0) continue;
+        double E = binE(b);
+        
+        double tm = gt0.Eval(E);
+        if(!(armTime(0,E) < tm && tm < armTime(1,E))) continue;
+        
+        double n0 = intShapeW(0, E, 10) - intShapeW(0, E, 0);
+        double n1 = intShapeW(1, E, 10) - intShapeW(1, E, 0);
+        double amm = C[0][b]*n0;
+        double amp = C[1][b]*n1;
+        double am = (amp-amm)/(amp+amm);
+        double dam = sqrt(dC[0][b]*dC[0][b]*n0*n0 + dC[1][b]*dC[1][b]*n1*n1)/(amm+amp);
+        modelA.SetPoint(npts, E, 100*am);
+        modelA.SetPointError(npts, 0, 100*dam);
+        
+        double t0,t1;
+        getComboFitRange(E, t0, t1);
+        double dadm, dadp;
+        double adm = integralAndError(hSlices[b],t0,tm,dadm,"interpolate");
+        double adp = integralAndError(hSlices[b],tm,t1,dadp,"interpolate");
+        double ad = (adp-adm)/(adp+adm);
+        double dad = sqrt(dadm*dadm + dadp*dadp)/(adm+adp);
+        dataA.SetPoint(npts, E, 100*ad);
+        dataA.SetPointError(npts, 0, 100*dad);
+        
+        double sens = 2*modelFit(b,tm)/(amm+amp);
+        dtSens.SetPoint(npts, E, 100*sens/10);
+        
+        npts++;
+    }
+    modelA.SetMinimum(0);
+    modelA.SetMaximum(20);
+    modelA.SetMarkerColor(4);
+    modelA.SetLineColor(4);
+    modelA.SetMarkerStyle(7);
+    modelA.Draw("AP");
+    modelA.SetTitle("aCORN wishbone asymmetry");
+    modelA.GetXaxis()->SetTitle("energy [keV]");
+    modelA.GetXaxis()->SetRangeUser(0,600);
+    modelA.GetYaxis()->SetTitle("branch asymmetry [%]");
+    modelA.GetYaxis()->SetTitleOffset(1.4);
+    
+    dataA.SetMarkerStyle(7);
+    dataA.SetMarkerColor(2);
+    dataA.SetLineColor(2);
+    dataA.Draw("P");
+    
+    dtSens.SetMarkerStyle(7);
+    dtSens.Draw("PL");
+    
+    printCanvas("Asymmetry");
+}
+
+void WishboneFit::calcGapFill() {
+    WeightBins wbx, wby;
+    for(int i=0; i<hWishbone->GetNcells(); i++) {
+        Int_t binx, biny, binz;
+        hWishbone->GetBinXYZ(i,binx,biny,binz);
+        if(binx == 0 || binx > hWishbone->GetNbinsX() || biny == 0 || biny > hWishbone->GetNbinsY()) continue;
+        double E = binE(binx);
+        double t = hWishbone->GetYaxis()->GetBinCenter(biny);
+        if(t < armTime(false, E) || t > armTime(true, E)) continue;
+        double zexp = modelFit(binx,t);
+        if(zexp > 0.05) continue;
+        double z = hWishbone->GetBinContent(i) - zexp;
+        double dz = hWishbone->GetBinError(i);
+        wbx.fill(binx, z, dz*dz);
+        if(E>100) wby.fill(biny, z, dz*dz);
+    }
+    
+    TH1F* fillx = axisHist(*hWishbone, "hWishboneFill_E", X_DIRECTION);
+    fillx->SetTitle("Wishbone inter-arm fill");
+    fillx->GetYaxis()->SetTitle("rate [Hz/MeV]");
+    fillx->GetYaxis()->SetTitleOffset(1.35);
+    fillx->GetXaxis()->SetRangeUser(0,600);
+    fillx->SetMaximum(1);
+    
+    TH1F* filly = axisHist(*hWishbone, "hWishboneFill_t", Y_DIRECTION);
+    filly->GetYaxis()->SetTitle("rate [Hz/#mus]");
+    filly->SetTitle("Wishbone inter-arm fill");
+    filly->GetYaxis()->SetTitleOffset(1.35);
+    filly->GetXaxis()->SetRangeUser(3,4);
+    wbx.intoHist(fillx);
+    wby.intoHist(filly);
+    
+    fillx->Draw();
+    drawHLine(0, defaultCanvas, 1, 2);
+    printCanvas("hWishboneFill_E");
+    
+    filly->Draw();
+    drawHLine(0, defaultCanvas, 1, 2);
+    printCanvas("hWishboneFill_t");
 }
 
 //////////////////

@@ -8,6 +8,19 @@
 #include "OutputManager.hh"
 #include "MultiGaus.hh"
 #include "SplineFit.hh"
+#include <map>
+using std::map;
+
+class WeightBins {
+public:
+    /// constructor
+    WeightBins() { }
+    /// add content
+    void fill(int b, double x, double dx2, double w = 1) { xs[b] += w*x; dx2s[b] += w*dx2; ws[b] += w; }
+    /// fill content into histogram by bin
+    void intoHist(TH1* h);
+    map<int,double> xs, dx2s, ws;
+};
 
 /// Base class for wishbone plot analysis
 class WishboneFit: public OutputManager {
@@ -20,8 +33,14 @@ public:
     
     /// (unscaled) wishbone upper/lower arm time profile
     virtual double shapeW(bool upper, double E, double t) const = 0;
+    /// wishbone model fit in energy bin
+    double modelFit(int b, double t) const;
     /// indefinite integral dt at t of unscaled wishbone shape function
     virtual double intShapeW(bool upper, double E, double t) const = 0;
+    /// total normalization integral over shape
+    virtual double intShapeW(bool upper, double E) const = 0;
+    /// characteristic time for specified arm events
+    virtual double armTime(bool upper, double E) const = 0;
     /// estimated misidentified tail fraction balance in bin for time cut t
     double tailBalance(int b, double t) const;
     
@@ -30,6 +49,10 @@ public:
     
     /// fit slices with model
     virtual void fitModel();
+    /// generate extracted asymmetry plots
+    virtual void extractAsymmetry();
+    /// inter-arm fill histograms
+    virtual void calcGapFill();
     
     int currentBin = 0;                 ///< bin in use for internal analysis
     
@@ -49,6 +72,7 @@ protected:
     vector<TH1F*> hSlices;              ///< wishbone slices for each energy bin
     TH1* sliceArms[2];                  ///< profiles for upper/lower arm slices
     vector<double> C[2];                ///< wishbone arm magnitudes for each slice
+    vector<double> dC[2];               ///< fit uncertainty on arm magnitudes
     TGraph gt0;                         ///< optimal t0 cut point
 };
 
@@ -62,6 +86,10 @@ public:
     virtual double shapeW(bool upper, double E, double t) const;
     /// indefinite integral dt at t of unscaled wishbone shape function
     virtual double intShapeW(bool uppter, double E, double t) const;
+    /// total normalization integral over shape
+    virtual double intShapeW(bool, double) const { return 1.; }
+    /// characteristic time for specified arm events
+    virtual double armTime(bool upper, double E) const { return tau[upper].mySpline.Eval(E); }
     
     /// evaluation for fit of single slice
     double sliceFitEval(double* x, double* p);

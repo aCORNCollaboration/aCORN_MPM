@@ -187,7 +187,7 @@ void WishbonePlugin::makePlots() {
     
     bool isCombined = myA->runTimes.nTags() > 1000;
     
-    if(!isCombined) {
+    if(true || !isCombined) {
         hWishboneBGSub->Rebin2D(2,2);
         hWishboneBGSub->Scale(1./4.);
     }
@@ -305,5 +305,7 @@ void WishbonePlugin::makePlots() {
         GausWishboneFit GWF("WishboneFit",myA);
         GWF.setWishbone(hWishboneBGSub);
         GWF.fitModel();
+        GWF.extractAsymmetry();
+        GWF.calcGapFill();
     }
 }
