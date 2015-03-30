@@ -21,22 +21,64 @@ void WeightBins::intoHist(TH1* h) {
 /////////////////////
 /////////////////////
 
-WishboneFit::WishboneFit(const string& n, OutputManager* pnt): OutputManager(n,pnt) {
-    sliceArms[0] = sliceArms[1] = NULL;
-}
-
-void WishboneFit::setWishbone(TH2* h) {
+void WishboneSeparator::setWishbone(TH2* h) {
     assert(h && !hWishbone);
     hWishbone = h;
     
-    // form slices
     for(auto it = hSlices.begin(); it != hSlices.end(); it++) delete *it;
     hSlices = sliceTH2(*hWishbone, X_DIRECTION, true);
     for(int i=0; i<=hWishbone->GetNbinsX()+1; i++) {
         hSlices[i]->SetTitle(("Wishbone Slice " + to_str(binE(i)) + " keV").c_str());
         hSlices[i]->GetYaxis()->SetTitleOffset(1.35);
     }
+}
+
+void WishboneSeparator::extractAsymmetry() {
+    int npts = 0;
+    for(int b=1; b<(int)hSlices.size(); b++) {
+        double E = binE(b);
+        double tm = gt0.Eval(E);
+
+        double t0,t1;
+        getComboFitRange(E, t0, t1);
+        double dadm, dadp;
+        double adm = integralAndErrorInterp(hSlices[b],t0,tm,dadm,true);
+        double adp = integralAndErrorInterp(hSlices[b],tm,t1,dadp,true);
+        dataN[0].SetPoint(npts, E, adm);
+        dataN[1].SetPoint(npts, E, adp);
+        dataN[0].SetPointError(npts, 0, dadm);
+        dataN[1].SetPointError(npts, 0, dadp);
+        double ad = (adp-adm)/(adp+adm);
+        double dad = sqrt(dadm*dadm + dadp*dadp)/(adm+adp);
+        dataA.SetPoint(npts, E, 100*ad);
+        dataA.SetPointError(npts, 0, 100*dad);
+        
+        npts++;
+    }
     
+    for(int i=0; i<2; i++) {
+        dataN[i].SetMarkerStyle(24+3*i);
+        dataN[i].SetMarkerSize(0.2);
+        dataN[i].SetMarkerColor(2);
+        dataN[i].SetLineColor(2);
+    }
+    
+    dataA.SetMarkerStyle(7);
+    dataA.SetMarkerColor(2);
+    dataA.SetLineColor(2);
+}
+
+/////////////////////
+/////////////////////
+/////////////////////
+
+WishboneFit::WishboneFit(const string& n, OutputManager* pnt): WishboneSeparator(n,pnt) {
+    sliceArms[0] = sliceArms[1] = NULL;
+}
+
+void WishboneFit::setWishbone(TH2* h) {
+    WishboneSeparator::setWishbone(h);
+
     // set up arm profiles
     // TODO comboFitter.Clear();
     for(int i=0; i<2; i++) {
@@ -164,12 +206,14 @@ double WishboneFit::calcCrossover(int b) {
 }
 
 void WishboneFit::extractAsymmetry() {
+    
+    WishboneSeparator::extractAsymmetry();
+    
     TGraphErrors modelN[2];
-    TGraphErrors dataN[2];
     TGraphErrors modelA;
-    TGraphErrors dataA;
     TGraph dtSens;
     int npts = 0;
+    TF1 lineFit("lineFit","pol0",100,400);
     
     for(int b=1; b<(int)hSlices.size(); b++) {
         if(C[0][b] <= 0 || C[1][b] <= 0) continue;
@@ -191,20 +235,6 @@ void WishboneFit::extractAsymmetry() {
         modelA.SetPoint(npts, E, 100*am);
         modelA.SetPointError(npts, 0, 100*dam);
         
-        double t0,t1;
-        getComboFitRange(E, t0, t1);
-        double dadm, dadp;
-        double adm = integralAndErrorInterp(hSlices[b],t0,tm,dadm,true);
-        double adp = integralAndErrorInterp(hSlices[b],tm,t1,dadp,true);
-        dataN[0].SetPoint(npts, E, adm);
-        dataN[1].SetPoint(npts, E, adp);
-        dataN[0].SetPointError(npts, 0, dadm);
-        dataN[1].SetPointError(npts, 0, dadp);
-        double ad = (adp-adm)/(adp+adm);
-        double dad = sqrt(dadm*dadm + dadp*dadp)/(adm+adp);
-        dataA.SetPoint(npts, E, 100*ad);
-        dataA.SetPointError(npts, 0, 100*dad);
-        
         double sens = 2*modelFit(b,tm)/(amm+amp);
         dtSens.SetPoint(npts, E, 100*sens/20);
         
@@ -216,10 +246,6 @@ void WishboneFit::extractAsymmetry() {
         modelN[i].SetMarkerSize(0.2);
         modelN[i].SetMarkerColor(4);
         modelN[i].SetLineColor(4);
-        dataN[i].SetMarkerStyle(24+3*i);
-        dataN[i].SetMarkerSize(0.2);
-        dataN[i].SetMarkerColor(2);
-        dataN[i].SetLineColor(2);
     }
     
     defaultCanvas->SetRightMargin(0.04);
@@ -247,15 +273,15 @@ void WishboneFit::extractAsymmetry() {
     modelA.GetYaxis()->SetTitle("branch asymmetry [%]");
     modelA.GetYaxis()->SetTitleOffset(1.4);
     
-    dataA.SetMarkerStyle(7);
-    dataA.SetMarkerColor(2);
-    dataA.SetLineColor(2);
     dataA.Draw("P");
     
     dtSens.SetMarkerStyle(7);
     dtSens.Draw("PL");
     
     printCanvas("Asymmetry");
+    
+    modelA.Fit(&lineFit,"RN");
+    dataA.Fit(&lineFit,"RN");
 }
 
 void WishboneFit::calcGapFill() {
@@ -307,10 +333,10 @@ void WishboneFit::calcGapFill() {
 GausWishboneFit::GausWishboneFit(const string& n, OutputManager* pnt):
 WishboneFit(n,pnt), MultiGaus(2,"GausWishbone",2) {
     /// initial guess timing
-    const size_t npts = 12;
-    const double Es[npts] =  {20,   40,   70,   100,  200,  300,  400,  500,  550, 600, 650,  700};
-    const double t0s[npts] = {3.3,  3.3,  3.3,  3.25, 3.25, 3.2,  3.2,  3.2,  3.2, 3.2, 3.2,  3.2};
-    const double t1s[npts] = {4.1,  4.0,  4.0,  4.0,  3.95, 3.8,  3.7,  3.5,  3.5, 3.4, 3.4,  3.2};
+    const size_t npts = 11;
+    const double Es[npts] =  {20,   40,   70,   100,  200,  300,  400,  500,  550, 600, 640};
+    const double t0s[npts] = {3.3,  3.3,  3.3,  3.25, 3.25, 3.2,  3.2,  3.2,  3.2, 3.2, 3.2};
+    const double t1s[npts] = {4.1,  4.0,  4.0,  4.0,  3.95, 3.8,  3.7,  3.5,  3.5, 3.4, 3.3};
     
     for(size_t i=0; i<npts; i++) {
         for(int j=0; j<2; j++) {

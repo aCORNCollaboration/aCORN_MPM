@@ -23,13 +23,39 @@ public:
 };
 
 /// Base class for wishbone plot analysis
-class WishboneFit: public OutputManager {
+class WishboneSeparator: public OutputManager {
+public:
+    /// Constructor
+    WishboneSeparator(const string& n, OutputManager* pnt): OutputManager(n,pnt) { }
+    
+    /// set up to analyze supplied wishbone plot
+    virtual void setWishbone(TH2* h);
+    
+    /// generate extracted asymmetry plots
+    virtual void extractAsymmetry();
+    
+protected:
+    /// calculate fit range for energy
+    virtual void getComboFitRange(double, double& t0, double& t1) const { t0 = 2.75; t1 = 4.5; }
+    
+    /// energy for wishbone bin
+    double binE(int b) const { return hWishbone->GetXaxis()->GetBinCenter(b); }
+ 
+    TH2* hWishbone = NULL;              ///< wishbone being analyzed
+    vector<TH1F*> hSlices;              ///< wishbone slices for each energy bin
+    TGraph gt0;                         ///< optimal t0 cut point
+    TGraphErrors dataN[2];              ///< integrated count rage in each wishbone branch
+    TGraphErrors dataA;                 ///< integrated count rate asymmetry
+};
+
+/// Base class for wishbone plot analysis
+class WishboneFit: public WishboneSeparator {
 public:
     /// Constructor
     WishboneFit(const string& n, OutputManager* pnt);
     
     /// set up to analyze supplied wishbone plot
-    void setWishbone(TH2* h);
+    virtual void setWishbone(TH2* h);
     
     /// (unscaled) wishbone upper/lower arm time profile
     virtual double shapeW(bool upper, double E, double t) const = 0;
@@ -60,20 +86,15 @@ protected:
     
     /// calculate arms at given energy
     void calcArms(double E);
-    /// energy for wishbone bin
-    double binE(int b) const { return hWishbone->GetXaxis()->GetBinCenter(b); }
     /// calculate fit range for energy
     virtual void getComboFitRange(double E, double& t0, double& t1) const;
     /// calculate t0 equal-tails crossover point for energy
     double calcCrossover(int b);
     
     LinHistCombo comboFitter;           ///< fitter for slice scales
-    TH2* hWishbone = NULL;              ///< wishbone being analyzed
-    vector<TH1F*> hSlices;              ///< wishbone slices for each energy bin
     TH1* sliceArms[2];                  ///< profiles for upper/lower arm slices
     vector<double> C[2];                ///< wishbone arm magnitudes for each slice
     vector<double> dC[2];               ///< fit uncertainty on arm magnitudes
-    TGraph gt0;                         ///< optimal t0 cut point
 };
 
 /// Wishbone fit assuming Gaussian profile
