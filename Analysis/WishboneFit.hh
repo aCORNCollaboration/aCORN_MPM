@@ -33,6 +33,9 @@ public:
     
     /// generate extracted asymmetry plots
     virtual void extractAsymmetry();
+        
+    /// compare asymmetries
+    virtual void compareAsym(WishboneSeparator& WB);
     
 protected:
     /// calculate fit range for energy
@@ -46,6 +49,13 @@ protected:
     TGraph gt0;                         ///< optimal t0 cut point
     TGraphErrors dataN[2];              ///< integrated count rage in each wishbone branch
     TGraphErrors dataA;                 ///< integrated count rate asymmetry
+};
+
+/// Fred's "midcentroid" cut
+class WishboneMidcentroid: public WishboneSeparator {
+public:
+    /// Constructor
+    WishboneMidcentroid(const string& n, OutputManager* pnt);
 };
 
 /// Base class for wishbone plot analysis

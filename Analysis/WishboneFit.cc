@@ -68,6 +68,44 @@ void WishboneSeparator::extractAsymmetry() {
     dataA.SetLineColor(2);
 }
 
+void WishboneSeparator::compareAsym(WishboneSeparator& WB) {
+    WB.dataA.SetMarkerColor(4);
+    WB.dataA.SetLineColor(4);
+    
+    TF1 lineFit("lineFit","pol0",100,400);
+    WB.dataA.Fit(&lineFit,"RN");
+    dataA.Fit(&lineFit,"RN");
+    
+    dataA.Draw("AP");
+    WB.dataA.Draw("P");
+    printCanvas("AsymCompare");
+    
+    gt0.SetLineColor(2);
+    WB.gt0.SetLineColor(4);
+    WB.gt0.SetMarkerColor(4);
+    WB.gt0.SetMarkerStyle(7);
+    gt0.Draw("AC");
+    gt0.SetTitle("Wishbone timing cuts comparison");
+    gt0.SetMinimum(3.2);
+    gt0.SetMaximum(3.8);
+    gt0.GetXaxis()->SetTitle("energy [keV]");
+    gt0.GetXaxis()->SetRangeUser(0,600);
+    gt0.GetYaxis()->SetTitle("timing cut [#mus]");
+    gt0.GetYaxis()->SetTitleOffset(1.35);
+    WB.gt0.Draw("CP");
+    printCanvas("T0Compare");
+}
+
+/////////////////////
+/////////////////////
+/////////////////////
+
+WishboneMidcentroid::WishboneMidcentroid(const string& n, OutputManager* pnt): WishboneSeparator(n,pnt) {
+    const size_t npts = 21;
+    const double t0s[npts] = {3.65, 3.6375, 3.6, 3.6125, 3.6, 3.5875, 3.5625, 3.55, 3.55, 3.5375, 3.5125, 3.5, 3.5, 3.4875, 3.475, 3.45, 3.4375, 3.425, 3.4125, 3.3875, 3.375};
+    for(size_t i=0; i<npts; i++) gt0.SetPoint(i, 110+20*i, t0s[i]);
+}
+
 /////////////////////
 /////////////////////
 /////////////////////
@@ -261,19 +299,18 @@ void WishboneFit::extractAsymmetry() {
     dataN[1].Draw("P");
     printCanvas("WishboneCounts");
     
-    modelA.SetMinimum(0);
-    modelA.SetMaximum(20);
-    modelA.SetMarkerColor(4);
-    modelA.SetLineColor(4);
-    modelA.SetMarkerStyle(7);
-    modelA.Draw("AP");
-    modelA.SetTitle("aCORN wishbone asymmetry");
-    modelA.GetXaxis()->SetTitle("energy [keV]");
-    modelA.GetXaxis()->SetRangeUser(0,600);
-    modelA.GetYaxis()->SetTitle("branch asymmetry [%]");
-    modelA.GetYaxis()->SetTitleOffset(1.4);
-    
-    dataA.Draw("P");
+    dataA.SetMinimum(0);
+    dataA.SetMaximum(20);
+    dataA.SetMarkerColor(2);
+    dataA.SetLineColor(2);
+    dataA.SetMarkerStyle(7);
+    dataA.Draw("AP");
+    dataA.SetTitle("aCORN wishbone asymmetry");
+    dataA.GetXaxis()->SetTitle("energy [keV]");
+    dataA.GetXaxis()->SetRangeUser(0,600);
+    dataA.GetYaxis()->SetTitle("branch asymmetry [%]");
+    dataA.GetYaxis()->SetTitleOffset(1.4);
+    modelA.Draw("P");
     
     dtSens.SetMarkerStyle(7);
     dtSens.Draw("PL");

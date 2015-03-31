@@ -306,10 +306,15 @@ void WishbonePlugin::makePlots() {
     myA->printCanvas("WishboneTime");
     
     if(isCombined) {
-        GausWishboneFit GWF("WishboneFit",myA);
+        GausWishboneFit GWF("WishboneFit", myA);
         GWF.setWishbone(hWishboneBGSub);
         GWF.fitModel();
         GWF.extractAsymmetry();
         GWF.calcGapFill();
+        
+        WishboneMidcentroid WM("WishboneMidcentroid", myA);
+        WM.setWishbone(hWishboneBGSub);
+        WM.extractAsymmetry();
+        GWF.compareAsym(WM);
     }
 }
