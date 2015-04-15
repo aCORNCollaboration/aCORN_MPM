@@ -69,6 +69,7 @@ public:
     TH1* hWishboneEProj[2];             ///< Wishbone energy spectrum, background and background-subtracted
     TH1* hWishboneTProj;                ///< Wishbone time-axis projection [Hz/us]
     TH2* hWishboneBGSub;                ///< Background-subtracted wishbone [Hz/MeV/us]
+    TH1* hWishboneFiducialTProj;        ///< Background-subtracted time profile in 100--300 keV region
 
 protected:
     /// initialize foreground/background regions

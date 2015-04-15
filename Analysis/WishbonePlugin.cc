@@ -177,11 +177,16 @@ void WishbonePlugin::calculateResults() {
     hWishboneTProj->SetTitle("Wishbone time of flight projection");
     normalize_to_bin_width(hWishboneTProj, 1./myA->runTimes.total());
     hWishboneTProj->GetYaxis()->SetTitle("event rate [Hz/#mus]");
-    hWishboneTProj->GetYaxis()->SetTitleOffset(1.45);
     
     hWishboneBGSub->Scale(s0/hWishboneTProj->GetBinWidth(1));
     hWishboneBGSub->GetZaxis()->SetTitle("rate [Hz/MeV/#mus]");
     
+    int eb0 = hWishboneBGSub->GetXaxis()->FindBin(100);
+    int eb1 = hWishboneBGSub->GetXaxis()->FindBin(300);
+    hWishboneFiducialTProj = hWishboneBGSub->ProjectionY("_tproj", eb0, eb1, "e");
+    hWishboneFiducialTProj->Scale(hWishboneBGSub->GetXaxis()->GetBinWidth(1)/1000.);
+    hWishboneFiducialTProj->GetYaxis()->SetTitle("event rate [Hz/#mus]");
+
     hWBRate = (TH2F*)hWishbone->Clone("hWBRate");
     normalize_to_bin_area(hWBRate, 1000./myA->runTimes.total());
     hWBRate->GetZaxis()->SetTitle("rate [Hz/MeV/#mus]");
@@ -225,6 +230,11 @@ void WishbonePlugin::makeAnaResults() {
     baseResult.value = integralAndError(hWishboneEProj[true], 1., 1000., baseResult.err, "width")/1000;
     baseResult.err /= 1000;
     AcornDB::ADB().uploadAnaResult("wb_fg", "Wishbone foreground rate [Hz]", baseResult);
+    
+    baseResult.value = integralAndError(hWishboneFiducialTProj, 3.0, 3.6, baseResult.err, "width");
+    AcornDB::ADB().uploadAnaResult("wb_fast_fiducial", "fast protons in energy fiducial [Hz]", baseResult);
+    baseResult.value = integralAndError(hWishboneFiducialTProj, 3.7, 4.5, baseResult.err, "width");
+    AcornDB::ADB().uploadAnaResult("wb_slow_fiducial", "slow protons in energy fiducial [Hz]", baseResult);
 }
 
 void WishbonePlugin::makePlots() {
@@ -331,6 +341,9 @@ void WishbonePlugin::makePlots() {
     drawVLine(T_p_min/1000., myA->defaultCanvas, 4);
     drawVLine(T_p_max/1000., myA->defaultCanvas, 4);
     myA->printCanvas("WishboneTime");
+    
+    hWishboneFiducialTProj->Draw();
+    myA->printCanvas("WishboneFiducialTime");
     
     if(isCombined) {
         GausWishboneFit GWF("WishboneFit", myA);
