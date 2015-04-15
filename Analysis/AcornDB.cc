@@ -4,6 +4,7 @@
 #include "BaseDataScanner.hh"
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 AcornDB* AcornDB::myDB = NULL;
 
@@ -215,4 +216,37 @@ sqlite3_int64 AcornDB::uploadRecal(const TGraph* g, RunID r0, RunID r1) {
     sqlite3_reset(stmt);
     
     return gid;
+}
+
+sqlite3_int64 AcornDB::getAnaResultType(const string& name, const string& descrip) {
+    static const char* qry = "SELECT rowid FROM named_object WHERE type = 'AnaResult' AND name = ?1";    
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
+    
+    sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_STATIC);
+    sqlite3_int64 id = 0;
+    if(sqlite3_step(stmt) == SQLITE_ROW) id = sqlite3_column_int64(stmt, 0);
+    else id = createNamed("AnaResult", name, descrip);
+    sqlite3_reset(stmt);
+    return id;
+}
+
+void AcornDB::uploadAnaResult(sqlite3_int64 type_id, AnaResult R) {
+    static const char* qry = "INSERT INTO analysis_results(type_id, start_s, end_s, time, value, err) VALUES (?1, ?2, ?3, ?4, ?5, ?6)";    
+    static sqlite3_stmt* stmt = NULL;
+    if(!stmt) setQuery(qry, stmt);
+    
+    sqlite3_bind_int64(stmt, 1, type_id);
+    sqlite3_bind_int(stmt, 2, combo_runid(R.start));
+    sqlite3_bind_int(stmt, 3, combo_runid(R.end));
+    sqlite3_bind_int64(stmt, 4, R.time? R.time : time(NULL));
+    sqlite3_bind_double(stmt, 5, R.value);
+    sqlite3_bind_double(stmt, 6, R.err);
+    sqlite3_step(stmt);
+    sqlite3_reset(stmt);
+}
+
+void AcornDB::uploadAnaResult(const string& name, const string& descrip, AnaResult R) {
+    printf("%s [%s]:\t%g ~ %g\n", descrip.c_str(), name.c_str(), R.value, R.err);
+    uploadAnaResult(getAnaResultType(name,descrip), R);
 }

@@ -5,6 +5,7 @@
 #include "Enums.hh"
 #include "TagCounter.hh"
 #include "BaseDataScanner.hh"
+#include "AcornDB.hh"
 
 using std::vector;
 using std::pair;
@@ -39,6 +40,8 @@ public:
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
     /// calculate results from filled histograms
     virtual void calculateResults();
+    /// calculate, upload analysis results
+    virtual void makeAnaResults();
     /// make plots from each plugin
     virtual void makePlots();
     /// run calculations and plots, save output files
@@ -58,6 +61,8 @@ public:
     
     /// make rate-scaled copy of histogram; optionally divide by bin size on number of scale axes
     TH1* hToRate(TH1* h, int scaleAxes);
+    /// generate base analysis result pre-filled with run range
+    AnaResult makeBaseResult() const;
     
 protected:
     map<std::string,AnalyzerPlugin*> myPlugins;        ///< analysis plugins
@@ -78,16 +83,18 @@ public:
         /// save canvas image
         void printCanvas(string fname, string suffix=".pdf") const { myA->printCanvas(fname,suffix); }
         
-        string name;       ///< plugin name
+        string name;            ///< plugin name
         RunAccumulator* myA;    ///< RunAccumulator with which this plugin is associated
         
         /// virtual routine for filling core histograms from data point
         virtual void fillCoreHists(BaseDataScanner& PDS, double weight) = 0;
         
+        /// generate calculated/normalized histograms derived from core saved data; possibly needed below.
+        virtual void calculateResults() {}
+        /// calculate, upload analysis results
+        virtual void makeAnaResults() {}
         /// generate output plots
         virtual void makePlots() {}
-        /// generate calculated hists
-        virtual void calculateResults() {}
         /// virtual routine for MC/Data comparison plots/calculations
         /// NOTE: this MUST NOT change the contents of saved histograms (calculated ones are OK)
         virtual void compareMCtoData(AnalyzerPlugin*) {}

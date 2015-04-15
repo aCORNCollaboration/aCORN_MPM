@@ -6,11 +6,11 @@
 #include <TLatex.h>
 
 SourceCalPlugin::SourceCalPlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"SourceCal") {    
-    hEnergy = registerHist("hEnergy", "Calibrated energy", 200, 0, 2000);
-    hEnergy->GetXaxis()->SetTitle("Energy [keV]");
+    hEnergy = registerHist("hEnergy", "electron energy", 200, 0, 2);
+    hEnergy->GetXaxis()->SetTitle("Energy [MeV]");
     
-    hEnergyRecal = registerHist("hEnergyRecal", "Re-calibrated energy", 200, 0, 2000);
-    hEnergyRecal->GetXaxis()->SetTitle("Energy [keV]");
+    hEnergyRecal = registerHist("hEnergyRecal", "Re-calibrated energy", 200, 0, 2);
+    hEnergyRecal->GetXaxis()->SetTitle("Energy [MeV]");
     
     for(unsigned int i=0; i<N_E_PMT; i++) {
     //for(unsigned int i=9; i<11; i++) {
@@ -22,8 +22,8 @@ SourceCalPlugin::SourceCalPlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"SourceC
 void SourceCalPlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
     if(PDS.Pos.r2() > 0.5*0.5) return;  // position cut... background exclusion
     if(PDS.nV > 0) return;              // omit backscatter events
-    hEnergy->Fill(PDS.E_recon, weight);
-    hEnergyRecal->Fill(PDS.getCal()->calEnergy(PDS.E_PMT + N_V_PMT),weight);
+    hEnergy->Fill(PDS.E_recon/1000., weight);
+    hEnergyRecal->Fill(PDS.getCal()->calEnergy(PDS.E_PMT + N_V_PMT)/1000.,weight);
     if(850 < PDS.E_recon && PDS.E_recon < 1200) {
         //for(unsigned int i=9; i<11; i++)
         for(unsigned int i=0; i<N_E_PMT; i++)
@@ -64,17 +64,17 @@ void fit_pks(TH1* hPk, double& p1, double& p2, bool show_fit = true) {
 
 void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     double rateMax = srcName=="Bi207"? 80 : srcName=="Sn113"? 500 : 1000;
+    double eMax = srcName=="Sn113"? 0.6 : 1.5;
     
     TH1* hEnergyRate = myA->hToRate(hEnergy,1);
-    hEnergyRate->Scale(1000);
     hEnergyRate->GetYaxis()->SetTitle("event rate [Hz/MeV]");
     hEnergyRate->GetYaxis()->SetTitleOffset(1.4);
     hEnergyRate->SetLineColor(2);
     TH1* hEnergyRateBG = bg.myA->hToRate(bg.hEnergy,1);
-    hEnergyRateBG->Scale(1000);
     hEnergyRateBG->SetLineColor(4);
     
     myA->defaultCanvas->SetLogy(true);
+    hEnergyRate->GetXaxis()->SetRangeUser(0,eMax);
     hEnergyRate->Draw();
     hEnergyRateBG->Draw("Same");
     myA->printCanvas("Energy_BG_"+srcName);
@@ -83,7 +83,7 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     hEnergyRate->Add(hEnergyRateBG,-1.0);
     hEnergyRate->SetMaximum(rateMax);
     
-    TF1 fPois("pois", &poissonf, 900, 1150, 3);
+    TF1 fPois("pois", &poissonf, .900, 1.150, 3);
     fPois.SetParameter(0,60);
     fPois.SetParameter(0,1000/257.);
     fPois.SetParameter(2,257.);
@@ -99,21 +99,19 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     //------------------------
     
     TH1* hEnergyRecalRate = myA->hToRate(hEnergyRecal,1);
-    hEnergyRecalRate->Scale(1000);
     hEnergyRecalRate->GetYaxis()->SetTitle("event rate [Hz/MeV]");
     hEnergyRecalRate->GetYaxis()->SetTitleOffset(1.4);
     hEnergyRecalRate->SetLineColor(2);
     TH1* hEnergyRecalRateBG = bg.myA->hToRate(bg.hEnergyRecal,1);
-    hEnergyRecalRateBG->Scale(1000);
     hEnergyRecalRateBG->SetLineColor(4);
     
     hEnergyRecalRate->Add(hEnergyRecalRateBG,-1.0);
     hEnergyRecalRate->SetMaximum(rateMax);
     if(srcName == "Bi207") {
-        TF1 fPoisR("pois", &poissonf, 1000, 1200, 3);
+        TF1 fPoisR("pois", &poissonf, 1.000, 1.200, 3);
         fPoisR.SetParameter(0,60);
-        fPoisR.SetParameter(0,1000/257.);
-        fPoisR.SetParameter(2,257.);
+        fPoisR.SetParameter(0,1.000/257.);
+        fPoisR.SetParameter(2,.257);
         fPoisR.SetLineColor(1);
         hEnergyRecalRate->Fit(&fPoisR,"RN");
         printf("Recalibrated energy: %g PE/MeV\n",fPoisR.GetParameter(2)/0.9948);

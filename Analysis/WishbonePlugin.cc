@@ -153,7 +153,6 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
 }
 
 void WishbonePlugin::calculateResults() {
-    hWishbone->Sumw2();
     hWishboneEProj[false] = hWishboneEProj[true] = NULL;
     TH2Slicer wbs(hWishbone);
     double tfg = wbs.projSlice(T_p_lo/1000., T_p_hi/1000., hWishboneEProj[true]);
@@ -182,17 +181,61 @@ void WishbonePlugin::calculateResults() {
     
     hWishboneBGSub->Scale(s0/hWishboneTProj->GetBinWidth(1));
     hWishboneBGSub->GetZaxis()->SetTitle("rate [Hz/MeV/#mus]");
+    
+    hWBRate = (TH2F*)hWishbone->Clone("hWBRate");
+    normalize_to_bin_area(hWBRate, 1000./myA->runTimes.total());
+    hWBRate->GetZaxis()->SetTitle("rate [Hz/MeV/#mus]");
+    
+    //-------------------
+    
+    hPos.makeRates(2);
+    hPosSigma.makeRates(2);
+    hEnergyRadius.makeRates(2);
+    hChanSpec.makeRates(2);
+    hNE.makeRates(0);
+    hModuleMult.makeRates(0);
+    hNVeto.makeRates(0);
+    hNVeto.hRates[true]->GetYaxis()->SetTitle("rate [Hz]");
+    
+    hProtonSignal.makeRates(1);
+    hProtonSignal.hRates[false]->GetYaxis()->SetTitle("rate [Hz/kchannel]");
+   
+    hVetoSum.makeRates(1,1000.);
+    hVetoSum.hRates[false]->GetYaxis()->SetTitle("rate [#muHz/channel]");
+    
+    int nrebin = 2;
+    for(int i=0; i<2; i++) {
+        hWishboneEProj[i]->Rebin(nrebin);
+        hWishboneEProj[i]->Scale(1./nrebin);
+    }
+    hWishboneEProj[false]->GetYaxis()->SetTitle("Background rate [Hz/MeV]");
+}
+
+void WishbonePlugin::makeAnaResults() {
+    AnaResult baseResult = myA->makeBaseResult();
+    
+    baseResult.value = integralAndError(hProtonSignal.hRates[false], E_p_lo/1000., E_p_hi/1000., baseResult.err, "width");
+    AcornDB::ADB().uploadAnaResult("proton_bg", "Proton peak background rate [Hz]", baseResult);
+    baseResult.value = integralAndError(hProtonSignal.hRates[true], E_p_lo/1000., E_p_hi/1000., baseResult.err, "width");
+    AcornDB::ADB().uploadAnaResult("proton_fg", "Proton peak foreground rate [Hz]", baseResult);
+    
+    baseResult.value = integralAndError(hWishboneEProj[false], 1., 1000., baseResult.err, "width")/1000;
+    baseResult.err /= 1000;
+    AcornDB::ADB().uploadAnaResult("wb_bg", "Wishbone background rate [Hz]", baseResult);
+    baseResult.value = integralAndError(hWishboneEProj[true], 1., 1000., baseResult.err, "width")/1000;
+    baseResult.err /= 1000;
+    AcornDB::ADB().uploadAnaResult("wb_fg", "Wishbone foreground rate [Hz]", baseResult);
 }
 
 void WishbonePlugin::makePlots() {
     
+    myA->defaultCanvas->SetRightMargin(0.15);
+
     bool isCombined = myA->runTimes.nTags() > 1000;
-    
     if(true || !isCombined) {
         hWishboneBGSub->Rebin2D(2,2);
         hWishboneBGSub->Scale(1./4.);
     }
-    myA->defaultCanvas->SetRightMargin(0.13);
     hWishboneBGSub->SetMinimum(-3.);
     hWishboneBGSub->SetMaximum(3.);
     hWishboneBGSub->GetXaxis()->SetRangeUser(0,1000);
@@ -204,59 +247,58 @@ void WishbonePlugin::makePlots() {
     drawHLine(T_p_min/1000., myA->defaultCanvas, 4);
     drawHLine(T_p_max/1000., myA->defaultCanvas, 4);
     myA->printCanvas("Wishbone");
-    gStyle->SetPalette(1);
     
-    hPos.makeRates(2);
+    makeGrayscalepalette(false);
+    hWBRate->SetMaximum(10);
+    hWBRate->SetContour(255);
+    hWBRate->GetXaxis()->SetRangeUser(0,1000);
+    hWBRate->GetYaxis()->SetRangeUser(2,5);
+    hWBRate->Draw("Col Z");
+    myA->printCanvas("Wishbone_NoSub");
+    
+    gStyle->SetPalette(1);
+      
     hPos.hRates[true]->SetMinimum(0);
     hPos.hRates[true]->SetMaximum(1);
-    hPos.hRates[true]->Draw("Col");
+    hPos.hRates[true]->Draw("Col Z");
     Positioner Pos;
     Pos.drawPMTs(1,true);
     myA->printCanvas("Positions");
     
-    hPosSigma.makeRates(2);
     hPosSigma.hRates[true]->SetMinimum(0);
     hPosSigma.hRates[true]->SetMaximum(10);
-    hPosSigma.hRates[true]->Draw("Col");
+    hPosSigma.hRates[true]->Draw("Col Z");
     myA->printCanvas("PosSigma");
     
-    hEnergyRadius.makeRates(2);
     hEnergyRadius.hRates[true]->SetMinimum(0);
     //hEnergyRadius.hRates[true]->SetMaximum(10);
-    hEnergyRadius.hRates[true]->Draw("Col");
+    hEnergyRadius.hRates[true]->Draw("Col Z");
     myA->printCanvas("EnergyRadius");
     
     myA->defaultCanvas->SetLogz(true);
     
-    hChanSpec.makeRates(2);
     //hChanSpec.hRates[true]->SetMaximum(0.4);
     hChanSpec.hRates[true]->Draw("Col Z");
     myA->printCanvas("ChannelSpectra");    
     
-    hNE.makeRates(0);
-    hNE.hRates[true]->Draw("Col");
+    hNE.hRates[true]->Draw("Col Z");
     myA->printCanvas("NPMTs");
 
-    hModuleMult.makeRates(0);   
     hModuleMult.hRates[true]->Draw("Col Z");
     myA->printCanvas("ModMult");
     
     myA->defaultCanvas->SetLogz(false);
     
-    myA->defaultCanvas->SetLogy(true);
+    myA->defaultCanvas->SetRightMargin(0.04);
     
-    hNVeto.makeRates(0);
-    hNVeto.hRates[true]->GetYaxis()->SetTitle("rate [Hz]");
-    hNVeto.hRates[true]->GetYaxis()->SetTitleOffset(1.4);
+    myA->defaultCanvas->SetLogy(true);
+
     hNVeto.hRates[true]->SetMinimum(1e-7);
     hNVeto.hRates[true]->SetMaximum(10);
     hNVeto.hRates[true]->Draw();
     hNVeto.hRates[false]->Draw("Same");
     myA->printCanvas("NVeto");
     
-    hProtonSignal.makeRates(1);
-    hProtonSignal.hRates[false]->GetYaxis()->SetTitle("rate [mHz/channel]");
-    hProtonSignal.hRates[false]->GetYaxis()->SetTitleOffset(1.4);
     hProtonSignal.hRates[false]->SetMinimum(isCombined?1e-4:1e-3);
     hProtonSignal.hRates[false]->SetMaximum(10);
     hProtonSignal.hRates[false]->Draw();
@@ -264,15 +306,9 @@ void WishbonePlugin::makePlots() {
     drawVLine(E_p_lo/1000., myA->defaultCanvas, 2);
     drawVLine(E_p_hi/1000., myA->defaultCanvas, 2);
     myA->printCanvas("ProtonSignal");
-    Double_t int_err;
-    double prate = integralAndError(hProtonSignal.hRates[false], E_p_lo/1000., E_p_hi/1000., int_err, "width");
-    printf("Proton peak rate: %.3f(%.3f) Hz\n", prate, int_err);
-    
+  
     myA->defaultCanvas->SetLogy(false);
     
-    hVetoSum.makeRates(1,1000.);
-    hVetoSum.hRates[false]->GetYaxis()->SetTitle("rate [#muHz/channel]");
-    hVetoSum.hRates[false]->GetYaxis()->SetTitleOffset(1.4);
     hVetoSum.hRates[false]->SetMinimum(-20);
     hVetoSum.hRates[false]->SetMaximum(200);
     hVetoSum.hRates[false]->Draw();
@@ -280,22 +316,13 @@ void WishbonePlugin::makePlots() {
     hVetoSum.hRates[true]->Draw("Same");
     myA->printCanvas("VetoSum");
     
-    int nrebin = 2;
-    for(int i=0; i<2; i++) {
-        hWishboneEProj[i]->Rebin(nrebin);
-        hWishboneEProj[i]->Scale(1./nrebin);
-    }
     hWishboneEProj[true]->SetMinimum(-0.2);
-    hWishboneEProj[false]->GetYaxis()->SetTitle("Background rate [Hz/MeV]");
-    hWishboneEProj[false]->GetYaxis()->SetTitleOffset(1.4);
+    hWishboneEProj[true]->GetXaxis()->SetRangeUser(0,1000);
     hWishboneEProj[true]->Draw();
     hWishboneEProj[false]->Draw("Same");
     drawHLine(0., myA->defaultCanvas, 1);
     myA->printCanvas("WishboneEnergy");
     
-    double bgrate = integralAndError(hWishboneEProj[false], 1., 1599., int_err, "width")/1000;
-    printf("Total background singles rate %g Hz\n",bgrate);
-           
     hWishboneTProj->SetMinimum(0);
     hWishboneTProj->SetMaximum(5);
     hWishboneTProj->Draw("E0");

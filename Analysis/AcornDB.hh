@@ -10,7 +10,16 @@
 
 using std::vector;
 
-class AcornDB: protected SQLite_Helper {
+/// Generic analysis result number
+struct AnaResult {
+    RunID start;        ///< start run included
+    RunID end;          ///< end run included
+    time_t time = 0;    ///< timestamp for result record
+    double value = 0;   ///< result value
+    double err = 0;     ///< result uncertainty
+};
+
+class AcornDB: public SQLite_Helper {
 public:
     /// get singleton instance
     static AcornDB& ADB();
@@ -44,6 +53,13 @@ public:
     TGraphErrors* getGraph(sqlite3_int64 gID);
     /// upload energy recalibration curve
     sqlite3_int64 uploadRecal(const TGraph* g, RunID r0, RunID r1);
+    
+    /// locate / generate analysis result type ID
+    sqlite3_int64 getAnaResultType(const string& name, const string& descrip = "");
+    /// upload analysis result by type number
+    void uploadAnaResult(sqlite3_int64 type_id, AnaResult R);
+    /// upload analysis result by name
+    void uploadAnaResult(const string& name, const string& descrip, AnaResult R);
     
 protected:
     /// Constructor

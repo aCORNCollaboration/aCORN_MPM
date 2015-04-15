@@ -3,6 +3,7 @@
 
 #include "RunAccumulator.hh"
 #include "RangeConfigFile.hh"
+#include "AcornDB.hh"
 
 #include <vector>
 #include <utility>
@@ -37,13 +38,16 @@ public:
     
     /// generate calculated hists
     virtual void calculateResults();
+    /// calculate, upload analysis results
+    virtual void makeAnaResults();
     /// Generate output plots
     virtual void makePlots();
     
     
     FGBGRegionsHist hProtonSignal;      ///< proton detector signal
     //TH1* h4pTiming;                     ///< "4p" mode discriminator arrival time
-    TH2F* hWishbone;                    ///< wishbone plot
+    TH2F* hWishbone;                    ///< wishbone counts
+    TH2F* hWBRate;                      ///< wishbone, non-background-subtracted, converted to rate
     FGBGRegionsHist hNVeto;             ///< number of veto PMTs for wishbone-like events
     FGBGRegionsHist hVetoSum;           ///< veto PMTs signal sum
     FGBGRegionsHist hNE;                ///< number of main PMTs triggered vs. total event energy
@@ -55,16 +59,16 @@ public:
     FGBGRegionsHist hPosSigma;          ///< PMT hit RMS spread
     FGBGRegionsHist hEnergyRadius;      ///< PMT hit position radius vs energy
     
-    double E_p_lo = 650;        ///< proton signal low cut for wishbone data
-    double E_p_hi = 2400;       ///< proton signal high cut for wishbone data
-    double T_p_min = 750;       ///< minimum TOF for background analysis [ns]
-    double T_p_lo = 2750;       ///< proton TOF lower window for wishbone [ns]
-    double T_p_hi = 4500;       ///< proton TOF lower window for wishbone [ns]
-    double T_p_max = 9500;      ///< maximum TOF for background analysis [ns]
+    double E_p_lo = 650;                ///< proton signal low cut for wishbone data
+    double E_p_hi = 2400;               ///< proton signal high cut for wishbone data
+    double T_p_min = 750;               ///< minimum TOF for background analysis [ns]
+    double T_p_lo = 2750;               ///< proton TOF lower window for wishbone [ns]
+    double T_p_hi = 4500;               ///< proton TOF lower window for wishbone [ns]
+    double T_p_max = 9500;              ///< maximum TOF for background analysis [ns]
     
-    TH1* hWishboneEProj[2];     ///< Wishbone energy spectrum, background and background-subtracted
-    TH1* hWishboneTProj;        ///< Wishbone time-axis projection [Hz/us]
-    TH2* hWishboneBGSub;        ///< Background-subtracted wishbone [Hz/MeV/us]
+    TH1* hWishboneEProj[2];             ///< Wishbone energy spectrum, background and background-subtracted
+    TH1* hWishboneTProj;                ///< Wishbone time-axis projection [Hz/us]
+    TH2* hWishboneBGSub;                ///< Background-subtracted wishbone [Hz/MeV/us]
 
 protected:
     /// initialize foreground/background regions

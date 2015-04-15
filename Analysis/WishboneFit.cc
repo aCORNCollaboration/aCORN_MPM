@@ -285,6 +285,8 @@ void WishboneFit::extractAsymmetry() {
         modelN[i].SetMarkerColor(4);
         modelN[i].SetLineColor(4);
     }
+    modelA.SetMarkerColor(4);
+    modelA.SetLineColor(4);
     
     defaultCanvas->SetRightMargin(0.04);
     
@@ -307,13 +309,13 @@ void WishboneFit::extractAsymmetry() {
     dataA.Draw("AP");
     dataA.SetTitle("aCORN wishbone asymmetry");
     dataA.GetXaxis()->SetTitle("energy [keV]");
-    dataA.GetXaxis()->SetRangeUser(0,600);
+    dataA.GetXaxis()->SetRangeUser(0,500);
     dataA.GetYaxis()->SetTitle("branch asymmetry [%]");
     dataA.GetYaxis()->SetTitleOffset(1.4);
     modelA.Draw("P");
     
     dtSens.SetMarkerStyle(7);
-    dtSens.Draw("PL");
+    //dtSens.Draw("PL");
     
     printCanvas("Asymmetry");
     
@@ -443,12 +445,17 @@ void GausWishboneFit::fitModel() {
         sigmafine[i].SetMinimum(0);
         sigmafine[i].SetMaximum(0.2);
     }
-    taufine[1].Draw("AP");
+    defaultCanvas->SetRightMargin(0.15);
+    makeRBpalette();
+    hWishbone->Draw("Col Z");
+    taufine[1].Draw("P");
     taufine[1].GetXaxis()->SetTitle("energy [keV]");
     taufine[1].GetYaxis()->SetTitle("proton TOF [#mus]");
     taufine[1].GetYaxis()->SetTitleOffset(1.4);
     taufine[0].Draw("P");
-    gt0.SetMarkerStyle(6);
+    gt0.SetMarkerStyle(8);
+    gt0.SetMarkerSize(0.2);
+    gt0.SetMarkerColor(4);
     gt0.Draw("P");
     //
     for(int i=0; i<2; i++) {

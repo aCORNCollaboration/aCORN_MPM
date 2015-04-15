@@ -3,9 +3,11 @@
 #include "SMExcept.hh"
 #include "PathUtils.hh"
 #include <time.h>
+#include <TH1.h>
 
 RunAccumulator::RunAccumulator(OutputManager* pnt, const std::string& nm, const std::string& inflName):
 SegmentSaver(pnt,nm,inflName), isSimulated(false) {
+    TH1::SetDefaultSumw2(true); // all histograms default to having errorbars
     
     // initialize blind time to 0
     zeroCounters();
@@ -47,18 +49,42 @@ void RunAccumulator::fillCoreHists(BaseDataScanner& PDS, double weight) {
 void RunAccumulator::calculateResults() {
     printf("Calculating results for %s...\n",name.c_str());
     if(isCalculated) printf("*** Warning: repeat calculation!\n");
-                            for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
-                                printf("... results in '%s' ...\n",it->first.c_str());
-    it->second->calculateResults();
-                            }
-                            printf("Done calculating results for %s.\n",name.c_str());
-        isCalculated = true;
+    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
+        printf("... results in '%s' ...\n",it->first.c_str());
+        it->second->calculateResults();
+    }
+    printf("Done calculating results for %s.\n",name.c_str());
+    isCalculated = true;
+}
+
+AnaResult RunAccumulator::makeBaseResult() const {
+    AnaResult baseResult;
+    if(runCounts.counts.size()) {
+        baseResult.start = runCounts.counts.begin()->first;
+        baseResult.end = runCounts.counts.rbegin()->first;
+    }
+    return baseResult;
+}
+
+void RunAccumulator::makeAnaResults() {
+    if(!isCalculated) calculateResults();
+    AcornDB::ADB().beginTransaction();
+    
+    AnaResult baseResult = makeBaseResult();
+    baseResult.value = runCounts.total();
+    AcornDB::ADB().uploadAnaResult("total_counts", "Total analyzed counts", baseResult);
+    baseResult.value = runTimes.total();
+    AcornDB::ADB().uploadAnaResult("total_time", "Total analyzed time [s]", baseResult);
+    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
+        it->second->makeAnaResults();
+    }
+    AcornDB::ADB().endTransaction();
 }
 
 void RunAccumulator::makePlots() {
     defaultCanvas->cd();
     if(!isCalculated) calculateResults();
-                   printf("Generating plots for %s...\n",name.c_str());
+    printf("Generating plots for %s...\n",name.c_str());
     for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
         printf("... plots in '%s' ...\n",it->first.c_str());
         it->second->makePlots();
@@ -69,8 +95,8 @@ void RunAccumulator::makePlots() {
 void RunAccumulator::compareMCtoData(RunAccumulator& OAdata) {
     defaultCanvas->cd();
     if(!isCalculated) calculateResults();
-                                                    if(!OAdata.isCalculated) OAdata.calculateResults();
-                                                    printf("Comparing MC %s and data %s...\n",name.c_str(),OAdata.name.c_str());
+    if(!OAdata.isCalculated) OAdata.calculateResults();
+    printf("Comparing MC %s and data %s...\n",name.c_str(),OAdata.name.c_str());
     for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
         AnalyzerPlugin* AP = OAdata.getPlugin(it->second->name);
         if(AP) {
@@ -92,7 +118,7 @@ void RunAccumulator::addSegment(const SegmentSaver& S) {
     // recast
     const RunAccumulator& RA = dynamic_cast<const RunAccumulator&>(S);
     if(RA.isSimulated) isSimulated = true;
-                                                    // add run counts, times
+    // add run counts, times
     runCounts += RA.runCounts;
     runTimes += RA.runTimes;
 }
@@ -123,13 +149,13 @@ void RunAccumulator::loadProcessedData(BaseDataScanner& PDS) {
         return;
     PDS.startScan();
     unsigned int nScanned = 0;
-
+    
     while(PDS.nextPoint()) {
         nScanned++;
         //if(PDS.withCals)
         //        PDS.recalibrateEnergy();
         //if(PDS.fPID==PID_BETA && PDS.fType==TYPE_0_EVENT) {
-            //        runCounts.add(PDS.getRun(),1.0);
+        //        runCounts.add(PDS.getRun(),1.0);
         //        totalCounts[afp][gv]++;
         //}
         fillCoreHists(PDS,PDS.physicsWeight);
@@ -141,7 +167,9 @@ void RunAccumulator::loadProcessedData(BaseDataScanner& PDS) {
 }
 
 void RunAccumulator::makeOutput(bool doPlots) {
+    printf("Generating output from %.0f counts over %.2f hours.\n", runCounts.total(), runTimes.total()/3600.);
     calculateResults();
+    makeAnaResults();
     if(doPlots)
         makePlots();
     write();
@@ -167,7 +195,6 @@ unsigned int RunAccumulator::mergeDir() {
 
 TH1* RunAccumulator::hToRate(TH1* h, int scaleAxes) {
     TH1* hc = (TH1*)h->Clone((h->GetName()+string("_Rate")).c_str());
-    hc->Sumw2();
     hc->Scale(1./runTimes.total());
     if(scaleAxes>=1) {
         for(int ix=1; ix<hc->GetNbinsX(); ix++) {
