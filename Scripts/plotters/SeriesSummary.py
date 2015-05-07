@@ -8,7 +8,11 @@ from pyx.graph.style import symbol
 from LinFitter import *
 import sqlite3
 import os
-
+try:
+    from scipy import stats
+except:
+    stats = None
+    
 def get_result_types(curs):
     """Get list of analysis result types in DB"""
     curs.execute("SELECT rowid,name,descrip FROM named_object WHERE type = 'AnaResult'")
@@ -23,7 +27,7 @@ def load_result_data(curs, num):
     
 def load_seriesplot(curs, num, yscale):
     sdat = load_result_data(curs, num)
-    gdat = [ [s[0]/10000, sdat[s][1]*yscale, sdat[s][2]*yscale] for s in sdat if s[0]/10000 == s[1]/10000]
+    gdat = [ [s[0]/10000, sdat[s][1]*yscale, sdat[s][2]*yscale] for s in sdat if s[0]/10000 == s[1]/10000 and sdat[s][1] is not None]
     gdat.sort()
     return gdat
 
@@ -52,8 +56,12 @@ class SeriesPlotSetup:
         self.yaxis = graph.axis.lin(title = self.ytitle)
         if not self.gdat:
             self.make_gdat(curs)
-        g = graph.graphxy(width=15, height=6, x=self.xaxis, y=self.yaxis)
-        g.plot(graph.data.points(self.gdat,x=1,y=2,dy=3),[graph.style.errorbar(), graph.style.symbol(symbol.circle,size=0.1,symbolattrs=[deco.filled([color.rgb(1,1,1)])])])
+        g = graph.graphxy(width=15, height=6, x=self.xaxis, y=self.yaxis, key=graph.key.key(pos="tl"))
+        g.plot(graph.data.points(self.gdat,x=1,y=2,dy=3,title=None),
+               [graph.style.errorbar(), graph.style.symbol(symbol.circle,size=0.1,symbolattrs=[deco.filled([color.rgb(1,1,1)])])])
+        
+        self.auxfits(g)
+        
         g.writetofile(self.basepath+self.name+".pdf")
         
     def summarize_dat(self):
@@ -68,6 +76,27 @@ class SeriesPlotSetup:
             sw += 1./x[2]**2
         print "Total =", sx, "Average =", sx/len(self.gdat), "Weighted =", sxw/sw, "N =", len(self.gdat)
         print
+        
+    def auxfits(self,g):
+        if self.name in ["fid_asym","obs_asym"]:
+            self.fit_line(g)
+            
+    def fit_line(self,g,nterms=1):
+        LF = LinearFitter(terms=[polyterm(i) for i in range(nterms)])
+        if self.gdat[0][2]:
+            LF.fit(self.gdat, cols=(0,1,2), errorbarWeights = True)
+        else:
+            LF.fit(self.gdat, cols=(0,1))
+        
+        chi2 = LF.chisquared()
+        nu = LF.nu()        
+        ttl = "$"+LF.toLatex(cfmt=".3g")+"$; $\\chi^2/\\nu = %.1f/%i$"%(chi2,nu)
+        if stats:
+           ttl +=  " ($P = %.2f$)"%stats.chisqprob(chi2,nu)
+           
+        g.plot(graph.data.points(LF.fittedpoints(True), x=1,y=3,title=ttl),
+               [graph.style.line(lineattrs=[rgb.red])])
+
 
 def combo_series_dat(slist):
     csentries = {}
@@ -85,8 +114,8 @@ def calc_asym(r0,dr0,r1,dr1):
     return (s,ds,a,da)
     
 def makeAsymmetrySeries(SP1,SP2):
-    srate = SeriesPlotSetup((0,"fiducial_rate","wishbone fiducial rate [Hz]"))
-    sasym = SeriesPlotSetup((0,"fiducial_asym","wishbone fiducial asymmetry"))
+    srate = SeriesPlotSetup((0,"fid_rate","wishbone fiducial rate [Hz]"))
+    sasym = SeriesPlotSetup((0,"fid_asym","wishbone fiducial asymmetry"))
     gdat = combo_series_dat((SP1,SP2))
     for g in gdat:
        (s,ds,a,da) =  calc_asym(*g[1:])
@@ -96,8 +125,18 @@ def makeAsymmetrySeries(SP1,SP2):
 
 def plot_correlated(SP1, SP2):
     gdat = combo_series_dat((SP1,SP2))
-    g = graph.graphxy(width=12,height=12, x=SP1.yaxis, y=SP2.yaxis)
-    g.plot(graph.data.points(gdat,x=2,dx=3,y=4,dy=5),[graph.style.errorbar(), graph.style.symbol(symbol.circle,size=0.1,symbolattrs=[deco.filled([color.rgb(1,1,1)])])])
+    g = graph.graphxy(width=12,height=12, x=SP1.yaxis, y=SP2.yaxis, key=graph.key.key(pos="tl"))
+    g.plot(graph.data.points(gdat,x=2,dx=3,y=4,dy=5,title=None),[graph.style.errorbar(), graph.style.symbol(symbol.circle,size=0.1,symbolattrs=[deco.filled([color.rgb(1,1,1)])])])
+    
+    LF = LinearFitter(terms=[polyterm(i) for i in range(2)])
+    LF.fit(gdat, cols=(1,3,4), errorbarWeights = True)
+    chi2 = LF.chisquared()
+    nu = LF.nu()        
+    ttl = "$"+LF.toLatex(cfmt=".3g")+"$; $\\chi^2/\\nu = %.1f/%i$"%(chi2,nu)
+    if stats:
+        ttl +=  " ($P = %.2f$)"%stats.chisqprob(chi2,nu)
+    g.plot(graph.data.points(LF.fittedpoints(True), x=1,y=3,title=ttl), [graph.style.line(lineattrs=[rgb.red])])
+
     g.writetofile(SP1.basepath+SP2.name+"_VS_"+SP1.name+".pdf")
     
 if __name__ == "__main__":
@@ -120,9 +159,10 @@ if __name__ == "__main__":
 
     cplots = [("wb_bg","wb_fg"),
               ("wb_fast_fiducial", "wb_slow_fiducial"),
-              ("fid_rate","fid_asym"),
-              ("wb_bg","fid_asym"),
-              ("fid_rate","wb_fg")]
+              ("fid_rate","obs_asym"),
+              ("wb_bg","obs_asym"),
+              ("fid_rate","wb_fg"),
+              ("fid_asym","obs_asym")]
     for cplot in cplots:
         plot_correlated(rtpdat[cplot[0]], rtpdat[cplot[1]])
         

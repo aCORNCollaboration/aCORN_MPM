@@ -41,8 +41,15 @@ int main(int argc, char** argv) {
     
     ReducedDataScanner RDS(series >= 1519);
     if(!RDS.addRuns(AcornDB::ADB().seriesRuns(series))) {
-        printf("Series %u contains no useful runs. Analysis stopped.\n", series);
-        return 0;
+        if(series > 3000) {
+            auto v = RDS.findSeriesRuns(series);
+            if(series == 3044) v.resize(420);
+            RDS.addRuns(v);
+            printf("No wishbone runs in DB for series %u; adding %zu runs found on disk.\n",series,v.size());
+        } else {
+            printf("Series %u contains no useful runs. Analysis stopped.\n", series);
+            return 0;
+        }
     }
     
     WishboneAnalyzer WA(&OM, "/Series_"+to_str(series));

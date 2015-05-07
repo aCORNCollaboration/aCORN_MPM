@@ -104,3 +104,11 @@ CREATE TABLE analysis_results (
     err REAL            -- result uncertainty
 );
 CREATE INDEX idx_analysis_results ON analysis_results(type_id, start_s, end_s, time);
+
+
+-----------------------------------------------------
+-- Admin commands
+--
+-- DELETE FROM pmt_sum_cal WHERE start_s = 30000000;
+-- INSERT INTO pmt_sum_cal(start_s, end_s, slope, intercept) VALUES(30000000,99999999,0.013,45);
+-- 

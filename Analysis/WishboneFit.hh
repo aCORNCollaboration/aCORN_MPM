@@ -37,6 +37,9 @@ public:
     /// compare asymmetries
     virtual void compareAsym(WishboneSeparator& WB);
     
+    /// fit asymmetry over energy range
+    double fitAsym(double E0, double E1, double& err);
+    
 protected:
     /// calculate fit range for energy
     virtual void getComboFitRange(double, double& t0, double& t1) const { t0 = 2.75; t1 = 4.5; }
@@ -49,6 +52,16 @@ protected:
     TGraph gt0;                         ///< optimal t0 cut point
     TGraphErrors dataN[2];              ///< integrated count rage in each wishbone branch
     TGraphErrors dataA;                 ///< integrated count rate asymmetry
+};
+
+/// Manually specified separator (for low-stats individual series)
+class ManualWishboneSeparator: public WishboneSeparator {
+public:
+    /// Constructor
+    ManualWishboneSeparator(const string& n, OutputManager* pnt);
+protected:
+    /// calculate fit range for energy
+    virtual void getComboFitRange(double E, double& t0, double& t1) const;
 };
 
 /// Fred's "midcentroid" cut

@@ -35,6 +35,7 @@ void WishboneSeparator::setWishbone(TH2* h) {
 
 void WishboneSeparator::extractAsymmetry() {
     int npts = 0;
+    int nptsa = 0;
     for(int b=1; b<(int)hSlices.size(); b++) {
         double E = binE(b);
         double tm = gt0.Eval(E);
@@ -48,11 +49,13 @@ void WishboneSeparator::extractAsymmetry() {
         dataN[1].SetPoint(npts, E, adp);
         dataN[0].SetPointError(npts, 0, dadm);
         dataN[1].SetPointError(npts, 0, dadp);
-        double ad = (adp-adm)/(adp+adm);
-        double dad = sqrt(dadm*dadm + dadp*dadp)/(adm+adp);
-        dataA.SetPoint(npts, E, 100*ad);
-        dataA.SetPointError(npts, 0, 100*dad);
-        
+        if(adm+adp) {
+            double ad = (adp-adm)/(adp+adm);
+            double dad = sqrt(dadm*dadm + dadp*dadp)/(adm+adp);
+            dataA.SetPoint(nptsa, E, 100*ad);
+            dataA.SetPointError(nptsa, 0, 100*dad);
+            nptsa++;
+        }
         npts++;
     }
     
@@ -96,6 +99,29 @@ void WishboneSeparator::compareAsym(WishboneSeparator& WB) {
     printCanvas("T0Compare");
 }
 
+double WishboneSeparator::fitAsym(double E0, double E1, double& err) {
+    TF1 fLin("fLin","pol0",E0,E1);
+    dataA.Fit(&fLin, "RN");
+    err = fLin.GetParError(0);
+    return fLin.GetParameter(0);
+}
+
+/////////////////////
+/////////////////////
+/////////////////////
+
+ManualWishboneSeparator::ManualWishboneSeparator(const string& n, OutputManager* pnt): WishboneSeparator(n,pnt) {
+    const size_t npts = 7;
+    const double E0s[npts] = {0,    100,  200,  300,  400,  500,  600 };
+    const double t0s[npts] = {3.72, 3.64, 3.55, 3.48, 3.40, 3.31, 3.25 };
+    for(size_t i=0; i<npts; i++) gt0.SetPoint(i, E0s[i], t0s[i]);
+}
+ 
+void ManualWishboneSeparator::getComboFitRange(double E, double& t0, double& t1) const {
+    t0 = 3.05;
+    t1 = 4.3 - 0.8*(E/700)*(E/700);
+}
+ 
 /////////////////////
 /////////////////////
 /////////////////////

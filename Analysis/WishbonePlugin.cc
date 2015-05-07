@@ -235,6 +235,12 @@ void WishbonePlugin::makeAnaResults() {
     AcornDB::ADB().uploadAnaResult("wb_fast_fiducial", "fast protons in energy fiducial [Hz]", baseResult);
     baseResult.value = integralAndError(hWishboneFiducialTProj, 3.7, 4.5, baseResult.err, "width");
     AcornDB::ADB().uploadAnaResult("wb_slow_fiducial", "slow protons in energy fiducial [Hz]", baseResult);
+    
+    ManualWishboneSeparator MWS("WBFit", myA);
+    MWS.setWishbone(hWishboneBGSub);
+    MWS.extractAsymmetry();
+    baseResult.value = MWS.fitAsym(50,400,baseResult.err);
+    AcornDB::ADB().uploadAnaResult("obs_asym", "observed uninterpreted asymmetry", baseResult);
 }
 
 void WishbonePlugin::makePlots() {

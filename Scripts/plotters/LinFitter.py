@@ -227,14 +227,16 @@ class LinearFitter:
                                 s += " - "+coeffstr
                                 continue
                                 
-                        fmt = "%+"+cfmt
+                        fmt = "%"+cfmt
                         if n==0:
                                 fmt = "%"+cfmt
                         if coeffstr == "1":
                                 coeffstr = ""
                         else:
                                 coeffstr = "\\cdot "+coeffstr
-                        s += (" "+fmt+" \\pm %"+cfmt)%(self.coeffs[n],sqrt(ccov[n,n])) + coeffstr
+                        if n:
+                            s += " + "
+                        s += ("("+fmt+" \\pm %"+cfmt+")")%(self.coeffs[n],sqrt(ccov[n,n])) + coeffstr
                 return s
 
 

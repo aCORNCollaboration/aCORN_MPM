@@ -33,7 +33,7 @@ public:
     
     /// get PMT sum energy calibration parameters
     void getPMTSumCal(RunID rn, double& slope, double& intercept);
-    /// get list of runs for given wishbone series
+    /// get list of runs in database for given wishbone series
     vector<RunID> seriesRuns(RunNum S, DataTier T = GOOD);
     
     /// upload PMT gain calibration data
