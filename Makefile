@@ -37,7 +37,7 @@ VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/:BaseTypes/:Analysis/:${MPMUT
 
 IOUtils = sqlite3.o
 
-Physics = BetaSpectrum.o ElectronBindingEnergy.o NuclEvtGen.o aSpectrum.o Collimator.o
+Physics = BetaSpectrum.o ElectronBindingEnergy.o NuclEvtGen.o UnpolarizedBeta.o aSpectrum.o Collimator.o
 
 ROOTUtils = SQLite_Helper.o
 

@@ -1,4 +1,7 @@
-#include "BetaSpectrum.hh"
+#ifndef ASPECTRUM_HH
+#define ASPECTRUM_HH
+
+#include "UnpolarizedBeta.hh"
 #include <cstddef>
 #include <cassert>
 #include <stdint.h>
@@ -18,8 +21,10 @@ public:
     double* u;          ///< kinematics array starting at u0[3]
 };
 
-/// Implementation of F. Gl\"uck, Computer Physics Communications 101 (1997) 223--231 
-class Gluck_beta_MC {
+/// Event generator for unpolarized neutron decays, including radiative corrections
+/// Implementation of F. Gl\"uck, Computer Physics Communications 101 (1997) 223--231 ,
+/// plus coulomb, recoil, and weak magnetism corrections
+class Gluck_beta_MC  {
 public:
     /// constructor
     Gluck_beta_MC(Gluck_MC_Rndm_Src* R, double M2_F = 1, double M2_GT = 3):
@@ -27,8 +32,7 @@ public:
         
     /// Generate weighted event
     double gen_evt_weighted();
-    /// Generate un-weighted event by Neumann rejection
-    void gen_evt();
+    
     /// Show "efficiency" of MC (5.22)
     void showEffic();
     /// test calculate hard photon decay probability by MC
@@ -36,9 +40,10 @@ public:
     /// set random number source
     void SetRandom(Gluck_MC_Rndm_Src* R) { myR = R; }
     
-    /// recoil, weak magnetism weight factor, from Bilenki'i 1959 (10)
+    /// additional recoil, weak magnetism weight factor, from Bilenki'i 1959 Eq. (10)
     double rwm_cxn() const;
-    
+    /// additional Coulomb correction weight factor
+    double coulomb_cxn() const { return WilkinsonF0(1, E_2/m_e); }
     
     const double G_F = 1.1663787e-17;   ///< Fermi coupling constant, [/keV^2]
     const double G2_V = G_F*G_F*0.94920; ///< |G_V|^2 = |V_ud G_F g_V|^2
@@ -89,7 +94,7 @@ public:
     double M_BR;        ///< hard brem amplitude (4.4)
     
     double evt_w;       ///< calculated event weight for kinematics
-    double evt_w0;      ///< uncorrected spectrum weight
+    double evt_w0;      ///< weight coming from uncorrected spectrum shape
     
 protected:
     
@@ -101,10 +106,10 @@ protected:
     double npp_2[3];    ///< coordinate transform vector (5.10)
     double V_g;         ///< re-weighting function integral (5.15)
     
-    double w_avg;       ///< average value of w, (5.23) and (5.16)
-    double Wavg_0VS;    ///< average value of W_0VS (5.23)
-    double w_max = 0;
-    double Wmax_0VS = 0;
+    double w_avg = 1.10753e-30;         ///< average value of w, (5.23) and (5.16)
+    double Wavg_0VS = 7.80418e-10;      ///< average value of W_0VS (5.23)
+    double w_max = 0;           ///< maximum observed value of w
+    double Wmax_0VS = 0;        ///< maximum observed value of W_0VS
     int64_t n_H = 0;            ///< number of hard brem events generated
     int64_t n_S = 0;            ///< number of soft brem events generated
     double sum_w = 0;           ///< sum of hard brem weights
@@ -134,3 +139,11 @@ protected:
     void calc_rho();
 };
 
+/// Recoil, weak magnetism weight factor, from Bilenki'i 1959 Eq. (10)
+double B59_rwm_cxn(double E, double cos_thn);
+
+/// Radiative correction according to Garcia, Maya, Phys. Rev. D, 1978
+double GM78_radiative_cxn(double E, double cos_thn);
+
+
+#endif

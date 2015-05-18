@@ -175,26 +175,6 @@ double Gluck_beta_MC::gen_evt_weighted() {
     return evt_w;
 }
 
-void Gluck_beta_MC::gen_evt() {
-    assert(false);
-    assert(myR);
-    evt_w = 1;
-    /*
-    if(P_H < myR->selectBranch()) {
-        do {
-            myR->next_0();
-            propose_kinematics();
-        } while(calc_soft()/Wmax_0VS < myR->selectBranch());
-    } else {
-        do {
-            myR->next();
-            propose_kinematics();
-        } while(calc_hard_brem()/w_max < myR->selectBranch());
-    }
-    calc_proton();
-    */
-}
-
 void Gluck_beta_MC::calc_proton() {
     p_1 = E_1; // massless neutrino approximation
     mag_p_f = 0;
@@ -230,7 +210,7 @@ void Gluck_beta_MC::calc_rho() {
         // (5.20)
         rho_VS += scoeff * w0 * (z_VS() - alpha/M_PI * N * (1-beta*beta)/beta);
         // (4.13)
-        rho_H += scoeff * C * beta * E0_1*E0_1 * E_2*E_2 * z_H(); 
+        rho_H += scoeff * w0 * z_H(); 
     }
     const double nrm = (Delta-m_2)/npts/3.;
     rho_0 *= nrm;
@@ -290,43 +270,68 @@ void Gluck_beta_MC::test_calc_P_H() {
 
 void Gluck_beta_MC::showEffic() {
     if(n_S) {
-        Wavg_0VS = sum_W_0VS/n_S; // (5.23)
-        E_0VS = 100*Wavg_0VS/Wmax_0VS; // (5.22)
-        printf("\tWmax_0VS = %g;\tE_0VS = %.1f%% (Gluck: 56%%)\n", Wmax_0VS, E_0VS);
+        Wavg_0VS = sum_W_0VS/n_S;       // (5.23)
+        E_0VS = 100*Wavg_0VS/Wmax_0VS;  // (5.22)
+        printf("\tWmax_0VS = %g;\tWavg_0VS = %g;\tE_0VS = %.1f%% (Gluck: 56%%)\n", Wmax_0VS, Wavg_0VS, E_0VS);
     }
     if(n_H) {
-        w_avg = sum_w/n_H; // (5.23)
+        w_avg = sum_w/n_H;     // (5.23)
         E_H = 100*w_avg/w_max; // (5.22)
-        printf("\tw_max = %g;\tE_H = %.1f%% (Gluck: 28%%)\n", w_max, E_H);
+        printf("\tw_max = %g;\tw_avg = %g;\tE_H = %.1f%% (Gluck: 28%%)\n", w_max, w_avg, E_H);
     }
 }
 
 double Gluck_beta_MC::rwm_cxn() const {
+    return B59_rwm_cxn(E_2, dot3(n_1, n_2));
+}
+
+double B59_rwm_cxn(double E, double cos_thn) {
     // from Bilenkii et. al., JETP 37 (10), No. 6, 1960
     // formula in equation (10), with 1+3*lambda^2 factored out
     // and also dividing out (1+beta*a0*cth) to avoid double-counting 'a' contribution.
     // lambda = |lambda| > 0 sign convention.
     
-    const double Delta = m_n - m_p;
     const double mu = 2.792847356-(-1.91304273);
+    const double Delta = m_n-m_p;
     
+    const double beta = sqrt(1-m_e*m_e/(E*E));
     const double x = 1 + 3*lambda*lambda;
     const double c1 = 1 + lambda*lambda;
     const double c2 = 1 - lambda*lambda;
     const double c3 = lambda + mu;
     const double c4 = 1 + lambda*lambda + 2*lambda*mu;
     
-    double A = ( 1 + (3 + 4*lambda*mu/x)*E_2/m_n
-                - c4/x * m_e*m_e/(m_n*E_2)
+    double A = ( 1 + (3 + 4*lambda*mu/x)*E/m_n
+                - c4/x * m_e*m_e/(m_n*E)
                 - 2*lambda*c3*Delta/m_p/x);
     double a0 = c2/x;
     double a = a0 + ( 4*lambda*c1*c3*Delta/m_n
-                      +c2*c4*m_e*m_e/(m_n*E_2)
-                      -(8*lambda*c1*mu + 3*x*x)*E_2/m_n )/(x*x);
-    double b = -3*c2/x*E_2/m_n;
+                     +c2*c4*m_e*m_e/(m_n*E)
+                     -(8*lambda*c1*mu + 3*x*x)*E/m_n )/(x*x);
+    double b = -3*c2/x*E/m_n;
     
-   
-    
-    double cth = dot3(n_1,n_2);
-    return A*(1 + beta*a*cth + beta*beta*b*cth*cth)/(1+beta*a0*cth);
+    return A*(1 + beta*a*cos_thn + beta*beta*b*cos_thn*cos_thn)/(1+beta*a0*cos_thn);
 }
+
+double GM78_radiative_cxn(double E, double cos_thn) {
+    const double E_m = m_n - m_p;
+    double beta = sqrt(1-m_e*m_e/(E*E));
+    double athb = atanh(beta);
+    double c0 = athb/beta;
+    double c1 = 3./2.*log(m_p/m_e) - 3./8. + 2./beta*SpenceL(2*beta/(1+beta));
+    double c2 = log(2*(E_m-E)/m_e);
+    
+    
+    double phth1 = ( c1 + 2*(c0-1)*( (E_m-E)/(3*E) - 3./2. + c2 )  
+                    + c0/2.*(2*(1+beta*beta) + (E_m-E)*(E_m-E)/(6*E*E) - 4*athb) ) * alpha/M_PI;
+                    
+    double phth2 = ( c1 + (c0-1)*((E_m-E)*(E_m-E)/(12*beta*beta*E*E) + 2*(E_m-E)/(3*E*beta*beta) + 2*c2 - 3)
+                    -2*c0*(athb-1) ) * alpha/M_PI;
+                    
+    //double r0 = (1 + 3*lambda*lambda + beta*cos_thn*(1 - lambda*lambda));
+     
+    double r0 = (1 + 3*lambda*lambda)*(1.+Wilkinson_g_a2pi(E/m_e));
+    return (1 + phth1 + 3*lambda*lambda*(1+phth1)
+            + beta*cos_thn*(1 + phth2 - lambda*lambda*(1 + phth2)) )/r0;
+}
+
