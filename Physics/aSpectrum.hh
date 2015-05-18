@@ -36,6 +36,10 @@ public:
     /// set random number source
     void SetRandom(Gluck_MC_Rndm_Src* R) { myR = R; }
     
+    /// recoil, weak magnetism weight factor, from Bilenki'i 1959 (10)
+    double rwm_cxn() const;
+    
+    
     const double G_F = 1.1663787e-17;   ///< Fermi coupling constant, [/keV^2]
     const double G2_V = G_F*G_F*0.94920; ///< |G_V|^2 = |V_ud G_F g_V|^2
     const double m = m_n;               ///< initial nucleus mass
@@ -49,10 +53,14 @@ public:
     double rho_0;       ///< 0^th order decay rate (5.18)
     double rho_VS;      ///< soft photon decay rate (5.20)
     double rho_0VS;     ///< soft decay rate = rho_0 + rho_VS;
+    double r_rho;       ///< total radiative correction to decay rate (6.1)
+    double r_H;         ///< hard photon contribution to total radiative correction
     double P_H;         ///< probability of hard photon decay (5.21)
+    double E_0VS;       ///< MC efficiency for virtual-soft events (5.22)
+    double E_H;         ///< MC efficiency for hard decay events (5.22)
 
-    double E_2;         ///< electron total energy
-    double p_2;         ///< electron momentum magnitude
+    double E_2;         ///< electron total energy [keV]
+    double p_2;         ///< electron momentum magnitude [keV/c]
     double n_2[3];      ///< electron unit direction
     double beta;        ///< electron velocity v/c (2.10)
     
@@ -60,10 +68,10 @@ public:
     double c_2_min;     ///< optional minimum electron cos theta
     double c_2_wt;      ///< extra weight for c_2 selection
     
-    double E0_1;        ///< antineutrino energy in center-of-mass frame (2.10)
-    double E_1;         ///< antineutrino energy minus photon (4.9)
-    double p_1;         ///< neutrino momentum magnitude
-    double n_1[3];      ///< neutrino momentum direction (5.8)
+    double E0_1;        ///< antineutrino energy in center-of-mass frame [keV] (2.10)
+    double E_1;         ///< antineutrino energy minus photon [keV] (4.9)
+    double p_1;         ///< neutrino momentum magnitude [keV/c]
+    double n_1[3];      ///< neutrino momentum unit direction (5.8)
     
     double K;           ///< hard photon energy (5.5)
     double n_gamma[3];  ///< gamma unit direction (5.8)
@@ -97,10 +105,10 @@ protected:
     double Wavg_0VS;    ///< average value of W_0VS (5.23)
     double w_max = 0;
     double Wmax_0VS = 0;
-    int64_t n_w = 0;
-    int64_t n_W_0VS = 0;
-    double sum_w = 0;
-    double sum_W_0VS = 0;
+    int64_t n_H = 0;            ///< number of hard brem events generated
+    int64_t n_S = 0;            ///< number of soft brem events generated
+    double sum_w = 0;           ///< sum of hard brem weights
+    double sum_W_0VS = 0;       ///< sum of soft brem weights
     
     /// choose initial un-weighted kinematics
     void propose_kinematics();

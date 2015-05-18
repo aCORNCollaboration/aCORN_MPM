@@ -18,6 +18,7 @@
 // We can try to put more than 5A in a trim coil if it is necessary.  5A feels conservative to me, but on the last round that is where we felt we needed to stop for some reason.
 //   - Gordon
 
+// make MagFitter; ./MagFitter
 
 #include "PathUtils.hh"
 #include "StringManip.hh"
@@ -184,15 +185,10 @@ public:
     }
     
     void optimize_field() {
-        ROOT::Math::Functor f(this, &FieldShaper::minFunc, series.size() + moveable.size());
-        
-        // Choose method upon creation between:
-        // kConjugateFR, kConjugatePR, kVectorBFGS,
-        // kVectorBFGS2, kSteepestDescent
-        // myMin(ROOT::Math::kConjugatePR)
         
         myMin = ROOT::Math::Factory::CreateMinimizer("Minuit2", "");
         assert(myMin);
+        ROOT::Math::Functor f(this, &FieldShaper::minFunc, series.size() + moveable.size());
         
         myMin->SetMaxFunctionCalls(10000);  // for Minuit
         myMin->SetMaxIterations(10000);     // for GSL
@@ -317,8 +313,8 @@ public:
     vector<FieldDat*> profiles;         ///< profiles for each coil
     FieldDat* EdProf = NULL;            ///< reference "Ed" profile
     vector<fitTarget> target;           ///< target field profile
-    vector< vector<int> > series;             ///< in-series current groups
-    vector< vector<int> > moveable;           ///< movable coils list, grouped by those moving together
+    vector< vector<int> > series;       ///< in-series current groups
+    vector< vector<int> > moveable;     ///< movable coils list, grouped by those moving together
     ROOT::Math::Minimizer* myMin;
     double Btarg = 368.;
     
@@ -361,12 +357,14 @@ int main(int, char**) {
             moveset.push_back(FS.profiles.size()-1);
             
             if(i <= 21) Bmain.push_back(FS.profiles.size()-1);
-            else B22_23.push_back(FS.profiles.size()-1);
-            //else FS.series.push_back(vecone(FS.profiles.size()-1));
+            //else B22_23.push_back(FS.profiles.size()-1);
+            else FS.series.push_back(vecone(FS.profiles.size()-1));
            
         }
         
         // trims
+        if(i==12) continue; // turn off middle trim to force reduced trim currents
+        
         //fname = basedir+"/Bmap_AxialTrim"+to_str(i);
         fname = basedir+"/Bmap_Trim"+to_str(i);
         if(i==23) fname = basedir+"/Bmap_Trim23-6cm";
