@@ -24,16 +24,18 @@ public:
     RootQRandom(): QR_8(11) { }
     virtual void next() { assert(QR_8.Next(u0)); }
     QuasiRandomSobol QR_8;
-    double b;
 };
 */
 
 class RootQRandom: public Gluck_MC_Rndm_Src {
 public:
     RootQRandom(): QR_8(8) { }
-    virtual void next() { assert(QR_8.Next(u)); }
+    virtual void next() {
+        assert(QR_8.Next(u));
+        //R.RndmArray(3, u+5);
+    }
     QuasiRandomSobol QR_8;
-    double b;
+    TRandom3 R;
 };
 
 double dot3x(const double* a, const double* b) {
@@ -54,7 +56,7 @@ int main(int, char**) {
         hBeta_A[i]->GetXaxis()->SetTitle("energy [MeV]");
         hBeta_A[i]->GetYaxis()->SetTitle("rate [1/decay/MeV]");
         
-        hBeta_MC[i] = new TH1F(i?"hBeta_MC1":"hBeta_MC0", "MC beta spectrum", 50, 0, .800);
+        hBeta_MC[i] = new TH1F(i?"hBeta_MC1":"hBeta_MC0", "MC beta spectrum", 100, 0, .800);
         hBeta_MC[i]->GetXaxis()->SetTitle("energy [MeV]");
         hBeta_MC[i]->GetYaxis()->SetTitle("rate [1/decay/MeV]");
     }
@@ -75,7 +77,7 @@ int main(int, char**) {
         }
     }
     for(int i=0; i<2; i++) {
-        hBeta_A[i]->Rebin(20);
+        hBeta_A[i]->Rebin(10);
         normalize_to_bin_width(hBeta_A[i], 1./sp);
     }
     
@@ -92,10 +94,11 @@ int main(int, char**) {
         if(!(i%(nToSim/nprog))) { printf("*"); fflush(stdout); }
         G.gen_evt_weighted();
         if(G.evt_w <= 0) continue;
-        double cos_thn = dot3x(G.n_1, G.n_2);
-        G.evt_w *= G.coulomb_cxn()*G.rwm_cxn();
         
+        G.evt_w *= G.coulomb_cxn()*G.rwm_cxn();
         sw += G.evt_w;
+        
+        double cos_thn = dot3x(G.n_1, G.n_2);
         hBeta_MC[cos_thn > 0]->Fill((G.E_2 - m_e)/1000, G.evt_w);
     }
     printf(" Done.\n");
@@ -115,6 +118,8 @@ int main(int, char**) {
     hBeta_MC[0]->Add(hBeta_A[0], -1.);
     hBeta_MC[0]->Draw("HIST");
     OM.printCanvas("hBeta_Resid");
+    
+    printf("Integral error: %g\n", hBeta_MC[0]->Integral("width"));
     
     return 0;
 }

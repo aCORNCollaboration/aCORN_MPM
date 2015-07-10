@@ -1,7 +1,7 @@
 #ifndef ELECTRONBINDINGENERGY_HH
 #define ELECTRONBINDINGENERGY_HH
 
-#include "QFile.hh"
+#include "SMFile.hh"
 #include <vector>
 #include <map>
 
@@ -34,8 +34,8 @@ protected:
 /// catalog of many BindingEnergyTables
 class BindingEnergyLibrary {
 public:
-    /// constructor from QFile containing element tables
-    BindingEnergyLibrary(const QFile& Q);
+    /// constructor from SMFile containing element tables
+    BindingEnergyLibrary(const SMFile& Q);
     /// destructor
     ~BindingEnergyLibrary();
     /// get BindingEnergyTable for specified element

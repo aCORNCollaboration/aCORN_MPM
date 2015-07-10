@@ -5,7 +5,7 @@
 #include "Enums.hh"
 #include "AcornCalibrator.hh"
 
-#include "QFile.hh"
+#include "SMFile.hh"
 #include "TagCounter.hh"
 
 #include <TH1.h>

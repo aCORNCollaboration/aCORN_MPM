@@ -70,8 +70,9 @@ class ReticlePos:
         self.h = dms2r(*hdms)
         self.v = dms2r(*vdms)
         self.r = r
+        self.angular_cxn = (0,0)
     def offset_from(self,rpos):
-        return ( (self.h-rpos.h)*self.r, (self.v-rpos.v)*self.r )
+        return ( (self.h-(rpos.h + rpos.angular_cxn[0]))*self.r, (self.v-(rpos.v + rpos.angular_cxn[1]))*self.r )
         
 if __name__ == "__main__":
     if 0:
@@ -182,6 +183,17 @@ if __name__ == "__main__":
             ReticlePos((359,59,53),(89,55,18),r0+r_TPC),
             ReticlePos((0,0,0),(89,55,07),r0+r_TC)]
     
+    # insert alignment 20150608
+    r0 = 48102 - r_BC
+    center_line = ReticlePos((0,9,33),(89,53,57),1)
+    rets = [ReticlePos((0,9,31),(89,53,47),r0+r_BC),
+            ReticlePos((0,9,50),(89,54,43),r0+r_BEC),
+            ReticlePos((0,10,10),(89,54,42),r0+r_BM),
+            ReticlePos((0,10,0), (89,54,20),r0+r_TM),
+            ReticlePos((0,9,41),(89,54,12),r0+r_TPC),
+            ReticlePos((0,9,33),(89,53,57),r0+r_TC)]
+    center_line.angular_cxn = [ (rets[-1].offset_from(center_line)[i]-rets[0].offset_from(center_line)[i])/(r_TC-r_BC) for i in range(2)]
+
     g = graph.graphxy(width=10,height=10,
         x=graph.axis.lin(title="horizontal offset [mils]", min=-20, max=20),
         y=graph.axis.lin(title="vertical offset [mils]", min=-10, max=30),

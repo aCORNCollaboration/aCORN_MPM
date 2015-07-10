@@ -55,6 +55,11 @@ public:
         string filedat;
         std::ifstream inf;
         inf.open(fname.c_str());
+        if(!inf.good()) {
+            printf("Unreadable file: '%s'\n", fname.c_str());
+            assert(false);
+            return;
+        }
         
         inf >> filedat;
         double sz = 0;
@@ -228,7 +233,7 @@ public:
             double z = P->B.GetX()[i];
             fitTarget t;
             t.z = z;
-            if(0.25 < z && z < 2.54) {  // collimator = 2.52
+            if(0.25 < z && z < 2.52) {  // collimator = 2.52
                 t.B = Btarg;
                 t.w = (z < 1.1)? 10*(z-0.25)/(1.1-0.25) : (z < 2.2)? 50 : 200;
             } else if(2.70 < z && z < 3.00) {
@@ -343,32 +348,33 @@ int main(int, char**) {
     vector<int> Bmain = vecone(FS.profiles.size()-1);
     vector<int> B22_23;
     
+    bool EdSpacing = false;
+    
     for(int i=1; i<=25; i++) {
         vector<int> moveset;
         string fname;
         // main
-        if(21 <= i && i <= 23) {
+        if(21 <= i && i <= 23+EdSpacing) {
             string fname = basedir+"/Bmap"+to_str(i);
-            if(i==23) fname = basedir+"/Bmap_Main23-6cm";
-            //if(22 <= i && i <= 24) fname += "Ed";
+            if(EdSpacing && 22 <= i && i <= 24) fname += "Ed";
+            else if(i==23) fname = basedir+"/Bmap_Main23-6cm";
             FS.profiles.push_back(new GordonFieldDat(fname+".csv"));
             FS.profiles.back()->B.SetLineColor(2+(i%7));
             FS.profiles.back()->I0 = 29.2;
             moveset.push_back(FS.profiles.size()-1);
             
             if(i <= 21) Bmain.push_back(FS.profiles.size()-1);
-            //else B22_23.push_back(FS.profiles.size()-1);
-            else FS.series.push_back(vecone(FS.profiles.size()-1));
+            else B22_23.push_back(FS.profiles.size()-1);
+            //else FS.series.push_back(vecone(FS.profiles.size()-1));
            
         }
         
         // trims
-        if(i==12) continue; // turn off middle trim to force reduced trim currents
+        if(i==12 && !EdSpacing) continue; // turn off middle trim to force reduced trim currents
         
-        //fname = basedir+"/Bmap_AxialTrim"+to_str(i);
         fname = basedir+"/Bmap_Trim"+to_str(i);
-        if(i==23) fname = basedir+"/Bmap_Trim23-6cm";
-        //if(22 <= i && i <= 24) fname += "Ed";
+        if(EdSpacing && 21 <= i && i <= 25) fname += "Ed";
+        else if(i==23) fname = basedir+"/Bmap_Trim23-6cm";
         FS.profiles.push_back(new GordonFieldDat(fname+".csv"));
         moveset.push_back(FS.profiles.size()-1);
         FS.profiles.back()->max_mul = 3;

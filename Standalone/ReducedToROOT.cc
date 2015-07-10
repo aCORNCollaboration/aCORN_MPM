@@ -144,7 +144,8 @@ int main(int argc, char** argv) {
             inf >> std::hex >> dtl;
             nLeft--;
             unsigned int chn = (dtl>>19);               // channel number
-            if(chn >= NCH_MAX) continue;                // skip proton readouts, for now...
+            assert(chn < NCH_MAX);
+            if(chn >= NCH_MAX) continue;
             R.E_PMT[chn] = (dtl>>4) & ((1<<15)-1);      // PMT ADC
             R.T_PMT[chn] = dtl & ((1<<4)-1);            // PMT TDC
             tps.push_back(R.T_PMT[chn]);

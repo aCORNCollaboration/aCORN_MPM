@@ -9,10 +9,11 @@ from pyx.color import rgb, hsb
 from pyx.graph.style import symbol
 
 # l: collimator diameter
-# d: distance of origin point from collimator
+# d: distance of origin point from collimator center
 # a: Larmor radius
 
 def nintegrate(f, x1, x2, npts=20):
+    """Simpson's Rule crude numerical integrator"""
     s = 0;
     for i in range(npts+1):
         x = x1 + (x2-x1)*float(i)/float(npts);
@@ -40,11 +41,11 @@ def plane_survival_fraction(l, d, a):
     return 1 - acos(x)/pi;
 
 def sphere_survival_fraction(l, d, a0):
-    """Proportion of trajectories emitted into sphere that survive"""
+    """Proportion of trajectories emitted into sphere with max Larmor radius a0 that survive"""
     
-    if d > l:
+    if d > l:           # vertex is outside collimator; no trajectories survive
         return 0.
-    if d + 2*a0 <= l:
+    if d + 2*a0 <= l:   # vertex is sufficiently inside collimator that all trajectories sruvive
         return 1.
     
     c0 = 0
@@ -53,6 +54,7 @@ def sphere_survival_fraction(l, d, a0):
         
     c1 = sqrt(1-((l-d)/(2.*a0))**2)      # cos phi above which all trajectories survive
     
+    # integrate over partially-surviving portion
     return nintegrate(lambda c: plane_survival_fraction(l, d, sqrt(1-c**2)*a0), c0, c1) + 1-c1
 
 def distrib_vertex_survival(l, a0):

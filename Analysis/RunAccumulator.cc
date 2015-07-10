@@ -14,7 +14,7 @@ SegmentSaver(pnt,nm,inflName), isSimulated(false) {
     
     // load existing data (if any)
     if(fIn) {
-        QFile qOld(inflname+".txt");
+        SMFile qOld(inflname+".txt");
         // fetch run counts, run times
         runCounts += TagCounter<RunID>(qOld.getFirst("runCounts"));
         runTimes += TagCounter<RunID>(qOld.getFirst("runTimes"));

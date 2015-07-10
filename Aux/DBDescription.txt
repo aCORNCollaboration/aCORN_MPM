@@ -109,6 +109,8 @@ CREATE INDEX idx_analysis_results ON analysis_results(type_id, start_s, end_s, t
 -----------------------------------------------------
 -- Admin commands
 --
--- DELETE FROM pmt_sum_cal WHERE start_s = 30000000;
+-- DELETE FROM pmt_sum_cal WHERE start_s = 30590000;
 -- INSERT INTO pmt_sum_cal(start_s, end_s, slope, intercept) VALUES(30000000,99999999,0.013,45);
--- 
+-- INSERT INTO pmt_sum_cal(start_s, end_s, slope, intercept) VALUES(30590000,99999999,0.13,4.5); -- first new DAQ runs require ~10x rescale
+-- INSERT INTO pmt_sum_cal(start_s, end_s, slope, intercept) VALUES(30650000,99999999,0.013,45);
+

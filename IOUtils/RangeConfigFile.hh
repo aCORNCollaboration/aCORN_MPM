@@ -1,13 +1,13 @@
 #ifndef RANGECONFIGFILE_HH
 #define RANGECONFIGFILE_HH
 
-#include "QFile.hh"
+#include "SMFile.hh"
 
 /// class for looking up manually-stored miscellaneous analysis info
-class RangeConfigFile: public QFile {
+class RangeConfigFile: public SMFile {
 public:
     /// constructor
-    RangeConfigFile(string fname): QFile(fname) {}
+    RangeConfigFile(string fname): SMFile(fname) {}
     
     /// get (double start,double end) pairs for key (or any other named pairs)
     vector< std::pair<double,double> > getRanges(const std::string& key, const std::string& k1="start", const std::string& k2="end") const;

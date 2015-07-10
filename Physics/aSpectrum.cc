@@ -159,13 +159,13 @@ double Gluck_beta_MC::gen_evt_weighted() {
     assert(myR);
     myR->next(); // random seed
     
-    if(P_H < myR->u[0]) {
-        myR->u[0] = (myR->u[0]-P_H)/(1-P_H);
+    if(P_H < myR->u[4]) {
+        myR->u[4] = (myR->u[4]-P_H)/(1-P_H);
         propose_kinematics();
         evt_w *= calc_soft()/Wavg_0VS;
         evt_w0 /= Wavg_0VS;
     } else {
-        myR->u[0] /= P_H;
+        myR->u[4] /= P_H;
         propose_kinematics();
         evt_w *= calc_hard_brem()/w_avg;
         evt_w0 = 0;

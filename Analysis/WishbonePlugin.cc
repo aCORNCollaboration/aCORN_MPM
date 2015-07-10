@@ -78,7 +78,7 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     initRegions(hNE);
     hNE.setTemplate(hNETemplate);
     
-    TH2F hPSTemplate("hChanSpec","PMT Spectra", 200, 0, 20., NCH_MAX, -0.5, NCH_MAX-0.5);
+    TH2F hPSTemplate("hChanSpec","PMT Spectra", 200, 0, (1<<15)/1000., NCH_MAX, -0.5, NCH_MAX-0.5);
     hPSTemplate.GetXaxis()->SetTitle("raw signal (#times 10^{3})");
     hPSTemplate.GetYaxis()->SetTitle("detector channel number");
     hPSTemplate.GetYaxis()->SetTitleOffset(1.4);
@@ -121,6 +121,13 @@ void WishbonePlugin::initRegions(FGBGRegionsHist& h) {
 
 void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
     
+    for(unsigned int i=0; i<NCH_MAX; i++) {
+        if(PDS.E_PMT[i]) {
+            assert(PDS.E_PMT[i] >= 0);
+            hChanSpec.fill(3500, PDS.E_PMT[i]/1000., i, weight);
+        }
+    }
+    
     if(PDS.E_p_0 <= 0) return;
     
     hProtonSignal.fill(PDS.T_e2p, PDS.E_p_0/1000., weight);
@@ -135,7 +142,7 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
         double vetosum = 0;
         for(unsigned int i=0; i<NCH_MAX; i++) {
             if(PDS.E_PMT[i]) {
-                hChanSpec.fill(PDS.T_e2p, PDS.E_PMT[i]/1000., i, weight);
+                //hChanSpec.fill(PDS.T_e2p, PDS.E_PMT[i]/1000., i, weight);
                 if(i<N_V_PMT) vetosum += PDS.E_PMT[i];
             }
         }
@@ -296,6 +303,8 @@ void WishbonePlugin::makePlots() {
     //hChanSpec.hRates[true]->SetMaximum(0.4);
     hChanSpec.hRates[true]->Draw("Col Z");
     myA->printCanvas("ChannelSpectra");    
+    hChanSpec.hRates[false]->Draw("Col Z");
+    myA->printCanvas("ChannelSpectraBG"); 
     
     hNE.hRates[true]->Draw("Col Z");
     myA->printCanvas("NPMTs");

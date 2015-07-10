@@ -227,7 +227,7 @@ protected:
 class NucDecaySystem {
 public:
     /// constructor from specification file
-    NucDecaySystem(const QFile& Q, const BindingEnergyLibrary& B, double t = DBL_MAX);
+    NucDecaySystem(const SMFile& Q, const BindingEnergyLibrary& B, double t = DBL_MAX);
     /// destructor
     ~NucDecaySystem();
     /// set cutoff lifetime for intermediate states

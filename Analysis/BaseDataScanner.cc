@@ -1,5 +1,6 @@
 #include "BaseDataScanner.hh"
 #include <iostream>
+#include <stdio.h>
 
 BaseDataScanner::BaseDataScanner(const std::string& treeName, bool fp):
 RunSetScanner(treeName), is4p(fp), physicsWeight(1.) { }

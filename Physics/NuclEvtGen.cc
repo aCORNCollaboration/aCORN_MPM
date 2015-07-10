@@ -267,7 +267,7 @@ void ECapture::run(vector<NucDecayEvent>&, double*) {
 
 bool sortLevels(const NucLevel& a, const NucLevel& b) { return (a.E < b.E); }
 
-NucDecaySystem::NucDecaySystem(const QFile& Q, const BindingEnergyLibrary& B, double t): BEL(B) {
+NucDecaySystem::NucDecaySystem(const SMFile& Q, const BindingEnergyLibrary& B, double t): BEL(B) {
     
     fancyname = Q.getDefault("fileinfo","fancyname","");
     
@@ -490,7 +490,7 @@ void NucDecaySystem::scale(double s) {
 //-----------------------------------------
 
 NucDecayLibrary::NucDecayLibrary(const std::string& datp, double t):
-datpath(datp), tcut(t), BEL(QFile(datpath+"/ElectronBindingEnergy.txt")) { }
+datpath(datp), tcut(t), BEL(SMFile(datpath+"/ElectronBindingEnergy.txt")) { }
 
 NucDecayLibrary::~NucDecayLibrary() {
     for(map<std::string,NucDecaySystem*>::iterator it = NDs.begin(); it != NDs.end(); it++)
@@ -507,7 +507,7 @@ NucDecaySystem& NucDecayLibrary::getGenerator(const std::string& nm) {
         throw(e);
     }
     std::pair<map<std::string,NucDecaySystem*>::iterator,bool> ret;
-    ret = NDs.insert(std::pair<std::string,NucDecaySystem*>(nm,new NucDecaySystem(QFile(fname),BEL,tcut)));
+    ret = NDs.insert(std::pair<std::string,NucDecaySystem*>(nm,new NucDecaySystem(SMFile(fname),BEL,tcut)));
     return *(ret.first->second);
 }
 

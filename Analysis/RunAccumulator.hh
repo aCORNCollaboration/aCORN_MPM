@@ -26,7 +26,7 @@ public:
     /// scale all saved histograms by a factor
     virtual void scaleData(double s);
         
-    /// write to QFile
+    /// write to SMFile
     virtual void write(string outName = "");
         
     /// fill data from a BaseDataScanner
