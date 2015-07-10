@@ -132,15 +132,15 @@ void RunAccumulator::write(string outName) {
     printf("Writing data to file '%s'...\n",outName.c_str());
     
     // clear previous tallies
-    qOut.erase("runCounts");
-    qOut.erase("runTimes");
+    //qOut.erase("runCounts");
+    //qOut.erase("runTimes");
     
     // record run counts, times
-    qOut.insert("runCounts",runCounts.toStringmap());
-    qOut.insert("runTimes",runTimes.toStringmap());
+    //qOut.insert("runCounts",runCounts.toStringmap());
+    //qOut.insert("runTimes",runTimes.toStringmap());
     
     // base class write
-    SegmentSaver::write(outName);
+    //SegmentSaver::write(outName);
 }
 
 void RunAccumulator::loadProcessedData(BaseDataScanner& PDS) {
