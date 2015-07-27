@@ -14,7 +14,7 @@ SegmentSaver(pnt,nm,inflName), isSimulated(false) {
     
     // load existing data (if any)
     if(fIn) {
-        SMFile qOld(inflname+".txt");
+        SMFile qOld(dropLast(inflname,".")+".txt");
         // fetch run counts, run times
         runCounts += TagCounter<RunID>(qOld.getFirst("runCounts"));
         runTimes += TagCounter<RunID>(qOld.getFirst("runTimes"));
@@ -132,15 +132,15 @@ void RunAccumulator::write(string outName) {
     printf("Writing data to file '%s'...\n",outName.c_str());
     
     // clear previous tallies
-    //qOut.erase("runCounts");
-    //qOut.erase("runTimes");
+    qOut.erase("runCounts");
+    qOut.erase("runTimes");
     
     // record run counts, times
-    //qOut.insert("runCounts",runCounts.toStringmap());
-    //qOut.insert("runTimes",runTimes.toStringmap());
+    qOut.insert("runCounts",runCounts.toStringmap());
+    qOut.insert("runTimes",runTimes.toStringmap());
     
-    // base class write
-    //SegmentSaver::write(outName);
+    if(!outName.size()) outName = basePath+"/"+name+".txt";
+    qOut.commit(outName);
 }
 
 void RunAccumulator::loadProcessedData(BaseDataScanner& PDS) {
@@ -182,7 +182,7 @@ unsigned int RunAccumulator::mergeDir() {
     for(vector<string>::iterator it = fnames.begin(); it != fnames.end(); it++) {
         // check whether data directory contains cloneable subdirectories
         string datinfl = basePath+"/"+(*it)+"/"+(*it);
-        if(!inflExists(datinfl)) continue;
+        if(!fileExists(datinfl)) continue;
         SegmentSaver* subRA = makeAnalyzer(*it,datinfl);
         addSegment(*subRA);
         delete(subRA);

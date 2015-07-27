@@ -6,6 +6,7 @@
 #include "TagCounter.hh"
 #include "BaseDataScanner.hh"
 #include "AcornDB.hh"
+#include "SMFile.hh"
 
 using std::vector;
 using std::pair;
@@ -35,7 +36,8 @@ public:
     bool isSimulated;               ///< flag for whether this is based on simulated data
     TagCounter<RunID> runCounts;    ///< event counts by run
     TagCounter<RunID> runTimes;     ///< time spent on each run
-        
+    SMFile qOut;
+    
     /// fill core histograms in plugins from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
     /// calculate results from filled histograms

@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     if(series < 0) {
         series = -series;
         string wbname = "Series_"+to_str(series);
-        WishboneAnalyzer WA(&OM, wbname, OM.basePath+"/"+wbname+"/"+wbname);
+        WishboneAnalyzer WA(&OM, wbname, OM.basePath+"/"+wbname+"/"+wbname+".root");
         WA.makeOutput();
         return 0;
     }

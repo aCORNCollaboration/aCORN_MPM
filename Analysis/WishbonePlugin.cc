@@ -259,8 +259,8 @@ void WishbonePlugin::makePlots() {
         hWishboneBGSub->Rebin2D(2,2);
         hWishboneBGSub->Scale(1./4.);
     }
-    hWishboneBGSub->SetMinimum(-3.);
-    hWishboneBGSub->SetMaximum(3.);
+    hWishboneBGSub->SetMinimum(-10.);
+    hWishboneBGSub->SetMaximum(10.);
     hWishboneBGSub->GetXaxis()->SetRangeUser(0,1000);
     hWishboneBGSub->GetYaxis()->SetRangeUser(2,5);
     makeRBpalette();
