@@ -349,7 +349,7 @@ void WishbonePlugin::makePlots() {
     myA->printCanvas("WishboneEnergy");
     
     hWishboneTProj->SetMinimum(0);
-    hWishboneTProj->SetMaximum(5);
+    hWishboneTProj->SetMaximum(20);
     hWishboneTProj->Draw("E0");
     drawVLine(T_p_lo/1000., myA->defaultCanvas, 2);
     drawVLine(T_p_hi/1000., myA->defaultCanvas, 2);

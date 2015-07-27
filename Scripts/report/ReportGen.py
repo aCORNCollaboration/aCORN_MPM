@@ -5,7 +5,8 @@ import os
 class ReportGenerator:
     
     def __init__(self):
-        self.slist =self. get_series_list()
+        self.missing = []
+        self.slist = [3102] #self. get_series_list()
         self.outPath = os.environ["ACORN_WISHBONE"]+"/Report/"
         os.system("mkdir -p "+self.outPath)
         
@@ -37,29 +38,38 @@ class ReportGenerator:
                 continue
             pgs += btext%page_settings
         page_settings = {"series":9999, "sdir":os.environ["ACORN_WISHBONE"]}
-        pgs += btext%page_settings
+        if os.path.exists(page_settings["sdir"]+"/Series_9999"):
+            pgs += btext%page_settings
         return pgs
         
     def build_output(self):
+        oneseries = len(self.slist) == 1
         
         self.body = ""
+        if not oneseries:
+            self.body += "\\tableofcontents\n"
         if self.missing:
             self.body += r"\section{Report errors}"+'\n'
             self.body += "Missing series files:\n"+r"\begin{itemize}"+'\n'
             for m in self.missing:
                 self.body += '\t'+r"\item \begin{verbatim}"+ m + r"\end{verbatim}"+'\n';
             self.body += r"\end{itemize}"+'\n\n'
-            
-        self.body += r"\clearpage\section{Detector response}"
+        
+        if not oneseries:
+            self.body += r"\clearpage\section{Detector response}"
         self.body += self.makePages("Template_Page_1.tex")
-        self.body += r"\clearpage\section{Event positions}"
+        if not oneseries:
+            self.body += r"\clearpage\section{Event positions}"
         self.body += self.makePages("Template_Page_3.tex")
-        self.body += r"\clearpage\section{Wishbone}"
+        if not oneseries:
+            self.body += r"\clearpage\section{Wishbone}"
         self.body += self.makePages("Template_Page_2.tex")
         
         texFile = self.outPath+"/aCORN_Summary.tex"
         fOut = open(texFile,"w");
         doc_settings = {"title":r"\aCORN\ analysis report", "author":r"\texttt{aCORN\_MPM/Scripts/report/ReportGen.py}", "body":self.body}
+        if oneseries:
+            doc_settings["title"] = r"\aCORN\ series %i report"%self.slist[0]
         fOut.write(open("Template_Document.tex","r").read()%doc_settings)
         fOut.close()
         
