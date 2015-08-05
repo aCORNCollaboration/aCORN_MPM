@@ -74,6 +74,9 @@ public:
 protected:
     /// initialize foreground/background regions
     void initRegions(FGBGRegionsHist& h);
+    
+    /// set NG-C cuts
+    void config_NGC_cuts();
 };
 
 

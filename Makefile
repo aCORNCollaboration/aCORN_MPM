@@ -33,7 +33,7 @@ endif
 # things to build
 #
 
-VPATH = ./:IOUtils/:Physics/:ROOTUtils/:Standalone/:BaseTypes/:Analysis/:${MPMUTILS}/GeneralUtils/
+VPATH = ./:IOUtils/:Physics/:Standalone/:BaseTypes/:Analysis/:${MPMUTILS}/GeneralUtils/
 
 IOUtils = sqlite3.o
 

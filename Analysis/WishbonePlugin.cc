@@ -44,6 +44,8 @@ WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"
 hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this),
 hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(this) {
     
+    config_NGC_cuts();
+    
     TH1F hProtonTemplate("hProtonSignal", "Proton detector signal", 200,0,20);
     hProtonTemplate.GetXaxis()->SetTitle("proton detector ADC channels (#times 10^{3})");
     initRegions(hProtonSignal);
@@ -70,6 +72,7 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     hTemplate.GetYaxis()->SetTitle("Proton TOF [#mus]");
     hTemplate.GetYaxis()->SetTitleOffset(1.4);
     hWishbone = (TH2F*)registerHist("hWishbone",hTemplate);
+    hWishbone->SetTitle("aCORN NG-C Wishbone");
     hWishbone->GetYaxis()->SetRange();
     
     TH2F hNETemplate("hNE","PMT trigger counts", 100, 0, 1000, 20, -0.5, 19.5);
@@ -113,6 +116,15 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     hEnergyRadius.setTemplate(hEnergyRadiusTemplate);
 }
 
+void WishbonePlugin::config_NGC_cuts() {
+    E_p_lo = 550;
+    E_p_hi = 1500;
+    T_p_min = 750;
+    T_p_lo = 3000;
+    T_p_hi = 4500;
+    T_p_max = 9500;
+}
+   
 void WishbonePlugin::initRegions(FGBGRegionsHist& h) {
     h.addRegion(T_p_min, T_p_lo, false);
     h.addRegion(T_p_lo, T_p_hi, true);
@@ -252,7 +264,7 @@ void WishbonePlugin::makeAnaResults() {
 
 void WishbonePlugin::makePlots() {
     
-    myA->defaultCanvas->SetRightMargin(0.15);
+    myA->defaultCanvas->SetRightMargin(0.20);
 
     bool isCombined = myA->runTimes.nTags() > 1000;
     if(true || !isCombined) {
@@ -270,6 +282,8 @@ void WishbonePlugin::makePlots() {
     drawHLine(T_p_min/1000., myA->defaultCanvas, 4);
     drawHLine(T_p_max/1000., myA->defaultCanvas, 4);
     myA->printCanvas("Wishbone");
+    
+    myA->defaultCanvas->SetRightMargin(0.15);
     
     makeGrayscalepalette(false);
     hWBRate->SetMaximum(10);
@@ -294,15 +308,17 @@ void WishbonePlugin::makePlots() {
     myA->printCanvas("PosSigma");
     
     hEnergyRadius.hRates[true]->SetMinimum(0);
-    //hEnergyRadius.hRates[true]->SetMaximum(10);
+    hEnergyRadius.hRates[true]->SetMaximum(0.03);
     hEnergyRadius.hRates[true]->Draw("Col Z");
     myA->printCanvas("EnergyRadius");
     
     myA->defaultCanvas->SetLogz(true);
     
     //hChanSpec.hRates[true]->SetMaximum(0.4);
+    hChanSpec.hRates[true]->GetXaxis()->SetRangeUser(0,16);
     hChanSpec.hRates[true]->Draw("Col Z");
     myA->printCanvas("ChannelSpectra");    
+    hChanSpec.hRates[false]->GetXaxis()->SetRangeUser(0,16);
     hChanSpec.hRates[false]->Draw("Col Z");
     myA->printCanvas("ChannelSpectraBG"); 
     
@@ -325,7 +341,7 @@ void WishbonePlugin::makePlots() {
     myA->printCanvas("NVeto");
     
     hProtonSignal.hRates[false]->SetMinimum(isCombined?1e-4:1e-3);
-    hProtonSignal.hRates[false]->SetMaximum(10);
+    hProtonSignal.hRates[false]->SetMaximum(50);
     hProtonSignal.hRates[false]->Draw();
     hProtonSignal.hRates[true]->Draw("Same");
     drawVLine(E_p_lo/1000., myA->defaultCanvas, 2);
@@ -342,6 +358,7 @@ void WishbonePlugin::makePlots() {
     myA->printCanvas("VetoSum");
     
     hWishboneEProj[true]->SetMinimum(-0.2);
+    hWishboneEProj[true]->SetMaximum(15);
     hWishboneEProj[true]->GetXaxis()->SetRangeUser(0,1000);
     hWishboneEProj[true]->Draw();
     hWishboneEProj[false]->Draw("Same");

@@ -4,9 +4,11 @@
 #include "OutputManager.hh"
 #include "AcornDB.hh"
 #include "StringManip.hh"
+#include "GraphicsUtils.hh"
 
 #include <stdio.h>
 #include <TStyle.h>
+#include <TROOT.h>
 
 int main(int argc, char** argv) {
     
@@ -14,10 +16,10 @@ int main(int argc, char** argv) {
         printf("Please supply a series number for analysis.\n");
         return 0;
     }
-    
     int series = atoi(argv[1]);
     
-    gStyle->SetOptStat("");
+    setupSlideStyle();
+    gROOT->ForceStyle();
     
     // series 0: merge all wishbone data into run total
     if(series == 0) {

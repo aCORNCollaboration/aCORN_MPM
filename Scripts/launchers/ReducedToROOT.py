@@ -17,7 +17,7 @@ if __name__ == "__main__":
     flist.sort()
     for f in flist:
         
-        if not (f[0] in ["S","s"] and ".txt" in f):
+        if "_spect" in f or not (f[0] in ["S","s"] and ".txt" in f):
             continue
         
         if f[0]=="S": # special case for differently-capitalized filenames
