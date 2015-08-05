@@ -1,4 +1,9 @@
-// Comparisons between simulations and source calibration data from PMT_Gainmatcher
+/// \file CalibSpectra.cc \brief Comparisons between simulations and source calibration data from PMT_Gainmatcher
+// This file was produced under the employ of the United States Government,
+// and is consequently in the PUBLIC DOMAIN, free from all provisions of
+// US Copyright Law (per USC Title 17, Section 105).
+//
+// -- Michael P. Mendenhall, 2015
 
 #include "NuclEvtGen.hh"
 #include "Collimator.hh"

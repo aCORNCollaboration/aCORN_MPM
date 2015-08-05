@@ -1,7 +1,13 @@
 ###################################################################
 # aCORN analysis toolkit
-# by Michael P. Mendenhall (NIST 2014--2015)
-
+# by Michael P. Mendenhall 2014--2015
+#
+# As noted in individual files in this project, much of
+# this code was produced under the employ of the United States Government,
+# and is consequently in the PUBLIC DOMAIN, free from all provisions of
+# US Copyright Law (per USC Title 17, Section 105).
+#
+# -- Michael P. Mendenhall, 2015
 
 ------------------------------------
 ---------- Dependencies ------------
