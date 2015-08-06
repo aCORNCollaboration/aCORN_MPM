@@ -10,10 +10,16 @@
 
 # assure correct shell is used
 SHELL = /bin/sh
+
+# check for necessary environment variables
+ifndef MPMUTILS
+$(error MPMUTILS is not set)
+endif
+
 # apply implicit rules only for listed file types
 .SUFFIXES:
 .SUFFIXES: .c .cc .cpp .o
-	 
+
 # compiler flags
 CXXFLAGS = -O3 --std=c++11 -fPIC `root-config --cflags` -I. -pedantic -Wall -Wextra \
 	-I${MPMUTILS}/GeneralUtils/ -I${MPMUTILS}/Matrix/ -I${MPMUTILS}/ROOTUtils/ \
@@ -24,14 +30,6 @@ LDFLAGS =  -L. -L${MPMUTILS}/GeneralUtils/ -L${MPMUTILS}/ROOTUtils/ \
 ifdef PROFILER_COMPILE
 	CXXFLAGS += -pg
 	LDFLAGS += -pg
-endif
-
-ifdef PUBLICATION_PLOTS
-	CXXFLAGS += -DPUBLICATION_PLOTS
-endif
-
-ifdef TSPECTRUM_USES_DOUBLE
-	CXXFLAGS += -DTSPECTRUM_USES_DOUBLE
 endif
 
 #
@@ -50,9 +48,9 @@ Analysis = AcornCalibrator.o AcornDB.o BaseDataScanner.o Positioner.o PMTsPlugin
 	ReducedDataScanner.o RunAccumulator.o RunSetScanner.o SourceCalPlugin.o WishboneFit.o WishbonePlugin.o
 
 objects = $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis) aCornCompileVersion.o
+StandaloneObjs = BetaSpectrometerScanner ReducedToROOT PMT_Gainmatcher WishboneScanner
 
-
-all: libaCORN_MPM.a
+all: libaCORN_MPM.a $(StandaloneObjs)
 
 libaCORN_MPM.a: $(objects)
 	ar rs libaCORN_MPM.a $(objects)
@@ -65,18 +63,9 @@ aCornCompileVersion.o:
 % : %.cc libaCORN_MPM.a
 	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) -o $@
 
-StandaloneObjs = BetaSpectrometerScanner ReducedToROOT PMT_Gainmatcher WishboneScanner
 
-standalone: $(StandaloneObjs)
-
-#
 # cleanup
-#
 .PHONY: clean
 clean:
-	-rm -f libaCORN_MPM.a
-	-rm -f *.o
-	-rm -rf *.dSYM
-	-rm -f ReducedToROOT  PMT_Gainmatcher SpectrumShape  WishboneScanner CalibSpectra
-
-
+	-rm -f *.a *.o *.dSYM
+	-rm -f $(StandaloneObjs)
