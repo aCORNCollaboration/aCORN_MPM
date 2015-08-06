@@ -42,20 +42,24 @@ VPATH = ./:IOUtils/:Physics/:Standalone/:BaseTypes/:Analysis/:${MPMUTILS}/Genera
 
 IOUtils = sqlite3.o
 
-Physics = BetaSpectrum.o ElectronBindingEnergy.o NuclEvtGen.o UnpolarizedBeta.o aSpectrum.o Collimator.o
+Physics = PolarizedBetaAsym.o ElectronBindingEnergy.o NuclEvtGen.o UnpolarizedBeta.o UnpolarizedNeutronDecay.o Collimator.o
 
 ROOTUtils = SQLite_Helper.o
 
 Analysis = AcornCalibrator.o AcornDB.o BaseDataScanner.o Positioner.o PMTsPlugin.o PluginInterpolator.o \
 	ReducedDataScanner.o RunAccumulator.o RunSetScanner.o SourceCalPlugin.o WishboneFit.o WishbonePlugin.o
 
-objects = $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis)
+objects = $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis) CompileVersion.o
 
 
 all: libaCORN_MPM.a
 
 libaCORN_MPM.a: $(objects)
 	ar rs libaCORN_MPM.a $(objects)
+
+.PHONY: CompileVersion.o
+CompileVersion.o: 
+	$(CXX) -c $(CXXFLAGS) -DGIT_SHA=$(shell git rev-parse -q HEAD) BaseTypes/CompileVersion.cc -o CompileVersion.o
 
 # generic rule for everything else .cc linked against libaCORN_MPM
 % : %.cc libaCORN_MPM.a

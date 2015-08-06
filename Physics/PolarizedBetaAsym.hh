@@ -1,6 +1,6 @@
-/// \file BetaSpectrum.hh calculations for the beta spectrum and various related corrections
-#ifndef BETASPECTRUM_HH
-#define BETASPECTRUM_HH
+/// \file PolarizedBetaAsym.hh calculations for the beta spectrum and various related corrections
+#ifndef POLARIZEDBETAASYM_HH
+#define POLARIZEDBETAASYM_HH
 
 #include "UnpolarizedBeta.hh"
 

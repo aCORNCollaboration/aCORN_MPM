@@ -1,4 +1,4 @@
-/// \file aSpectrum.hh
+/// \file UnpolarizedNeutronDecay.hh Neutron beta decay event generator with three-body kinematics plus radiative decay
 // This file was produced under the employ of the United States Government,
 // and is consequently in the PUBLIC DOMAIN, free from all provisions of
 // US Copyright Law (per USC Title 17, Section 105).

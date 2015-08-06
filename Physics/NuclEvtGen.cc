@@ -1,3 +1,4 @@
+/// \file NuclEvtGen.cc
 #include "NuclEvtGen.hh"
 #include "SMExcept.hh"
 #include "StringManip.hh"

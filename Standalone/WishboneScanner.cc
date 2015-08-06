@@ -12,12 +12,15 @@
 #include "AcornDB.hh"
 #include "StringManip.hh"
 #include "GraphicsUtils.hh"
+#include "CompileVersion.hh"
 
 #include <stdio.h>
 #include <TStyle.h>
 #include <TROOT.h>
 
 int main(int argc, char** argv) {
+    
+    aCORN_MPM::display_version();
     
     if(argc != 2) {
         printf("Please supply a series number for analysis.\n");

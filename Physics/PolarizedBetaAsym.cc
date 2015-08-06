@@ -1,9 +1,16 @@
-#include "BetaSpectrum.hh"
-#include "SMExcept.hh"
+/// \file PolarizedBetaAsym.cc
+#include "PolarizedBetaAsym.hh"
 #include <stdio.h>
-#include <TMath.h>
+#include <cmath>
 #include <vector>
 #include <map>
+
+#ifdef USE_ROOT_MATH
+#include <TMath.h>
+#define Gamma(x) TMath::Gamma(x)
+#else
+#define Gamma(x) tgamma(x)
+#endif
 
 double Sirlin_g_a2pi(double KE,double KE0,double m) {
     if(KE<=0 || KE>=KE0)
@@ -68,10 +75,10 @@ double Davidson_C1T(double W, double W0, double Z, double R) {
     double a2Z2 = alpha*alpha*Z*Z;
     double S0 = sqrt(1-a2Z2);
     double S1 = sqrt(4-a2Z2);
-    const double C = pow(TMath::Gamma(0.25),2)/sqrt(8*M_PI*M_PI*M_PI); // "Gauss number"
+    const double C = pow(Gamma(0.25),2)/sqrt(8*M_PI*M_PI*M_PI); // "Gauss number"
     double sm = 0;
     for(unsigned int n=1; n<10; n++) sm += 1/(n*(n*n+y*y));
-    double A = ( (S1+2)/(2*S0+2) * pow(12*TMath::Gamma(2.*S0+1.)/TMath::Gamma(2.*S1+1.),2) *
+    double A = ( (S1+2)/(2*S0+2) * pow(12*Gamma(2.*S0+1.)/Gamma(2.*S1+1.),2) *
     pow(2*p*R,a2Z2/2) * (pow(1-a2Z2/4,2)+y*y) * (1-a2Z2*C/2+a2Z2*y*y*sm/2) );
     
     return (1+S0)*((W0-W)*(W0-W)+A*(W*W-1))/24;
@@ -88,10 +95,10 @@ double Behrens_l2(double W, double W0, double Z, double R) {
     double a2Z2 = alpha*alpha*Z*Z;
     double S0 = sqrt(1-a2Z2);
     double S1 = sqrt(4-a2Z2);
-    const double C = pow(TMath::Gamma(0.25),2)/sqrt(8*M_PI*M_PI*M_PI); // "Gauss number"
+    const double C = pow(Gamma(0.25),2)/sqrt(8*M_PI*M_PI*M_PI); // "Gauss number"
     double sm = 0;
     for(unsigned int n=1; n<10; n++) sm += 1/(n*(n*n+y*y));
-    return ( (S1+2)/(2*S0+2) * pow(12*TMath::Gamma(2.*S0+1.)/TMath::Gamma(2.*S1+1.),2) *
+    return ( (S1+2)/(2*S0+2) * pow(12*Gamma(2.*S0+1.)/Gamma(2.*S1+1.),2) *
     pow(2*p*R,a2Z2/2) * (pow(1-a2Z2/4,2)+y*y) * (1-a2Z2*C/2+a2Z2*y*y*sm/2) );
 }
 

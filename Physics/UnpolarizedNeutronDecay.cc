@@ -1,11 +1,11 @@
-/// \file aSpectrum.cc
+/// \file UnpolarizedNeutronDecay.cc
 // This file was produced under the employ of the United States Government,
 // and is consequently in the PUBLIC DOMAIN, free from all provisions of
 // US Copyright Law (per USC Title 17, Section 105).
 //
 // -- Michael P. Mendenhall, 2015
 
-#include "aSpectrum.hh"
+#include "UnpolarizedNeutronDecay.hh"
 #include <stdio.h>
 
 double dot3(const double* a, const double* b) {

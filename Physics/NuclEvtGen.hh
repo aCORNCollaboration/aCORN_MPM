@@ -1,8 +1,9 @@
+/// \file NuclEvtGen.hh Nuclear decay scheme event generator
 #ifndef NUCLEVTGEN_HH
 #define NUCLEVTGEN_HH
 
 #include "ElectronBindingEnergy.hh"
-#include "BetaSpectrum.hh"
+#include "PolarizedBetaAsym.hh"
 #include "FloatErr.hh"
 #include "GraphUtils.hh"
 #include "TChainScanner.hh"
@@ -49,13 +50,13 @@ public:
     /// scale probabilities
     void scale(double s) { fluxIn *= s; fluxOut *= s; }
     
-    string name;   ///< name for this level
+    string name;        ///< name for this level
     unsigned int A;     ///< nucleus A
     unsigned int Z;     ///< nucleus Z
     unsigned int n;     ///< level number
     double E;           ///< energy
     double hl;          ///< half-life
-    string jpi;    ///< spin/parity
+    string jpi;         ///< spin/parity
     double fluxIn;      ///< net flux into level
     double fluxOut;     ///< net flux out of level
 };

@@ -5,7 +5,7 @@
 //
 // -- Michael P. Mendenhall, 2015
 
-#include "aSpectrum.hh"
+#include "UnpolarizedNeutronDecay.hh"
 
 #include "OutputManager.hh"
 #include "GraphUtils.hh"

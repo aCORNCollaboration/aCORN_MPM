@@ -9,7 +9,7 @@
 #define COLLIMATOR_HH
 
 #include <cmath>
-#include "BetaSpectrum.hh"
+#include "PolarizedBetaAsym.hh"
 
 /// Base class for particle transport model
 class ParticleTransport {

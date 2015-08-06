@@ -1,3 +1,4 @@
+/// \file ElectronBindingEnergy.hh Atomic shell binding energy tables
 #ifndef ELECTRONBINDINGENERGY_HH
 #define ELECTRONBINDINGENERGY_HH
 

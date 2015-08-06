@@ -1,3 +1,4 @@
+/// \file ElectronBindingEnergy.cc Atomic shell binding energy tables
 #include "ElectronBindingEnergy.hh"
 #include "StringManip.hh"
 #include "SMExcept.hh"

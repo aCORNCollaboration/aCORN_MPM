@@ -1,15 +1,21 @@
+/// \file UnpolarizedBeta.cc
 #include "UnpolarizedBeta.hh"
-#include <TMath.h>
 #include <vector>
 #include <map>
 #include <cassert>
 
+#ifdef USE_ROOT_MATH
+#include <TMath.h>
+#define Gamma(x) TMath::Gamma(x)
+#else
+#define Gamma(x) tgamma(x)
+#endif
+
 using std::map;
 using std::vector;
 
-/// hyperbolic sine
-double my_sinh(double x) { return (exp(x)-exp(-x))*0.5; }
-
+// hyperbolic sine
+//double my_sinh(double x) { return (exp(x)-exp(-x))*0.5; }
 /// inverse hyperbolic tangent
 //double atanh(double x) throw() { return 0.5*log((1.+x)/(1.-x)); }
 
@@ -82,7 +88,7 @@ double WilkinsonF_PowerSeries(double Z, double W, double R) {
     
     double p = sqrt(W*W-1);
     double gm = WilkinsonGamma(Z);
-    double z = TMath::Gamma(2.*gm+1.);
+    double z = Gamma(2.*gm+1.);
     return 2.*(gm+1.)/(z*z)*pow(2*R,2*(gm-1))*sumCoeffs(coeffs,alpha*Z,W/p,log(p));
 }
 
@@ -96,7 +102,7 @@ double WilkinsonGammaMagSquaredApprox(double Z, double W, unsigned int N) {
     double y1 = a*y;
     for(unsigned int n=0; n<N; n++)
         s += log((n*n+y1*y1)/((n+gm)*(n+gm)+y*y));
-    return exp(s + log(M_PI*(N*N+y1*y1)/(y1*my_sinh(M_PI*y1)))
+    return exp(s + log(M_PI*(N*N+y1*y1)/(y1*sinh(M_PI*y1)))
     +(1.-gm)*(2.-log(Ngm*Ngm+y*y) + 2.*y/Ngm*atan(y/Ngm)
     +1./(Ngm*Ngm+y*y)/(6.*a))
     -(2.*N+1.)*log(a));
@@ -121,7 +127,7 @@ double F_approx(double W, double Z, double R, bool fullterms) {
 double WilkinsonF0(double Z, double W, double R, unsigned int N) {
     if(W<=1) return 0;
     double gm = WilkinsonGamma(Z);
-    double GMi = 1./TMath::Gamma(2*gm+1);
+    double GMi = 1./Gamma(2*gm+1);
     double p = sqrt(W*W-1.);
     double F0 = 4.*pow(2.*p*R,2.*gm-2.)*GMi*GMi*exp(M_PI*Z*alpha*W/p)*WilkinsonGammaMagSquaredApprox(Z,W,N);
     return F0<1e3?F0:0;
