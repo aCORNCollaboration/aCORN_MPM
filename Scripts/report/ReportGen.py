@@ -6,7 +6,7 @@ class ReportGenerator:
     
     def __init__(self):
         self.missing = []
-        self.slist = [3102, 3109, 3116, 3124] #self. get_series_list()
+        self.slist = [3102, 3109, 3116, 3124, 3126] #self. get_series_list()
         self.outPath = os.environ["ACORN_WISHBONE"]+"/Report/"
         os.system("mkdir -p "+self.outPath)
         

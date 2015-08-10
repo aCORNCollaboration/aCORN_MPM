@@ -63,6 +63,10 @@ aCornCompileVersion.o:
 % : %.cc libaCORN_MPM.a
 	$(CXX) $(CXXFLAGS) $< $(LDFLAGS) -o $@
 
+# documentation
+.PHONY: doc
+doc:
+	doxygen Doxyfile
 
 # cleanup
 .PHONY: clean
