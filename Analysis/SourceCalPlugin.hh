@@ -11,18 +11,14 @@
 #include "RunAccumulator.hh"
 
 /// Analyzer plugin for source calibrations (non-proton-coincident data)
-class SourceCalPlugin: public AnalyzerPlugin {
+class SourceCalPlugin: public RunAccumulatorPlugin {
 public:
     /// Constructor
-    SourceCalPlugin(RunAccumulator* RA);
+    SourceCalPlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname = "");
     
     /// Fill core histograms from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
     
-    /// generate calculated hists
-    virtual void calculateResults() { }
-    /// Generate output plots
-    virtual void makePlots() { }
     /// Generate background-subtracted output
     void bgSubtrPlots(SourceCalPlugin& bg);
     
@@ -33,20 +29,13 @@ public:
     string srcName;             ///< type of source being analyzed
 };
 
-
-/// Analyzer with SourceCal plugin
-class SourceCalAnalyzer: public RunAccumulator {
+/// Builder for RunAccumulatorPlugins
+class SourceCalPluginBuilder: public RunAccumulatorPluginBuilder {
 public:
     /// Constructor
-    SourceCalAnalyzer(OutputManager* pnt, const std::string& nm = "SourceCal", const std::string& inflName = ""): RunAccumulator(pnt,nm,inflName) {
-        addPlugin(mySourceCalPlugin = new SourceCalPlugin(this));
-    }
-    
-    /// create a new instance of this object (cloning self settings) for given directory
-    virtual SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) { return new SourceCalAnalyzer(this,nm,inflname); }
-    
-    SourceCalPlugin* mySourceCalPlugin;         ///< Source calibration analyzer plugin
+    SourceCalPluginBuilder(RunAccumulator* R): RunAccumulatorPluginBuilder(R) { }
+    /// instantiate plugin SegmentSaver
+    virtual void makePlugin(OutputManager* pnt, const string& inflName = "") { thePlugin = new SourceCalPlugin(RA, pnt, "SourceCal", inflName); }
 };
-
 
 #endif

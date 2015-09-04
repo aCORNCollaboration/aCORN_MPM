@@ -11,10 +11,10 @@
 #include "RunAccumulator.hh"
 
 /// Analyzer plugin for PMT (non-proton-coincident) data
-class PMTsPlugin: public AnalyzerPlugin {
+class PMTsPlugin: public RunAccumulatorPlugin {
 public:
     /// Constructor
-    PMTsPlugin(RunAccumulator* RA);
+    PMTsPlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname = "");
     
     /// Fill core histograms from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
@@ -34,18 +34,13 @@ protected:
     double prev_e_time;         ///< time of previous electron event
 };
 
-/// Analyzer with wishbone plugin
-class PMTsAnalyzer: public RunAccumulator {
+/// Builder for RunAccumulatorPlugins
+class PMTsPluginBuilder: public RunAccumulatorPluginBuilder {
 public:
     /// Constructor
-    PMTsAnalyzer(OutputManager* pnt, const std::string& nm = "PMTs", const std::string& inflName = ""): RunAccumulator(pnt,nm,inflName) {
-        addPlugin(myPMTsPlugin = new PMTsPlugin(this));
-    }
-    
-    /// create a new instance of this object (cloning self settings) for given directory
-    virtual SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) { return new PMTsAnalyzer(this,nm,inflname); }
-    
-    PMTsPlugin* myPMTsPlugin;   ///< PMTs analyzer plugin
+    PMTsPluginBuilder(RunAccumulator* R): RunAccumulatorPluginBuilder(R) { }
+    /// instantiate plugin SegmentSaver
+    virtual void makePlugin(OutputManager* pnt, const string& inflName = "") { thePlugin = new PMTsPlugin(RA, pnt, "PMTs", inflName); }
 };
 
 #endif

@@ -35,10 +35,10 @@ protected:
 };
 
 /// Analyzer plugin for wishbone data
-class WishbonePlugin: public AnalyzerPlugin {
+class WishbonePlugin: public RunAccumulatorPlugin {
 public:
     /// Constructor
-    WishbonePlugin(RunAccumulator* RA);
+    WishbonePlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname = "");
     
     /// Fill core histograms from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
@@ -86,19 +86,13 @@ protected:
     void config_NGC_cuts();
 };
 
-
-/// Analyzer with wishbone plugin
-class WishboneAnalyzer: public RunAccumulator {
+/// Builder for RunAccumulatorPlugins
+class WishbonePluginBuilder: public RunAccumulatorPluginBuilder {
 public:
     /// Constructor
-    WishboneAnalyzer(OutputManager* pnt, const std::string& nm = "Wishbone", const std::string& inflName = ""): RunAccumulator(pnt,nm,inflName) {
-        addPlugin(myWishbonePlugin = new WishbonePlugin(this));
-    }
-    
-    /// create a new instance of this object (cloning self settings) for given directory
-    virtual SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) { return new WishboneAnalyzer(this,nm,inflname); }
-    
-    WishbonePlugin* myWishbonePlugin;   ///< Wishbone analyzer plugin
+    WishbonePluginBuilder(RunAccumulator* R): RunAccumulatorPluginBuilder(R) { }
+    /// instantiate plugin SegmentSaver
+    virtual void makePlugin(OutputManager* pnt, const string& inflName = "") { thePlugin = new WishbonePlugin(RA, pnt, "Wishbone", inflName); }
 };
 
 #endif

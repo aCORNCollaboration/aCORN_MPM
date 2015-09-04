@@ -8,28 +8,29 @@
 #include "PMTsPlugin.hh"
 #include <TStyle.h>
 
-PMTsPlugin::PMTsPlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"PMTs") {
+PMTsPlugin::PMTsPlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname):
+RunAccumulatorPlugin(RA, pnt, nm, inflname) {
     unsigned int nEnBins = 400;
     double E0 = 0;
     double E1 = 3000;
     
     
-    hEnergy = registerHist("hEnergy","Electron energy spectrum", nEnBins, E0, E1);
+    hEnergy = registerSavedHist("hEnergy","Electron energy spectrum", nEnBins, E0, E1);
     hEnergy->GetXaxis()->SetTitle("Electron energy [keV]");
     
     TH2F hNETemplate("hNEtemplate","PMT trigger counts", 100, 0, 3000, 20, -0.5, 19.5);
     hNETemplate.GetYaxis()->SetTitle("Number of PMTs triggered");
     hNETemplate.GetXaxis()->SetTitle("Electron energy [keV]");
-    hNE = (TH2*)registerHist("hNE",hNETemplate);
+    hNE = (TH2*)registerSavedHist("hNE",hNETemplate);
     
-    hEETime =  registerHist("hEETime","Electron event timing difference", 999, 0, 10);
+    hEETime =  registerSavedHist("hEETime","Electron event timing difference", 999, 0, 10);
     hEETime->GetXaxis()->SetTitle("time difference [#mus]");
     
     TH2F hPSTemplate("hChanSpecT","PMT Spectra", 200, 0, 20., NCH_MAX, -0.5, NCH_MAX-0.5);
     hPSTemplate.GetXaxis()->SetTitle("raw signal (#times 10^{3})");
     hPSTemplate.GetYaxis()->SetTitle("detector channel number");
     hPSTemplate.GetYaxis()->SetTitleOffset(1.4);
-    hChanSpec = (TH2*)registerHist("hChanSpec",hPSTemplate);
+    hChanSpec = (TH2*)registerSavedHist("hChanSpec",hPSTemplate);
 }
 
 

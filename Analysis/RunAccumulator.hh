@@ -8,7 +8,7 @@
 #ifndef RUNACCUMULATOR_HH
 #define RUNACCUMULATOR_HH
 
-#include "SegmentSaver.hh"
+#include "PluginSaver.hh"
 #include "Enums.hh"
 #include "TagCounter.hh"
 #include "BaseDataScanner.hh"
@@ -18,14 +18,10 @@
 using std::vector;
 using std::pair;
 
-class AnalyzerPlugin;
-
-class RunAccumulator: public SegmentSaver {
+class RunAccumulator: public PluginSaver {
 public:
     /// constructor
     RunAccumulator(OutputManager* pnt, const std::string& nm = "RunAccumulator", const std::string& inflName = "");
-    /// destructor
-    virtual ~RunAccumulator();
         
     /// add histograms from another RunAccumulator of the same type
     virtual void addSegment(const SegmentSaver& S);
@@ -47,20 +43,10 @@ public:
     
     /// fill core histograms in plugins from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
-    /// calculate results from filled histograms
-    virtual void calculateResults();
     /// calculate, upload analysis results
     virtual void makeAnaResults();
-    /// make plots from each plugin
-    virtual void makePlots();
     /// run calculations and plots, save output files
     virtual void makeOutput(bool doPlots = true);
-    /// MC/Data comparison plots/calculations from each plugin
-    virtual void compareMCtoData(RunAccumulator& OAdata);
-    /// add an analyzer plugin
-    void addPlugin(AnalyzerPlugin* AP);
-    /// get plugin by name
-    AnalyzerPlugin* getPlugin(const std::string& nm);
         
     /// create a new instance of this object (cloning self settings) for given directory
     virtual SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) { return new RunAccumulator(this,nm,inflname); }
@@ -72,51 +58,37 @@ public:
     TH1* hToRate(TH1* h, int scaleAxes);
     /// generate base analysis result pre-filled with run range
     AnaResult makeBaseResult() const;
-    
-protected:
-    map<std::string,AnalyzerPlugin*> myPlugins;        ///< analysis plugins
 };
 
-/// generic analyzer plug-in class
-class AnalyzerPlugin {
+/// generic analyzer plug-in class for a RunAccumulator
+class RunAccumulatorPlugin: public SegmentSaver {
 public:
-        /// constructor
-        AnalyzerPlugin(RunAccumulator* RA, const std::string& nm): name(nm), myA(RA) { }
-        /// destructor
-        virtual ~AnalyzerPlugin() {}
-        
-        /// create or load a TH1F stored histogram
-        TH1* registerHist(const std::string& hname, const std::string& title, unsigned int nbins, float xmin, float xmax);
-        /// create or load a stored histogram from template
-        TH1* registerHist(const std::string& nm, const TH1& hTemplate);
-        /// save canvas image
-        void printCanvas(string fname, string suffix=".pdf") const { myA->printCanvas(fname,suffix); }
-        
-        string name;            ///< plugin name
-        RunAccumulator* myA;    ///< RunAccumulator with which this plugin is associated
-        
-        /// virtual routine for filling core histograms from data point
-        virtual void fillCoreHists(BaseDataScanner& PDS, double weight) = 0;
-        
-        /// generate calculated/normalized histograms derived from core saved data; possibly needed below.
-        virtual void calculateResults() {}
-        /// calculate, upload analysis results
-        virtual void makeAnaResults() {}
-        /// generate output plots
-        virtual void makePlots() {}
-        /// virtual routine for MC/Data comparison plots/calculations
-        /// NOTE: this MUST NOT change the contents of saved histograms (calculated ones are OK)
-        virtual void compareMCtoData(AnalyzerPlugin*) {}
+    /// constructor
+    RunAccumulatorPlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname = ""):
+    SegmentSaver(pnt, nm, inflname), myA(RA) { }
 
-protected:
-        vector<TH1*> myHists; ///< histograms registered by this plugin
+    /// virtual routine for filling core histograms from data point
+    virtual void fillCoreHists(BaseDataScanner& PDS, double weight) = 0;
+    
+    RunAccumulator* myA;    ///< RunAccumulator with which this plugin is associated
 };
+
+/// Builder for RunAccumulatorPlugins
+class RunAccumulatorPluginBuilder: public PluginBuilder {
+public:
+    /// Constructor
+    RunAccumulatorPluginBuilder(RunAccumulator* R): RA(R) { }
+    RunAccumulator* RA;  ///< main plotter to associate plugin with
+};
+
+//////////////////////////////
+//////////////////////////////
 
 /// Helper class for background-region-subtracted histograms
 class FGBGRegionsHist {
 public:
     /// Constructor
-    FGBGRegionsHist(AnalyzerPlugin* P);
+    FGBGRegionsHist(RunAccumulatorPlugin* P);
     /// Destructor
     ~FGBGRegionsHist();
     /// Setup using template histogram
@@ -133,7 +105,7 @@ public:
     TH1* hRates[2];     ///< background-subtracted, rate-scaled versions
     
 protected:
-    AnalyzerPlugin* myP;                        ///< plugin to which this pair belongs
+    RunAccumulatorPlugin* myP;                  ///< plugin to which this pair belongs
     TH1* h[2];                                  ///< background, foreground region histograms
     vector< pair<double,double> > regions[2];   ///< regions defined for FG/BG
     double totalLength[2];                      ///< total length of FG/BG regions

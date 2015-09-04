@@ -19,6 +19,17 @@
 #include <TStyle.h>
 #include <TROOT.h>
 
+class WishboneAnalyzer: public RunAccumulator {
+public:
+    WishboneAnalyzer(OutputManager* pnt, const std::string& nm = "Wishbone", const std::string& inflname = ""):
+    RunAccumulator(pnt, nm, inflname), myWishbonePluginBuilder(this) {
+        myBuilders["WishbonePlugin"] = &myWishbonePluginBuilder;
+        buildPlugins();
+    }
+    
+    WishbonePluginBuilder myWishbonePluginBuilder;
+};
+
 int main(int argc, char** argv) {
     aCORN_MPM::display_version();
     MPMUtils::display_version();

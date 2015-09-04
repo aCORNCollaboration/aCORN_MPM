@@ -18,6 +18,7 @@
 #include <map>
 using std::map;
 
+/// Enumerated bins weighted fill histogram class
 class WeightBins {
 public:
     /// constructor

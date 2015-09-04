@@ -15,6 +15,17 @@
 #include <stdio.h>
 #include <TStyle.h>
 
+class PMTsAnalyzer: public RunAccumulator {
+public:
+    PMTsAnalyzer(OutputManager* pnt, const std::string& nm = "PMTs", const std::string& inflname = ""):
+    RunAccumulator(pnt, nm, inflname), myPMTsPluginBuilder(this) {
+        myBuilders["PMTsPlugin"] = &myPMTsPluginBuilder;
+        buildPlugins();
+    }
+    
+    PMTsPluginBuilder myPMTsPluginBuilder;
+};
+
 int main(int argc, char** argv) {
     
     if(argc != 2) {

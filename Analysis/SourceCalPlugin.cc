@@ -12,16 +12,17 @@
 #include <TF1.h>
 #include <TLatex.h>
 
-SourceCalPlugin::SourceCalPlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"SourceCal") {    
-    hEnergy = registerHist("hEnergy", "electron energy", 200, 0, 2);
+SourceCalPlugin::SourceCalPlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname):
+RunAccumulatorPlugin(RA, pnt, nm, inflname) {    
+    hEnergy = registerSavedHist("hEnergy", "electron energy", 200, 0, 2);
     hEnergy->GetXaxis()->SetTitle("Energy [MeV]");
     
-    hEnergyRecal = registerHist("hEnergyRecal", "Re-calibrated energy", 200, 0, 2);
+    hEnergyRecal = registerSavedHist("hEnergyRecal", "Re-calibrated energy", 200, 0, 2);
     hEnergyRecal->GetXaxis()->SetTitle("Energy [MeV]");
     
     for(unsigned int i=0; i<N_E_PMT; i++) {
     //for(unsigned int i=9; i<11; i++) {
-        hPMTSig[i] = registerHist("hPMTSig_"+to_str(i), "PMT " + to_str(i+1) + " signal", 200, 0, 15);
+        hPMTSig[i] = registerSavedHist("hPMTSig_"+to_str(i), "PMT " + to_str(i+1) + " signal", 200, 0, 15);
         hPMTSig[i]->GetXaxis()->SetTitle("ADC channels [#times 10^{3}]");
     }
 }

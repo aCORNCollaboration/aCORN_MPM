@@ -12,6 +12,18 @@
 #include "StringManip.hh"
 
 #include <TStyle.h>
+#include <cassert>
+
+class SourceCalAnalyzer: public RunAccumulator {
+public:
+    SourceCalAnalyzer(OutputManager* pnt, const std::string& nm = "SourceCal", const std::string& inflname = ""):
+    RunAccumulator(pnt, nm, inflname), mySourceCalPluginBuilder(this) {
+        myBuilders["SourceCalPlugin"] = &mySourceCalPluginBuilder;
+        buildPlugins();
+    }
+    
+    SourceCalPluginBuilder mySourceCalPluginBuilder;
+};
 
 class SourceRunSubtracter: public OutputManager, public PluginInterpolator {
 public:
@@ -36,14 +48,15 @@ public:
         SourceCalAnalyzer SCAfg(this);
         SCAfg.loadProcessedData(Rf);
         SCAfg.name += "_"+snm;
-        SCAfg.mySourceCalPlugin->srcName = snm;
+        dynamic_cast<SourceCalPlugin*>(SCAfg.mySourceCalPluginBuilder.thePlugin)->srcName = snm;
         
         printf("Interpolating background region...\n");
         SourceCalAnalyzer* SCAInterp = dynamic_cast<SourceCalAnalyzer*>(SCAfg.makeAnalyzer("interp_bg_"+snm, ""));
         SCAInterp->addSegment(SCAfg);
         interpolate(SCAInterp);
         
-        SCAfg.mySourceCalPlugin->bgSubtrPlots(*SCAInterp->mySourceCalPlugin);
+        //dynamic_cast<SourceCalPlugin*>(SCAfg.mySourceCalPluginBuilder.thePlugin)->bgSubtrPlots(*dynamic_cast<SourceCalPlugin*>(SCAInterp.mySourceCalPluginBuilder.thePlugin));
+        assert(false); // TODO line above
         SCAfg.writeROOT();
     }
 

@@ -13,7 +13,7 @@
 #include <TH1.h>
 
 RunAccumulator::RunAccumulator(OutputManager* pnt, const std::string& nm, const std::string& inflName):
-SegmentSaver(pnt,nm,inflName), isSimulated(false) {
+PluginSaver(pnt,nm,inflName), isSimulated(false) {
     TH1::SetDefaultSumw2(true); // all histograms default to having errorbars
     
     // initialize blind time to 0
@@ -28,40 +28,11 @@ SegmentSaver(pnt,nm,inflName), isSimulated(false) {
     }
 }
 
-RunAccumulator::~RunAccumulator() {
-    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++)
-        delete it->second;
-}
-
-void RunAccumulator::addPlugin(AnalyzerPlugin* AP) {
-    if(myPlugins.find(AP->name) != myPlugins.end()) {
-        SMExcept e("DuplicatePluginName");
-        e.insert("myName",name);
-        e.insert("pluginName",AP->name);
-        throw(e);
-    }
-    myPlugins.insert(std::make_pair(AP->name,AP));
-}
-
-AnalyzerPlugin* RunAccumulator::getPlugin(const std::string& nm) {
-    map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.find(nm);
-    return it != myPlugins.end() ? it->second : NULL;
-}
-
 void RunAccumulator::fillCoreHists(BaseDataScanner& PDS, double weight) {
-    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++)
-        it->second->fillCoreHists(PDS,weight);
-}
-
-void RunAccumulator::calculateResults() {
-    printf("Calculating results for %s...\n",name.c_str());
-    if(isCalculated) printf("*** Warning: repeat calculation!\n");
-    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
-        printf("... results in '%s' ...\n",it->first.c_str());
-        it->second->calculateResults();
+    for(auto it = myBuilders.begin(); it != myBuilders.end(); it++) {
+        auto P = dynamic_cast<RunAccumulatorPlugin*>(it->second->thePlugin);
+        if(P) P->fillCoreHists(PDS,weight);
     }
-    printf("Done calculating results for %s.\n",name.c_str());
-    isCalculated = true;
 }
 
 AnaResult RunAccumulator::makeBaseResult() const {
@@ -82,36 +53,11 @@ void RunAccumulator::makeAnaResults() {
     AcornDB::ADB().uploadAnaResult("total_counts", "Total analyzed counts", baseResult);
     baseResult.value = runTimes.total();
     AcornDB::ADB().uploadAnaResult("total_time", "Total analyzed time [s]", baseResult);
-    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
-        it->second->makeAnaResults();
-    }
+    //for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
+    //    it->second->makeAnaResults();
+    //}
+    assert(false);
     AcornDB::ADB().endTransaction();
-}
-
-void RunAccumulator::makePlots() {
-    defaultCanvas->cd();
-    if(!isCalculated) calculateResults();
-    printf("Generating plots for %s...\n",name.c_str());
-    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
-        printf("... plots in '%s' ...\n",it->first.c_str());
-        it->second->makePlots();
-    }
-    printf("Done generating plots for %s...\n",name.c_str());
-}
-
-void RunAccumulator::compareMCtoData(RunAccumulator& OAdata) {
-    defaultCanvas->cd();
-    if(!isCalculated) calculateResults();
-    if(!OAdata.isCalculated) OAdata.calculateResults();
-    printf("Comparing MC %s and data %s...\n",name.c_str(),OAdata.name.c_str());
-    for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
-        AnalyzerPlugin* AP = OAdata.getPlugin(it->second->name);
-        if(AP) {
-            printf("... comparison in '%s' ...\n",it->first.c_str());
-            it->second->compareMCtoData(AP);
-        }
-    }
-    printf("Done comparing MC %s and data %s.\n",name.c_str(),OAdata.name.c_str());
 }
 
 void RunAccumulator::zeroCounters() {
@@ -121,7 +67,8 @@ void RunAccumulator::zeroCounters() {
 
 void RunAccumulator::addSegment(const SegmentSaver& S) {
     // histograms add
-    SegmentSaver::addSegment(S);
+    PluginSaver::addSegment(S);
+    
     // recast
     const RunAccumulator& RA = dynamic_cast<const RunAccumulator&>(S);
     if(RA.isSimulated) isSimulated = true;
@@ -131,7 +78,7 @@ void RunAccumulator::addSegment(const SegmentSaver& S) {
 }
 
 void RunAccumulator::scaleData(double s) {
-    SegmentSaver::scaleData(s);
+    PluginSaver::scaleData(s);
     runCounts.scale(s);
 }
 
@@ -199,7 +146,6 @@ unsigned int RunAccumulator::mergeDir() {
     return nMerged;
 }
 
-
 TH1* RunAccumulator::hToRate(TH1* h, int scaleAxes) {
     TH1* hc = (TH1*)h->Clone((h->GetName()+string("_Rate")).c_str());
     hc->Scale(1./runTimes.total());
@@ -224,19 +170,7 @@ TH1* RunAccumulator::hToRate(TH1* h, int scaleAxes) {
 
 /* --------------------------------------------------- */
 
-TH1* AnalyzerPlugin::registerHist(const std::string& hname, const std::string& title, unsigned int nbins, float xmin, float xmax) {
-    myHists.push_back(myA->registerSavedHist(hname,title,nbins,xmin,xmax));
-    return myHists.back();
-}
-
-TH1* AnalyzerPlugin::registerHist(const std::string& nm, const TH1& hTemplate) {
-    myHists.push_back(myA->registerSavedHist(nm,hTemplate));
-    return myHists.back();
-}
-
-/*------------------------------------------------------*/
-
-FGBGRegionsHist::FGBGRegionsHist(AnalyzerPlugin* P): myP(P) {
+FGBGRegionsHist::FGBGRegionsHist(RunAccumulatorPlugin* P): myP(P) {
     for(int i=0; i<2; i++) {
         h[i] = hRates[i] = NULL;
         totalLength[i] = 0;
@@ -252,8 +186,8 @@ FGBGRegionsHist::~FGBGRegionsHist() {
 
 void FGBGRegionsHist::setTemplate(const TH1& hTemplate) {
     string hname = hTemplate.GetName();
-    h[false] = myP->registerHist(hname+"_bg",hTemplate);
-    h[true]  = myP->registerHist(hname+"_fg",hTemplate);
+    h[false] = myP->registerSavedHist(hname+"_bg",hTemplate);
+    h[true]  = myP->registerSavedHist(hname+"_fg",hTemplate);
 }
 
 void FGBGRegionsHist::addRegion(double x0, double x1, bool fg) {

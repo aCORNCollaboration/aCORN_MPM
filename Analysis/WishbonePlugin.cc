@@ -47,7 +47,8 @@ TH2* TH2Slicer::subtractProfile(const TH1* p, double s) const {
 ////////////
 ////////////
 
-WishbonePlugin::WishbonePlugin(RunAccumulator* RA): AnalyzerPlugin(RA,"Wishbone"),
+WishbonePlugin::WishbonePlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname):
+RunAccumulatorPlugin(RA, pnt, nm, inflname),
 hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this),
 hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(this) {
     
@@ -78,7 +79,7 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     hTemplate.GetXaxis()->SetTitle("Electron energy [keV]");
     hTemplate.GetYaxis()->SetTitle("Proton TOF [#mus]");
     hTemplate.GetYaxis()->SetTitleOffset(1.4);
-    hWishbone = (TH2F*)registerHist("hWishbone",hTemplate);
+    hWishbone = (TH2F*)registerSavedHist("hWishbone",hTemplate);
     hWishbone->SetTitle("aCORN NG-C Wishbone");
     hWishbone->GetYaxis()->SetRange();
     
