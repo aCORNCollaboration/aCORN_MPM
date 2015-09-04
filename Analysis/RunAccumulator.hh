@@ -80,6 +80,8 @@ public:
     virtual void makeAnaResults() { }
     
     RunAccumulator* myA;    ///< RunAccumulator with which this plugin is associated
+    /// shortcut for histogram to rate normalization
+    TH1* hToRate(TH1* h, int scaleAxes) { return myA->hToRate(h, scaleAxes); }
 };
 
 /// Builder for RunAccumulatorPlugins

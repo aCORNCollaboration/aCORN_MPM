@@ -20,7 +20,7 @@ MPMUtils https://github.com/mpmendenhall/MPMUtils
 
 export MPMUTILS=${HOME}/Applications/MPMUtils/
 
-export ACORN_DATA=${HOME}/Data/aCORN/
+export ACORN_DATA=/media/mpmendenhall/MPM_Data/aCORN/
 export ACORN_RAWDAT=${ACORN_DATA}/Raw_PIXIE/
 export ACORN_PULSEDAT=${ACORN_DATA}/PulseDat/
 export ACORN_REDUCED_DATA=${ACORN_DATA}/Reduced/
@@ -38,8 +38,6 @@ export ACORN_MCOUT=${ACORN_DATA}/GeantMC/
 
 make clean
 make -j4
-make standalone -j4
-
 
 ----------------------------
 --------- Workflow ---------
@@ -70,5 +68,4 @@ cd Scripts/report/
 
 #############
 # example background-subtracted source set
-make standalone -j4
 ./PMT_Gainmatcher

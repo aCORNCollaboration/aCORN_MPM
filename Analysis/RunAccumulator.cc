@@ -218,7 +218,7 @@ void FGBGRegionsHist::fill(double cutval, double x, double y, double w) {
 void FGBGRegionsHist::makeRates(int axesScale, double xscale) {
     for(int i=0; i<2; i++) {
         if(hRates[i]) delete hRates[i];
-        hRates[i] = myP->myA->hToRate(h[i],axesScale);
+        hRates[i] = myP->hToRate(h[i],axesScale);
         hRates[i]->SetLineColor(4-2*i);
     }
     hRates[false]->Scale(xscale*totalLength[true]/totalLength[false]);

@@ -272,7 +272,7 @@ void WishbonePlugin::makeAnaResults() {
 
 void WishbonePlugin::makePlots() {
     
-    myA->defaultCanvas->SetRightMargin(0.20);
+    defaultCanvas->SetRightMargin(0.20);
 
     bool isCombined = myA->runTimes.nTags() > 1000;
     if(true || !isCombined) {
@@ -285,13 +285,13 @@ void WishbonePlugin::makePlots() {
     hWishboneBGSub->GetYaxis()->SetRangeUser(2,5);
     makeRBpalette();
     hWishboneBGSub->Draw("Col Z");
-    drawHLine(T_p_lo/1000., myA->defaultCanvas, 2);
-    drawHLine(T_p_hi/1000., myA->defaultCanvas, 2);
-    drawHLine(T_p_min/1000., myA->defaultCanvas, 4);
-    drawHLine(T_p_max/1000., myA->defaultCanvas, 4);
-    myA->printCanvas("Wishbone");
+    drawHLine(T_p_lo/1000., defaultCanvas, 2);
+    drawHLine(T_p_hi/1000., defaultCanvas, 2);
+    drawHLine(T_p_min/1000., defaultCanvas, 4);
+    drawHLine(T_p_max/1000., defaultCanvas, 4);
+    printCanvas("Wishbone");
     
-    myA->defaultCanvas->SetRightMargin(0.15);
+    defaultCanvas->SetRightMargin(0.15);
     
     makeGrayscalepalette(false);
     hWBRate->SetMaximum(10);
@@ -299,7 +299,7 @@ void WishbonePlugin::makePlots() {
     hWBRate->GetXaxis()->SetRangeUser(0,1000);
     hWBRate->GetYaxis()->SetRangeUser(2,5);
     hWBRate->Draw("Col Z");
-    myA->printCanvas("Wishbone_NoSub");
+    printCanvas("Wishbone_NoSub");
     
     gStyle->SetPalette(1);
       
@@ -308,82 +308,82 @@ void WishbonePlugin::makePlots() {
     hPos.hRates[true]->Draw("Col Z");
     Positioner Pos;
     Pos.drawPMTs(1,true);
-    myA->printCanvas("Positions");
+    printCanvas("Positions");
     
     hPosSigma.hRates[true]->SetMinimum(0);
     hPosSigma.hRates[true]->SetMaximum(10);
     hPosSigma.hRates[true]->Draw("Col Z");
-    myA->printCanvas("PosSigma");
+    printCanvas("PosSigma");
     
     hEnergyRadius.hRates[true]->SetMinimum(0);
     hEnergyRadius.hRates[true]->SetMaximum(0.03);
     hEnergyRadius.hRates[true]->Draw("Col Z");
-    myA->printCanvas("EnergyRadius");
+    printCanvas("EnergyRadius");
     
-    myA->defaultCanvas->SetLogz(true);
+    defaultCanvas->SetLogz(true);
     
     //hChanSpec.hRates[true]->SetMaximum(0.4);
     hChanSpec.hRates[true]->GetXaxis()->SetRangeUser(0,16);
     hChanSpec.hRates[true]->Draw("Col Z");
-    myA->printCanvas("ChannelSpectra");    
+    printCanvas("ChannelSpectra");    
     hChanSpec.hRates[false]->GetXaxis()->SetRangeUser(0,16);
     hChanSpec.hRates[false]->Draw("Col Z");
-    myA->printCanvas("ChannelSpectraBG"); 
+    printCanvas("ChannelSpectraBG"); 
     
     hNE.hRates[true]->Draw("Col Z");
-    myA->printCanvas("NPMTs");
+    printCanvas("NPMTs");
 
     hModuleMult.hRates[true]->Draw("Col Z");
-    myA->printCanvas("ModMult");
+    printCanvas("ModMult");
     
-    myA->defaultCanvas->SetLogz(false);
+    defaultCanvas->SetLogz(false);
     
-    myA->defaultCanvas->SetRightMargin(0.04);
+    defaultCanvas->SetRightMargin(0.04);
     
-    myA->defaultCanvas->SetLogy(true);
+    defaultCanvas->SetLogy(true);
 
     hNVeto.hRates[true]->SetMinimum(1e-7);
     hNVeto.hRates[true]->SetMaximum(10);
     hNVeto.hRates[true]->Draw();
     hNVeto.hRates[false]->Draw("Same");
-    myA->printCanvas("NVeto");
+    printCanvas("NVeto");
     
     hProtonSignal.hRates[false]->SetMinimum(isCombined?1e-4:1e-3);
     hProtonSignal.hRates[false]->SetMaximum(50);
     hProtonSignal.hRates[false]->Draw();
     hProtonSignal.hRates[true]->Draw("Same");
-    drawVLine(E_p_lo/1000., myA->defaultCanvas, 2);
-    drawVLine(E_p_hi/1000., myA->defaultCanvas, 2);
-    myA->printCanvas("ProtonSignal");
+    drawVLine(E_p_lo/1000., defaultCanvas, 2);
+    drawVLine(E_p_hi/1000., defaultCanvas, 2);
+    printCanvas("ProtonSignal");
   
-    myA->defaultCanvas->SetLogy(false);
+    defaultCanvas->SetLogy(false);
     
     hVetoSum.hRates[false]->SetMinimum(-20);
     hVetoSum.hRates[false]->SetMaximum(200);
     hVetoSum.hRates[false]->Draw();
-    drawHLine(0, myA->defaultCanvas, 1);
+    drawHLine(0, defaultCanvas, 1);
     hVetoSum.hRates[true]->Draw("Same");
-    myA->printCanvas("VetoSum");
+    printCanvas("VetoSum");
     
     hWishboneEProj[true]->SetMinimum(-0.2);
     hWishboneEProj[true]->SetMaximum(15);
     hWishboneEProj[true]->GetXaxis()->SetRangeUser(0,1000);
     hWishboneEProj[true]->Draw();
     hWishboneEProj[false]->Draw("Same");
-    drawHLine(0., myA->defaultCanvas, 1);
-    myA->printCanvas("WishboneEnergy");
+    drawHLine(0., defaultCanvas, 1);
+    printCanvas("WishboneEnergy");
     
     hWishboneTProj->SetMinimum(0);
     hWishboneTProj->SetMaximum(20);
     hWishboneTProj->Draw("E0");
-    drawVLine(T_p_lo/1000., myA->defaultCanvas, 2);
-    drawVLine(T_p_hi/1000., myA->defaultCanvas, 2);
-    drawVLine(T_p_min/1000., myA->defaultCanvas, 4);
-    drawVLine(T_p_max/1000., myA->defaultCanvas, 4);
-    myA->printCanvas("WishboneTime");
+    drawVLine(T_p_lo/1000., defaultCanvas, 2);
+    drawVLine(T_p_hi/1000., defaultCanvas, 2);
+    drawVLine(T_p_min/1000., defaultCanvas, 4);
+    drawVLine(T_p_max/1000., defaultCanvas, 4);
+    printCanvas("WishboneTime");
     
     hWishboneFiducialTProj->Draw();
-    myA->printCanvas("WishboneFiducialTime");
+    printCanvas("WishboneFiducialTime");
     
     if(isCombined) {
         GausWishboneFit GWF("WishboneFit", myA);

@@ -74,20 +74,20 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     double rateMax = srcName=="Bi207"? 80 : srcName=="Sn113"? 500 : 1000;
     double eMax = srcName=="Sn113"? 0.6 : 1.5;
     
-    TH1* hEnergyRate = myA->hToRate(hEnergy,1);
+    TH1* hEnergyRate = hToRate(hEnergy,1);
     hEnergyRate->GetYaxis()->SetTitle("event rate [Hz/MeV]");
     hEnergyRate->GetYaxis()->SetTitleOffset(1.4);
     hEnergyRate->SetLineColor(2);
-    TH1* hEnergyRateBG = bg.myA->hToRate(bg.hEnergy,1);
+    TH1* hEnergyRateBG = bg.hToRate(bg.hEnergy,1);
     hEnergyRateBG->SetLineColor(4);
     
-    myA->defaultCanvas->SetLogy(true);
+    defaultCanvas->SetLogy(true);
     hEnergyRate->GetXaxis()->SetRangeUser(0,eMax);
     hEnergyRate->Draw();
     hEnergyRateBG->Draw("Same");
-    myA->printCanvas("Energy_BG_"+srcName);
+    printCanvas("Energy_BG_"+srcName);
     
-    myA->defaultCanvas->SetLogy(false);
+    defaultCanvas->SetLogy(false);
     hEnergyRate->Add(hEnergyRateBG,-1.0);
     hEnergyRate->SetMaximum(rateMax);
     
@@ -101,16 +101,16 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     
     hEnergyRate->Draw();
     hEnergyRateBG->Draw("Same");
-    myA->printCanvas("Energy_"+srcName);
-    myA->addObject(hEnergyRate);
+    printCanvas("Energy_"+srcName);
+    addObject(hEnergyRate);
     
     //------------------------
     
-    TH1* hEnergyRecalRate = myA->hToRate(hEnergyRecal,1);
+    TH1* hEnergyRecalRate = hToRate(hEnergyRecal,1);
     hEnergyRecalRate->GetYaxis()->SetTitle("event rate [Hz/MeV]");
     hEnergyRecalRate->GetYaxis()->SetTitleOffset(1.4);
     hEnergyRecalRate->SetLineColor(2);
-    TH1* hEnergyRecalRateBG = bg.myA->hToRate(bg.hEnergyRecal,1);
+    TH1* hEnergyRecalRateBG = bg.hToRate(bg.hEnergyRecal,1);
     hEnergyRecalRateBG->SetLineColor(4);
     
     hEnergyRecalRate->Add(hEnergyRecalRateBG,-1.0);
@@ -127,7 +127,7 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     
     hEnergyRecalRate->Draw();
     hEnergyRecalRateBG->Draw("Same");
-    myA->printCanvas("EnergyRecal_"+srcName);
+    printCanvas("EnergyRecal_"+srcName);
     
     //---------------------
     
@@ -137,11 +137,11 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     double pmt_n0[N_E_PMT];
     vector<string> hnames;
     for(unsigned int i=0; i<N_E_PMT; i++) {
-        TH1* hPMTRate = myA->hToRate(hPMTSig[i],1);
+        TH1* hPMTRate = hToRate(hPMTSig[i],1);
         hPMTRate->GetYaxis()->SetTitle("event rate [mHz/channel]");
         hPMTRate->GetYaxis()->SetTitleOffset(1.4);
         hPMTRate->SetLineColor(2);
-        TH1* hPMTRateBG = bg.myA->hToRate(bg.hPMTSig[i],1);
+        TH1* hPMTRateBG = bg.hToRate(bg.hPMTSig[i],1);
         hPMTRateBG->SetLineColor(4);
         
         hPMTRate->Add(hPMTRateBG,-1.0);
@@ -160,10 +160,10 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
         L.Draw();
         L2.Draw();
         string hname = "PMT_Signal_"+to_str(i+1);
-        myA->printCanvas(hname);
-        hnames.push_back(myA->plotPath + "/" + hname + ".pdf");
+        printCanvas(hname);
+        hnames.push_back(plotPath + "/" + hname + ".pdf");
     }
-    combo_pdf(hnames,myA->plotPath + "/PMT_Signal_"+srcName+".pdf");
+    combo_pdf(hnames,plotPath + "/PMT_Signal_"+srcName+".pdf");
     
     double total_PE = 0;
     printf("PMT response, Channels per PE:\n");

@@ -60,17 +60,17 @@ void PMTsPlugin::makePlots() {
     
     hEETime->Draw("HIST");
     gPad->SetLogy(true);
-    myA->printCanvas("hEETime");
+    printCanvas("hEETime");
     
-    TH2* hNERate = (TH2*)myA->hToRate(hNE,0);
+    TH2* hNERate = (TH2*)hToRate(hNE,0);
     hNERate->SetMinimum(0.01);
     hNERate->Draw("Col Z");
     gPad->SetLogz(true);
-    myA->printCanvas("hNE");
+    printCanvas("hNE");
     
-    TH1* hEnergyR = myA->hToRate(hEnergy,1);
+    TH1* hEnergyR = hToRate(hEnergy,1);
     hEnergyR->GetYaxis()->SetTitle("event rate [Hz/keV]");
     hEnergyR->SetMaximum(2*hEnergyR->GetBinContent(hEnergyR->FindBin(200)));
     hEnergyR->Draw();
-    myA->printCanvas("hEnergy");
+    printCanvas("hEnergy");
 }
