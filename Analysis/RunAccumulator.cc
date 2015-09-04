@@ -28,11 +28,16 @@ PluginSaver(pnt,nm,inflName), isSimulated(false) {
     }
 }
 
-void RunAccumulator::fillCoreHists(BaseDataScanner& PDS, double weight) {
+void RunAccumulator::buildPlugins() {
+    PluginSaver::buildPlugins();
     for(auto it = myBuilders.begin(); it != myBuilders.end(); it++) {
         auto P = dynamic_cast<RunAccumulatorPlugin*>(it->second->thePlugin);
-        if(P) P->fillCoreHists(PDS,weight);
+        if(P) myRAPs.push_back(P);
     }
+}
+
+void RunAccumulator::fillCoreHists(BaseDataScanner& PDS, double weight) {
+    for(auto it = myRAPs.begin(); it != myRAPs.end(); it++) (*it)->fillCoreHists(PDS,weight);
 }
 
 AnaResult RunAccumulator::makeBaseResult() const {
@@ -53,10 +58,7 @@ void RunAccumulator::makeAnaResults() {
     AcornDB::ADB().uploadAnaResult("total_counts", "Total analyzed counts", baseResult);
     baseResult.value = runTimes.total();
     AcornDB::ADB().uploadAnaResult("total_time", "Total analyzed time [s]", baseResult);
-    //for(map<std::string,AnalyzerPlugin*>::iterator it = myPlugins.begin(); it != myPlugins.end(); it++) {
-    //    it->second->makeAnaResults();
-    //}
-    assert(false);
+    for(auto it = myRAPs.begin(); it != myRAPs.end(); it++) (*it)->makeAnaResults();
     AcornDB::ADB().endTransaction();
 }
 

@@ -18,6 +18,8 @@
 using std::vector;
 using std::pair;
 
+class RunAccumulatorPlugin;
+
 class RunAccumulator: public PluginSaver {
 public:
     /// constructor
@@ -58,6 +60,11 @@ public:
     TH1* hToRate(TH1* h, int scaleAxes);
     /// generate base analysis result pre-filled with run range
     AnaResult makeBaseResult() const;
+    
+protected:
+    /// build plugins appropriate for input file; call in subclass after setting up myBuilders
+    virtual void buildPlugins();
+    vector<RunAccumulatorPlugin*> myRAPs;       ///< properly typecast active plugins
 };
 
 /// generic analyzer plug-in class for a RunAccumulator
@@ -69,6 +76,8 @@ public:
 
     /// virtual routine for filling core histograms from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight) = 0;
+    /// calculate, upload analysis results
+    virtual void makeAnaResults() { }
     
     RunAccumulator* myA;    ///< RunAccumulator with which this plugin is associated
 };
