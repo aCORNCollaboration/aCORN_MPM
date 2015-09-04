@@ -127,16 +127,16 @@ def plot_scans(fname):
     
     gEa = graph.graphxy(width=10,height=6,
         x=graph.axis.lin(title="position [cm]", min = -1, max = 1),
-        y=graph.axis.lin(title="axial field [kV/cm]"))
+        y=graph.axis.lin(title="axial field [V/cm]"))
     
     V = 4.1
     BC1 = BesselCalcs(5.5)
-    BC1.add_endcircle(4.0, V)
+    BC1.add_endcircle(4.14, V)
     
     BC2 = BesselCalcs(10.)
-    BC2.add_endcircle(10, 1.7*V)
-    BC2.add_endcircle(5.5, -1.7*V)
-    BC2.add_endcircle(4.0, V)
+    BC2.add_endcircle(10, 3*V)
+    BC2.add_endcircle(6.5, -3*V)
+    BC2.add_endcircle(3.928, V)
     BC2 = TwoEndedBessel(10, BC2)
     
     def bccombo(r,z):
@@ -146,7 +146,7 @@ def plot_scans(fname):
     
     for (n,sc) in enumerate(scans):
         print sc.r(), sc.npts
-        gdat = [(p.x[2], p.phi, 1000*p.Er, p.E[0], p.E[1], p.E[2]) for p in sc.pts]
+        gdat = [(p.x[2], p.phi, p.Er, p.E[0], p.E[1], p.E[2]) for p in sc.pts]
         gtitle = "$r = %.1f$ cm"%sc.r()
         
         plotl = [graph.style.line([cols[n], style.linewidth.thin])]

@@ -77,7 +77,7 @@ vector<RunID> ReducedDataScanner::findSeriesRuns(int s) const {
     RunID rn;
     rn.first = s;
     rn.second = 0;
-    while(nmissing < 10) {
+    while(nmissing < 50) {
         if(locateRun(rn).size()) {
             v.push_back(rn);
             nmissing = 0;

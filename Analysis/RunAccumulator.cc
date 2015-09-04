@@ -180,7 +180,7 @@ void RunAccumulator::makeOutput(bool doPlots) {
     if(doPlots)
         makePlots();
     write();
-    setWriteRoot(true);
+    writeROOT();
 }
 
 unsigned int RunAccumulator::mergeDir() {

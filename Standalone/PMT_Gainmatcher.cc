@@ -44,7 +44,7 @@ public:
         interpolate(SCAInterp);
         
         SCAfg.mySourceCalPlugin->bgSubtrPlots(*SCAInterp->mySourceCalPlugin);
-        SCAfg.setWriteRoot(true);
+        SCAfg.writeROOT();
     }
 
 };
