@@ -11,6 +11,7 @@
 #include "StringManip.hh"
 #include "PathUtils.hh"
 #include "OutputManager.hh"
+#include "ProgressBar.hh"
 
 #include <TStyle.h>
 #include <Math/QuasiRandom.h>
@@ -55,33 +56,46 @@ TH1* calcAsym(TH1* h1, TH1* h2) {
     return hAsym;
 }
 
-int main(int, char**) {
+int main(int, char**) { 
+    const double B0 = 364;      // field [Gauss]
+    ElectronTOF eTOF(B0);
+    ProtonTOF pTOF(B0);
+    
+    const double origin[3] = {0,0,0};
+    double p[3] = {1,-2,3};
+    
+    pTOF.setInitial(origin, p);
+    eTOF.setInitial(origin, p);
+}
+
+int mainz(int, char**) {
     
     OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated/");
     
     gStyle->SetOptStat("");
     
+    // kinematics generator
     RootQRandom* RQR = new RootQRandom();
     Gluck_beta_MC G(RQR);
     G.test_calc_P_H();
     
-    const double B0 = 364;  // field [Gauss]
-    const double r_beam = 3.0;
-    ElectronTOF eTOF;
-    ProtonTOF pTOF;
+    const double B0 = 364;      // field [Gauss]
+    const double r_beam = 3.0;  // beam radius [cm]
+    ElectronTOF eTOF(B0);
+    ProtonTOF pTOF(B0);
     CircleCollimator eCol(B0, 2.75, 5.08, 0);
     CircleCollimator pCol(B0, 4.0, 5.08, 0);
     
-    G.pt2_max = eCol.pt_max();
+    G.pt2_max = eCol.pt_max();  // limit max electron transverse momentum to save calculation time
     
     ////////////// Wishbone timing estimates
     const double zmin[3] = {0,0,-r_beam};
     const double zmax[3] = {0,0,r_beam};
     const double pemax[3] = {0, 0, sqrt(G.Delta*G.Delta - m_e*m_e)};
     const double pnumax[3] = {0, 0, -(G.Delta-m_e)};
-    pTOF.setVertex(zmin, pnumax);
+    pTOF.setInitial(zmin, pnumax);
     const double tof_max = pTOF.calcTOF(pDet_z);
-    pTOF.setVertex(zmax, pemax);
+    pTOF.setInitial(zmax, pemax);
     const double tof_min = pTOF.calcTOF(pDet_z);
     double tof_mid = 0.5*(tof_max+tof_min);
     printf("Min proton TOF %.2f us, mid %.2f us, max %.2f us\n", tof_min*1e6, tof_mid*1e6, tof_max*1e6);
@@ -126,16 +140,18 @@ int main(int, char**) {
     
     TH1F hw("hw","weighting",200,0,1e-29);
    
-    int nprog = 50;
-    for(int i=0; i<nprog; i++) printf("="); printf("\n");
+    ProgressBar* PB = new ProgressBar(npts, npts/50);
     for(int i=0; i<npts; i++) {
-        if(!(i%(npts/nprog))) { printf("*"); fflush(stdout); }
+        PB->update(i);
+        
+        // generate new event
         G.gen_evt_weighted();
         if(G.evt_w <= 0) continue;
        
         double E_e = G.E_2-G.m_2; // electron KE
+        // electron-nu cos angle
         double cos_th_enu = 0;
-        for(int i=0; i<3; i++) cos_th_enu += G.n_1[i]*G.n_2[i]; // electron-nu cos angle
+        for(int i=0; i<3; i++) cos_th_enu += G.n_1[i]*G.n_2[i];
         
         hSpec->Fill(E_e, G.evt_w);
         hNu->Fill(G.E_1, G.evt_w);
@@ -144,6 +160,7 @@ int main(int, char**) {
         // vertex position
         RQR->u0[0] = (2*RQR->u0[0]-1)*eCol.r;
         circle_the_square(RQR->u0+1, r_beam);
+        
         // momenta, with sign convention reversed
         double p_e[3];
         double p_p[3];
@@ -154,13 +171,16 @@ int main(int, char**) {
         
         if(p_e[2] > 0) continue; // lose upward-going electrons
         
-        double passprob = eCol.pass(RQR->u0, p_e) * pCol.pass(RQR->u0, p_p);
+        pTOF.setInitial(RQR->u0, p_p);
+        eTOF.setInitial(RQR->u0, p_e);
+        
+        double e_passprob = eCol.pass(eTOF);
+        if(!e_passprob) continue;
+        double passprob = e_passprob * pCol.pass(pTOF);
         double wt = passprob * G.evt_w * G.c_2_wt;
         if(!wt) continue;
         
         // proton-to-electron time
-        pTOF.setVertex(RQR->u0, p_p);
-        eTOF.setVertex(RQR->u0, p_e);
         double dt = pTOF.calcTOF(pDet_z) - eTOF.calcTOF(eDet_z);
         hWishbone->Fill(E_e, 1e6*dt, wt);
         
@@ -173,7 +193,7 @@ int main(int, char**) {
         hpAccept->Fill(E_e, p_p[2]/G.mag_p_f, wt);
         hnuAccept->Fill(E_e, G.n_1[2], wt);
     }
-    printf("\n");
+    delete PB;
         
     hSpec->Draw();
     double acs = 0.8*hSpec->GetMaximum()/haCorn[0][true]->GetMaximum();
@@ -229,7 +249,7 @@ int main(int, char**) {
     
     G.showEffic();
     
-    OM.setWriteRoot(true);
+    OM.writeROOT();
     
     return 0;
 }

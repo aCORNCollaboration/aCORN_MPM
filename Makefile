@@ -48,7 +48,7 @@ Analysis = AcornCalibrator.o AcornDB.o BaseDataScanner.o Positioner.o PMTsPlugin
 	ReducedDataScanner.o RunAccumulator.o RunSetScanner.o SourceCalPlugin.o WishboneFit.o WishbonePlugin.o
 
 objects = $(IOUtils) $(Physics) $(ROOTUtils) $(Analysis) aCornCompileVersion.o
-StandaloneObjs = BetaSpectrometerScanner ReducedToROOT PMT_Gainmatcher WishboneScanner
+StandaloneObjs = BetaSpectrometerScanner ReducedToROOT PMT_Gainmatcher WishboneScanner SpectrumShape
 
 all: libaCORN_MPM.a $(StandaloneObjs)
 
