@@ -51,6 +51,8 @@ public:
     double rwm_cxn() const;
     /// additional Coulomb correction weight factor
     double coulomb_cxn() const { return WilkinsonF0(1, E_2/m_e); }
+    /// calculate cos theta between electron, neutrino
+    double cos_theta_e_nu() const { return n_1[0]*n_2[0] + n_1[1]*n_2[1] + n_1[2]*n_2[2]; }
     
     const double G_F = 1.1663787e-17;   ///< Fermi coupling constant, [/keV^2]
     const double G2_V = G_F*G_F*0.94920; ///< |G_V|^2 = |V_ud G_F g_V|^2

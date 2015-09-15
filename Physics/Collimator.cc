@@ -19,24 +19,36 @@ void LarmorSpiral::setInitial(const double x0[3], const double p[3]) {
     cx[1] = 3.34*p[0]/(q*B);
     cx[2] = x0[2];
     rL = normTwo(cx);
-    phi = atan2(-cx[1], -cx[0]);
-    double gamma = 1.0; // TODO relativistic factor
+    phi0 = atan2(-cx[1], -cx[0]);
+    gamma = sqrt(1+(p[0]*p[0] + p[1]*p[1] + p[2]*p[2])/(m*m));
     omega = q*B/(gamma*m)*8.987e9;
     
     // convert to absolute position
     for(int i=0; i<3; i++) cx[i] += x0[i];
     rC = normTwo(cx);
-    
-    // check offset calculation!
-    calcPos();
-    printf("r = %g\tomega = %g\n", rL, omega);
-    printf("Position = %g, %g\t->\t%g, %g\n", x0[0], x0[1], xx[0], xx[1]);
 }
 
 void LarmorSpiral::calcPos() {
+    double phi = phi0 + omega*t;
     xx[0] = cx[0]+rL*cos(phi);
     xx[1] = cx[1]+rL*sin(phi);
     xx[2] = cx[2];
+}
+
+void LarmorSpiral::kickMomentum(double dpx, double dpy) {
+    // new spiral center
+    cx[0] += -3.34*dpy/(q*B);
+    cx[1] += 3.34*dpx/(q*B);
+    rC = normTwo(cx);
+    
+    // particle position at deflection relative to center
+    double dx[2] = { xx[0]-cx[0], xx[1]-cx[1] };
+    
+    // new Larmor radius
+    rL = normTwo(dx);
+    
+    // spiral phase CHEAT assuming frequency unchanged.
+    phi0 = atan2(dx[1], dx[0]) - omega*t;
 }
 
 //////////////////////////////////////////////////
@@ -64,10 +76,11 @@ void ProtonTOF::setInitial(const double x[3], const double p[3]) {
     
     double E0 = p[2]*p[2]/(2*m_p);                              // initial kinetic energy in z direction [keV/c^2]
     p_exit = sqrt(2*m_p*(E0 + (V_mirror/L_mirror)*(mirror_z-x[2])));   // z momentum exiting mirror [keV/c]
+    v_exit = p_exit/m_p * c_light;
 }
 
 double ProtonTOF::calcTOF(double z) const {
-    double t_det = (z-mirror_z)/(p_exit/m_p * c_light);         // time from bottom of mirror to detector [s]
+    double t_det = (z-mirror_z)/v_exit;                         // time from bottom of mirror to detector [s]
     return t_mr + t_det;
 }
 

@@ -25,19 +25,19 @@ public:
     
     /// initial setup from position [cm], momentum [keV/c]
     virtual void setInitial(const double x0[3], const double p[3]);
-    
-    /// propagate forward in time
-    virtual void addTime(double dt) { t += dt; phi += omega * dt; }
     /// calculate position xx
     void calcPos();
+    /// apply momentum "kick" [keV/c] into new trajectory; assumes calcPos() previously called using kick time
+    void kickMomentum(double dpx, double dpy);
     
     double cx[3];       ///< spiral center position [cm]
     double xx[3];       ///< current position [cm]
     double rL;          ///< Larmor radius [cm]
     double rC;          ///< distance of spiral center from axis [cm]
     double omega;       ///< angular frequency [radians / s]
-    double phi;         ///< phase around spiral [radians]
+    double phi0;        ///< angle around spiral at t=0 [radians]
     double t;           ///< accumulated TOF [s]
+    double gamma;       ///< Lorentz factor
 };
 
 
@@ -83,7 +83,8 @@ public:
     virtual double calcTOF(double z) const;
     
     double t_mr;                ///< time spent in mirror
-    double p_exit;              ///< momentum at mirror exit
+    double p_exit;              ///< momentum along axis at mirror exit [keV/c]
+    double v_exit;              ///< velocity along axis at mirror exit [cm/s]
     
     double V_mirror = 3.0;      ///< potential across electrostatic mirror [kV]
     double L_mirror = 43;       ///< length of mirror region [cm]

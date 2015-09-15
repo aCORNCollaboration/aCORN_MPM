@@ -56,23 +56,33 @@ TH1* calcAsym(TH1* h1, TH1* h2) {
     return hAsym;
 }
 
-int main(int, char**) { 
-    const double B0 = 364;      // field [Gauss]
-    ElectronTOF eTOF(B0);
-    ProtonTOF pTOF(B0);
+/// Calculations for electric field momentum deflection
+class MomentumDeflector {
+public:
+    /// Constructor
+    MomentumDeflector() { }
     
-    const double origin[3] = {0,0,0};
-    double p[3] = {1,-2,3};
+    /// momentum impulse in x direction due to wires [cm V/cm]
+    double wires_momentum_deflection(double x) const {
+        return -(floor(x/d) + 0.5 - x/d)*d*E0*0.5;
+    }
     
-    pTOF.setInitial(origin, p);
-    eTOF.setInitial(origin, p);
-}
+    /// momentum deflection from endcap mismatch [cm V/cm]
+    void radial_momentum_deflection(double x, double y, double& Vx, double& Vy) const {
+        // TODO correct values here!!
+        double r = sqrt(x*x + y*y);
+        Vx = x*r*0.6;
+        Vy = y*r*0.6;
+    }
+    
+    double E0 = 70;     ///< mirror field [V/cm]
+    double d = 0.2;     ///< wire spacing
+};
 
-int mainz(int, char**) {
+int main(int, char**) {
+    setupSlideStyle();
     
     OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated/");
-    
-    gStyle->SetOptStat("");
     
     // kinematics generator
     RootQRandom* RQR = new RootQRandom();
@@ -85,6 +95,7 @@ int mainz(int, char**) {
     ProtonTOF pTOF(B0);
     CircleCollimator eCol(B0, 2.75, 5.08, 0);
     CircleCollimator pCol(B0, 4.0, 5.08, 0);
+    MomentumDeflector MD;
     
     G.pt2_max = eCol.pt_max();  // limit max electron transverse momentum to save calculation time
     
@@ -105,7 +116,7 @@ int mainz(int, char**) {
     
     TH1F* hSpec = OM.registeredTH1F("hSpec","Corrected beta spectrum",200,0,800);
     
-    TH1F* haCorn[2][2];
+    TH1F* haCorn[2][2]; // energy spectrum for [branch][radiative corrected?]
     for(int i=0; i<2; i++) {
         for(int j=0; j<2; j++) {
             haCorn[i][j] = OM.registeredTH1F("haCorn_"+to_str(i)+"_"+to_str(j), "asymmetry beta spectrum", 200,0,800);
@@ -115,10 +126,13 @@ int mainz(int, char**) {
     
     TH2F* hPassPos = OM.registeredTH2F("hPassPos","Vertex passed collimator",50,-4,4,50,-4,4);
     
-    TH2F* hWishbone = OM.registeredTH2F("hWishbone","simulated wishbone", 400, 0, 800, 400, 2, 5);
-    hWishbone->GetXaxis()->SetTitle("Electron energy [keV]");
-    hWishbone->GetYaxis()->SetTitle("Proton TOF [#mus]");
-    hWishbone->GetYaxis()->SetTitleOffset(1.4);
+    TH2F* hWishbone[2]; // wishbone for upper/lower branches
+    for(int i=0; i<2; i++) {
+        hWishbone[i] = OM.registeredTH2F("hWishbone_"+to_str(i),"simulated wishbone", 400, 0, 800, 400, 2, 5);
+        hWishbone[i]->GetXaxis()->SetTitle("Electron energy [keV]");
+        hWishbone[i]->GetYaxis()->SetTitle("Proton TOF [#mus]");
+        hWishbone[i]->GetYaxis()->SetTitleOffset(1.4);
+    }
     
     TH2F* hAccept = OM.registeredTH2F("hAccept","simulated acceptance", 200, 0, 800, 200, -1, 1);
     hAccept->GetXaxis()->SetTitle("Electron energy [keV]");
@@ -178,23 +192,40 @@ int mainz(int, char**) {
         if(!e_passprob) continue;
         double passprob = e_passprob * pCol.pass(pTOF);
         double wt = passprob * G.evt_w * G.c_2_wt;
-        if(!wt) continue;
         
         // proton-to-electron time
         double dt = pTOF.calcTOF(pDet_z) - eTOF.calcTOF(eDet_z);
-        hWishbone->Fill(E_e, 1e6*dt, wt);
+        // wishbone true branch
+        bool upper = G.cos_theta_e_nu() < 0;
         
-        bool upper = dt > tof_mid + (tof_min - tof_mid)*(E_e/neutronBetaEp);
-        haCorn[upper][true]->Fill(E_e, wt);
-        if(G.K==0) haCorn[upper][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
-        hPassPos->Fill(RQR->u0[0],RQR->u0[1],wt);
+        if(wt) {
+            hWishbone[upper]->Fill(E_e, 1e6*dt, wt);
+            haCorn[upper][true]->Fill(E_e, wt);
+            //if(G.K==0) haCorn[upper][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
+            hPassPos->Fill(RQR->u0[0],RQR->u0[1],wt);
 
-        hAccept->Fill(E_e, cos_th_enu, wt);
-        hpAccept->Fill(E_e, p_p[2]/G.mag_p_f, wt);
-        hnuAccept->Fill(E_e, G.n_1[2], wt);
+            hAccept->Fill(E_e, cos_th_enu, wt);
+            hpAccept->Fill(E_e, p_p[2]/G.mag_p_f, wt);
+            hnuAccept->Fill(E_e, G.n_1[2], wt);
+        }
+        
+        // re-calculate with grid deflection
+        pTOF.t = pTOF.t_mr;  // time at mirror crossing
+        pTOF.calcPos();      // position at mirror crossing
+        double Vx = 0, Vy = 0;
+        MD.radial_momentum_deflection(pTOF.xx[0], pTOF.xx[1], Vx, Vy);
+        //Vx += MD.wires_momentum_deflection(pTOF.xx[0]);
+        double dpx = Vx / pTOF.v_exit * 3e7;
+        double dpy = Vy / pTOF.v_exit * 3e7;
+        pTOF.kickMomentum(dpx, dpy);
+        wt = e_passprob * pCol.pass(pTOF) * G.evt_w * G.c_2_wt;
+        if(wt) haCorn[upper][false]->Fill(E_e, wt);
     }
     delete PB;
-        
+    
+    OM.defaultCanvas->SetLeftMargin(0.17);
+    OM.defaultCanvas->SetRightMargin(0.04);
+    
     hSpec->Draw();
     double acs = 0.8*hSpec->GetMaximum()/haCorn[0][true]->GetMaximum();
     for(int i=0; i<2; i++) {
@@ -212,10 +243,20 @@ int mainz(int, char**) {
         hAsym[j]->Scale(1./nrebin);
         hAsym[j]->SetLineColor(4-2*j);
         hAsym[j]->SetMaximum(0);
+        hAsym[j]->GetXaxis()->SetTitle("electron energy [keV]");
+        hAsym[j]->GetYaxis()->SetTitle("wishbhone asymmetry");
+        hAsym[j]->SetTitle("aCORN simulation");
         hAsym[j]->Draw(j?"HIST Same":"HIST");
         printf("Asymmetry %i %.4f\n",j,hAsym[j]->Integral());
     }
     OM.printCanvas("Asymmetry");
+    
+    hAsym[0]->Add(hAsym[1], -1);
+    hAsym[0]->Scale(100);
+    hAsym[0]->GetYaxis()->SetTitle("false asymmetry [%]");
+    hAsym[0]->Draw("HIST");
+    OM.printCanvas("DeltaAsymmetry");
+    
     
     gPad->SetCanvasSize(300,300);
     hPassPos->Draw("Col");
@@ -241,10 +282,15 @@ int mainz(int, char**) {
     hnuAccept->Draw("Col");
     OM.printCanvas("nuAcceptance");
     
-    double wmx = 0.9*hWishbone->GetMaximum();
-    hWishbone->SetMinimum(-wmx);
-    hWishbone->SetMaximum(wmx);
-    hWishbone->Draw("Col");
+    double wmx = 0.9*hWishbone[0]->GetMaximum();
+    hWishbone[1]->Scale(-1.0);
+    hWishbone[0]->Add(hWishbone[1]);
+    for(int i=0; i<2; i++) {
+        hWishbone[i]->SetMinimum(-wmx);
+        hWishbone[i]->SetMaximum(wmx);
+    }
+    hWishbone[0]->Draw("Col");
+    //hWishbone[1]->Draw("Col Same");
     OM.printCanvas("Wishbone");
     
     G.showEffic();
