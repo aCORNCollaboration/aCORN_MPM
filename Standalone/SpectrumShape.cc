@@ -133,23 +133,19 @@ int main(int, char**) {
         hWishbone[i] = OM.registeredTH2F("hWishbone_"+to_str(i),"simulated wishbone", 400, 0, 800, 400, 2, 5);
         hWishbone[i]->GetXaxis()->SetTitle("Electron energy [keV]");
         hWishbone[i]->GetYaxis()->SetTitle("Proton TOF [#mus]");
-        hWishbone[i]->GetYaxis()->SetTitleOffset(1.4);
     }
     
     TH2F* hAccept = OM.registeredTH2F("hAccept","simulated acceptance", 200, 0, 800, 200, -1, 1);
     hAccept->GetXaxis()->SetTitle("Electron energy [keV]");
     hAccept->GetYaxis()->SetTitle("cos #theta_{e#nu}");
-    hAccept->GetYaxis()->SetTitleOffset(1.4);
     
     TH2F* hpAccept = OM.registeredTH2F("hpAccept","simulated proton acceptance", 200, 0, 800, 200, -1, 1);
     hpAccept->GetXaxis()->SetTitle("Electron energy [keV]");
     hpAccept->GetYaxis()->SetTitle("cos #theta_{p}");
-    hpAccept->GetYaxis()->SetTitleOffset(1.4);
     
     TH2F* hnuAccept = OM.registeredTH2F("hnuAccept","simulated neutrino acceptance", 200, 0, 800, 200, -1, 1);
     hnuAccept->GetXaxis()->SetTitle("Electron energy [keV]");
     hnuAccept->GetYaxis()->SetTitle("cos #theta_{#nu}");
-    hnuAccept->GetYaxis()->SetTitleOffset(1.4);
     
     TH1F* hNu  = OM.registeredTH1F("hNu","Neutrino spectrum",200,0,800);
     hNu->SetLineColor(3);

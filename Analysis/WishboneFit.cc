@@ -36,7 +36,6 @@ void WishboneSeparator::setWishbone(TH2* h) {
     hSlices = sliceTH2(*hWishbone, X_DIRECTION, true);
     for(int i=0; i<=hWishbone->GetNbinsX()+1; i++) {
         hSlices[i]->SetTitle(("Wishbone Slice " + to_str(binE(i)) + " keV").c_str());
-        hSlices[i]->GetYaxis()->SetTitleOffset(1.35);
     }
 }
 
@@ -101,7 +100,6 @@ void WishboneSeparator::compareAsym(WishboneSeparator& WB) {
     gt0.GetXaxis()->SetTitle("energy [keV]");
     gt0.GetXaxis()->SetRangeUser(0,600);
     gt0.GetYaxis()->SetTitle("timing cut [#mus]");
-    gt0.GetYaxis()->SetTitleOffset(1.35);
     WB.gt0.Draw("CP");
     printCanvas("T0Compare");
 }
@@ -328,7 +326,6 @@ void WishboneFit::extractAsymmetry() {
     modelN[0].GetXaxis()->SetTitle("energy [keV]");
     modelN[0].GetXaxis()->SetRangeUser(0,600);
     modelN[0].GetYaxis()->SetTitle("rate [Hz/MeV]");
-    modelN[0].GetYaxis()->SetTitleOffset(1.35);
     modelN[1].Draw("P");
     dataN[0].Draw("P");
     dataN[1].Draw("P");
@@ -344,7 +341,6 @@ void WishboneFit::extractAsymmetry() {
     dataA.GetXaxis()->SetTitle("energy [keV]");
     dataA.GetXaxis()->SetRangeUser(0,500);
     dataA.GetYaxis()->SetTitle("branch asymmetry [%]");
-    dataA.GetYaxis()->SetTitleOffset(1.4);
     modelA.Draw("P");
     
     dtSens.SetMarkerStyle(7);
@@ -378,14 +374,12 @@ void WishboneFit::calcGapFill() {
     TH1F* fillx = axisHist(*hWishbone, "hWishboneFill_E", X_DIRECTION);
     fillx->SetTitle("Wishbone inter-arm fill");
     fillx->GetYaxis()->SetTitle("rate [mHz/MeV]");
-    fillx->GetYaxis()->SetTitleOffset(1.35);
     fillx->GetXaxis()->SetRangeUser(0,600);
     fillx->SetMaximum(50);
     
     TH1F* filly = axisHist(*hWishbone, "hWishboneFill_t", Y_DIRECTION);
     filly->GetYaxis()->SetTitle("rate [mHz/#mus]");
     filly->SetTitle("Wishbone inter-arm fill");
-    filly->GetYaxis()->SetTitleOffset(1.35);
     filly->GetXaxis()->SetRangeUser(3,4);
     wbx.intoHist(fillx);
     wby.intoHist(filly);
@@ -484,7 +478,6 @@ void GausWishboneFit::fitModel() {
     taufine[1].Draw("P");
     taufine[1].GetXaxis()->SetTitle("energy [keV]");
     taufine[1].GetYaxis()->SetTitle("proton TOF [#mus]");
-    taufine[1].GetYaxis()->SetTitleOffset(1.4);
     taufine[0].Draw("P");
     gt0.SetMarkerStyle(8);
     gt0.SetMarkerSize(0.2);
@@ -503,7 +496,6 @@ void GausWishboneFit::fitModel() {
     sigmafine[0].SetTitle("Wishbone timing spread");
     sigmafine[0].GetXaxis()->SetTitle("energy [keV]");
     sigmafine[0].GetYaxis()->SetTitle("proton TOF #sigma [#mus]");
-    sigmafine[0].GetYaxis()->SetTitleOffset(1.4);
     sigmafine[1].Draw("P");
     //
     for(int i=0; i<2; i++) {

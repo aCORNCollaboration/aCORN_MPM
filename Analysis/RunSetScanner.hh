@@ -10,7 +10,6 @@
 
 #include "TChainScanner.hh"
 #include "Enums.hh"
-#include "AcornCalibrator.hh"
 
 #include "SMFile.hh"
 #include "TagCounter.hh"

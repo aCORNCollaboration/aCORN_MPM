@@ -83,8 +83,16 @@ protected:
     /// initialize foreground/background regions
     void initRegions(FGBGRegionsHist& h);
     
+    enum DataMode {
+        BAD,
+        NG6,
+        NGC
+    } dataMode = BAD;
+    
     /// set NG-C cuts
     void config_NGC_cuts();
+    /// set NG-6 cuts
+    void config_NG6_cuts();
 };
 
 /// Builder for RunAccumulatorPlugins

@@ -7,6 +7,7 @@
 
 #include "WishbonePlugin.hh"
 #include "WishboneFit.hh"
+#include "PathUtils.hh"
 #include "GraphicsUtils.hh"
 #include "GraphUtils.hh"
 #include "StringManip.hh"
@@ -52,7 +53,11 @@ RunAccumulatorPlugin(RA, nm, inflname),
 hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this),
 hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(this) {
     
-    config_NGC_cuts();
+    dataMode = BAD;
+    string dsrc = split(strip(getEnvSafe("ACORN_REDUCED_ROOT"),"/"),"/").back();
+    if(dsrc == "ROOT_NG6") { dataMode = NG6; config_NG6_cuts(); }
+    if(dsrc == "ROOT_NGC") { dataMode = NGC; config_NGC_cuts(); }
+    assert(dataMode != BAD);
     
     TH1F hProtonTemplate("hProtonSignal", "Proton detector signal", 200,0,20);
     hProtonTemplate.GetXaxis()->SetTitle("proton detector ADC channels (#times 10^{3})");
@@ -78,7 +83,6 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     TH2F hTemplate("hTemplate","aCORN Wishbone", nEnBins, E0, E1, 10/timeBin + 1, - 0.005, 10. + timeBin - 0.005);
     hTemplate.GetXaxis()->SetTitle("Electron energy [keV]");
     hTemplate.GetYaxis()->SetTitle("Proton TOF [#mus]");
-    hTemplate.GetYaxis()->SetTitleOffset(1.4);
     hWishbone = (TH2F*)registerSavedHist("hWishbone",hTemplate);
     hWishbone->SetTitle("aCORN NG-C Wishbone");
     hWishbone->GetYaxis()->SetRange();
@@ -92,7 +96,6 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     TH2F hPSTemplate("hChanSpec","PMT Spectra", 200, 0, (1<<15)/1000., NCH_MAX, -0.5, NCH_MAX-0.5);
     hPSTemplate.GetXaxis()->SetTitle("raw signal (#times 10^{3})");
     hPSTemplate.GetYaxis()->SetTitle("detector channel number");
-    hPSTemplate.GetYaxis()->SetTitleOffset(1.4);
     initRegions(hChanSpec);
     hChanSpec.setTemplate(hPSTemplate);
     
@@ -111,7 +114,6 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     TH2F hPosSigmaTemplate("hPosSigma","Beta hit position spread", 100, 0, 2, 100, 0, 2);
     hPosSigmaTemplate.GetXaxis()->SetTitle("#sigma_{x} [PMT spacings]");
     hPosSigmaTemplate.GetYaxis()->SetTitle("#sigma_{y} [PMT spacings]");
-    hPosSigmaTemplate.GetYaxis()->SetTitleOffset(1.4);
     initRegions(hPosSigma);
     hPosSigma.setTemplate(hPosSigmaTemplate);
     
@@ -119,7 +121,6 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     TH2F hEnergyRadiusTemplate("hEnergyRadius","Beta hit positions", 100, 0, 4, 100, 0, 800);
     hEnergyRadiusTemplate.GetXaxis()->SetTitle("radius^{2} [(PMT spacings)^{2}]");
     hEnergyRadiusTemplate.GetYaxis()->SetTitle("Energy [keV]");
-    hEnergyRadiusTemplate.GetYaxis()->SetTitleOffset(1.4);
     initRegions(hEnergyRadius);
     hEnergyRadius.setTemplate(hEnergyRadiusTemplate);
 }
@@ -129,6 +130,15 @@ void WishbonePlugin::config_NGC_cuts() {
     E_p_hi = 1500;
     T_p_min = 750;
     T_p_lo = 3000;
+    T_p_hi = 4500;
+    T_p_max = 9500;
+}
+
+void WishbonePlugin::config_NG6_cuts() {
+    E_p_lo = 650;
+    E_p_hi = 2400;
+    T_p_min = 750;
+    T_p_lo = 2750;
     T_p_hi = 4500;
     T_p_max = 9500;
 }
@@ -194,7 +204,6 @@ void WishbonePlugin::calculateResults() {
     hWishboneEProj[true]->Add(hWishboneEProj[false],-1.0);
     
     hWishboneEProj[true]->GetYaxis()->SetTitle("rate [Hz/MeV]");
-    hWishboneEProj[true]->GetYaxis()->SetTitleOffset(1.45);
     hWishboneEProj[true]->SetTitle("aCORN electron spectrum");
     hWishboneEProj[false]->SetTitle("aCORN electron spectrum background");
     hWishboneEProj[false]->SetLineColor(4);
@@ -366,7 +375,7 @@ void WishbonePlugin::makePlots() {
     printCanvas("VetoSum");
     
     hWishboneEProj[true]->SetMinimum(-0.2);
-    hWishboneEProj[true]->SetMaximum(15);
+    hWishboneEProj[true]->SetMaximum(dataMode == NG6? 3 : 15);
     hWishboneEProj[true]->GetXaxis()->SetRangeUser(0,1000);
     hWishboneEProj[true]->Draw();
     hWishboneEProj[false]->Draw("Same");

@@ -76,7 +76,6 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     
     TH1* hEnergyRate = hToRate(hEnergy,1);
     hEnergyRate->GetYaxis()->SetTitle("event rate [Hz/MeV]");
-    hEnergyRate->GetYaxis()->SetTitleOffset(1.4);
     hEnergyRate->SetLineColor(2);
     TH1* hEnergyRateBG = bg.hToRate(bg.hEnergy,1);
     hEnergyRateBG->SetLineColor(4);
@@ -108,7 +107,6 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     
     TH1* hEnergyRecalRate = hToRate(hEnergyRecal,1);
     hEnergyRecalRate->GetYaxis()->SetTitle("event rate [Hz/MeV]");
-    hEnergyRecalRate->GetYaxis()->SetTitleOffset(1.4);
     hEnergyRecalRate->SetLineColor(2);
     TH1* hEnergyRecalRateBG = bg.hToRate(bg.hEnergyRecal,1);
     hEnergyRecalRateBG->SetLineColor(4);
@@ -139,7 +137,6 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     for(unsigned int i=0; i<N_E_PMT; i++) {
         TH1* hPMTRate = hToRate(hPMTSig[i],1);
         hPMTRate->GetYaxis()->SetTitle("event rate [mHz/channel]");
-        hPMTRate->GetYaxis()->SetTitleOffset(1.4);
         hPMTRate->SetLineColor(2);
         TH1* hPMTRateBG = bg.hToRate(bg.hPMTSig[i],1);
         hPMTRateBG->SetLineColor(4);

@@ -12,6 +12,7 @@
 #include "Positioner.hh"
 #include <Rtypes.h>
 #include "RunSetScanner.hh"
+#include "AcornCalibrator.hh"
 
 const unsigned int NCH_MAX = 32;        ///< number of channels in DAQ
 const unsigned int N_MODULES = 2;       ///< number of modules in DAQ

@@ -191,11 +191,9 @@ void gen_calib_spectra(const std::string& sname, TH1*& hInitEnergy, TH1*& hEnerg
     hInitEnergy = new TH1F("hInitEnergy", (sname + " electrons").c_str(), 1000, 0, 2000);
     hInitEnergy->GetXaxis()->SetTitle("Energy [keV]");
     hInitEnergy->GetYaxis()->SetTitle("Counts / keV / 1e6 decays");
-    hInitEnergy->GetYaxis()->SetTitleOffset(1.4);
     
     hEnergy = new TH1F("hEnergy", (sname + " electrons").c_str(), 2000, 0, 2000);
     hEnergy->GetXaxis()->SetTitle("Energy [keV]");
-    hEnergy->GetYaxis()->SetTitleOffset(1.4);
     
     const size_t npts = 1000000;
     for(size_t i=0; i<npts; i++) {
@@ -233,7 +231,6 @@ void load_calib_spectra(const string& sname, TH1*& hInitEnergy, TH1*& hEnergy, O
     if(hInitEnergyG && hEnergyG) {
         if(OM) {
             OM->defaultCanvas->SetLogy(true);
-            hEnergyG->GetYaxis()->SetTitleOffset(1.4);
             hEnergyG->GetXaxis()->SetTitle("scintillator energy [keV]");
             hEnergyG->SetTitle("Simulated calibration spectrum");
             hEnergyG->SetLineColor(4);
@@ -287,7 +284,6 @@ int main(int argc, char** argv) {
         hSmeared[i] = new TH1F(("hSmeared_"+to_str(i)).c_str(), (sname + " PE-smeared energy").c_str(), 500, 0, 2000);
         hSmeared[i]->GetXaxis()->SetTitle("Quenched Energy [keV]");
         hSmeared[i]->GetYaxis()->SetTitle("Counts / 1e6 decays");
-        hSmeared[i]->GetYaxis()->SetTitleOffset(1.4);
         hSmeared[i]->SetLineColor(4-3*i);
     }
     

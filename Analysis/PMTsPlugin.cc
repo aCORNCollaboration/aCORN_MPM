@@ -29,7 +29,6 @@ RunAccumulatorPlugin(RA, nm, inflname) {
     TH2F hPSTemplate("hChanSpecT","PMT Spectra", 200, 0, 20., NCH_MAX, -0.5, NCH_MAX-0.5);
     hPSTemplate.GetXaxis()->SetTitle("raw signal (#times 10^{3})");
     hPSTemplate.GetYaxis()->SetTitle("detector channel number");
-    hPSTemplate.GetYaxis()->SetTitleOffset(1.4);
     hChanSpec = (TH2*)registerSavedHist("hChanSpec",hPSTemplate);
 }
 
