@@ -42,6 +42,8 @@ public:
     void getPMTSumCal(RunID rn, double& slope, double& intercept);
     /// get list of runs in database for given wishbone series
     vector<RunID> seriesRuns(RunNum S, DataTier T = GOOD);
+    /// get list of series in database for given analysis group
+    vector<RunNum> groupSeries(const string& sname);
     
     /// upload PMT gain calibration data
     void loadPMTcal(RunID start, RunID end, int n, double sigPerPE, double sigPerMeV);

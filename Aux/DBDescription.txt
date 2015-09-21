@@ -105,6 +105,18 @@ CREATE TABLE analysis_results (
 );
 CREATE INDEX idx_analysis_results ON analysis_results(type_id, start_s, end_s, time);
 
+-- Wishbone series analysis sets
+CREATE TABLE wishbone_groups (
+    name TEXT,          -- set name
+    start_s INTEGER,    -- starting series
+    end_s INTEGER,      -- ending series
+    field REAL          -- magnetic field sign/magnitude
+);
+
+INSERT INTO wishbone_groups VALUES("A", 531, 682, -360);
+INSERT INTO wishbone_groups VALUES("B", 764, 915, 360);
+INSERT INTO wishbone_groups VALUES("C", 951, 1159, 360);
+INSERT INTO wishbone_groups VALUES("D", 1211, 1391, -360);
 
 -----------------------------------------------------
 -- Admin commands

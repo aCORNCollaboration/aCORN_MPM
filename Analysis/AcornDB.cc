@@ -26,10 +26,7 @@ AcornDB::AcornDB(): SQLite_Helper(getEnvSafe("ACORN_DB")) {
 int combo_runid(RunID rn) { return 10000*rn.first + rn.second; }
 
 void AcornDB::getPMTSumCal(RunID rn, double& slope, double& intercept) {
-    
-    static const char* qry = "SELECT slope,intercept FROM pmt_sum_cal WHERE start_s <= ?1 AND ?1 <= end_s ORDER BY end_s-start_s ASC";
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("SELECT slope,intercept FROM pmt_sum_cal WHERE start_s <= ?1 AND ?1 <= end_s ORDER BY end_s-start_s ASC");
     
     sqlite3_bind_int(stmt, 1, combo_runid(rn));
     int rc1 = sqlite3_step(stmt);
@@ -45,10 +42,7 @@ void AcornDB::getPMTSumCal(RunID rn, double& slope, double& intercept) {
 }
 
 vector<RunID> AcornDB::seriesRuns(RunNum S, DataTier T) {
-    
-    static const char* qry = "SELECT start_s,end_s FROM data_series WHERE ?2 >= start_s AND ?1 <= end_s AND type = 'wishbone' AND tier = ?3";
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("SELECT start_s,end_s FROM data_series WHERE ?2 >= start_s AND ?1 <= end_s AND type = 'wishbone' AND tier = ?3");
     
     vector<RunID> v;
     
@@ -68,10 +62,26 @@ vector<RunID> AcornDB::seriesRuns(RunNum S, DataTier T) {
     return v;
 }
 
+vector<RunNum> AcornDB::groupSeries(const string& sname) {
+    static sqlite3_stmt* stmt = loadStatement("SELECT start_s,end_s FROM wishbone_groups WHERE name = ?1");
+    sqlite3_bind_text(stmt, 1, sname.c_str(), -1, SQLITE_STATIC);
+    int rc1 = sqlite3_step(stmt);
+    vector<RunNum> v;
+    if(rc1 == SQLITE_ROW) {
+        RunNum s0 = sqlite3_column_int(stmt, 0);
+        RunNum s1 = sqlite3_column_int(stmt, 1);
+        static sqlite3_stmt* stmt2 = loadStatement("SELECT DISTINCT start_s/10000 FROM data_series WHERE start_s/10000 = end_s/10000 AND ?1 <= start_s/10000 AND start_s/10000 <= ?2 AND tier = 1;");
+        sqlite3_bind_int(stmt2, 1, s0);
+        sqlite3_bind_int(stmt2, 2, s1);
+        while(sqlite3_step(stmt2) == SQLITE_ROW) v.push_back(sqlite3_column_int(stmt2, 0));
+        sqlite3_reset(stmt2);
+    }
+    sqlite3_reset(stmt);
+    return v;
+}
+
 void AcornDB::loadPMTcal(RunID start, RunID end, int n, double sigPerPE, double sigPerMeV) {    
-    static const char* qry = "INSERT OR REPLACE INTO pmt_gaincal(start_s, end_s, pmt, sigPerPE, sigPerMeV) VALUES (?1, ?2, ?3, ?4, ?5)";
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("INSERT OR REPLACE INTO pmt_gaincal(start_s, end_s, pmt, sigPerPE, sigPerMeV) VALUES (?1, ?2, ?3, ?4, ?5)");
     
     sqlite3_bind_int(stmt, 1, combo_runid(start));
     sqlite3_bind_int(stmt, 2, combo_runid(end));
@@ -84,9 +94,7 @@ void AcornDB::loadPMTcal(RunID start, RunID end, int n, double sigPerPE, double 
 }
 
 void AcornDB::getPMTcal(RunID rn, vector<double>& sigPerPE, vector<double>& sigPerMeV) {
-    static const char* qry = "SELECT pmt,sigPerPE,sigPerMeV FROM pmt_gaincal WHERE start_s <= ?1 AND ?1 <= end_s ORDER BY end_s-start_s ASC";
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("SELECT pmt,sigPerPE,sigPerMeV FROM pmt_gaincal WHERE start_s <= ?1 AND ?1 <= end_s ORDER BY end_s-start_s ASC");
 
     sigPerPE = vector<double>(N_E_PMT,0);
     sigPerMeV = vector<double>(N_E_PMT,0);
@@ -102,9 +110,7 @@ void AcornDB::getPMTcal(RunID rn, vector<double>& sigPerPE, vector<double>& sigP
 }
 
 TGraphErrors* AcornDB::getRecal(RunID rn) {
-    static const char* qry = "SELECT graph_ID FROM wishbone_recal WHERE start_s <= ?1 AND ?1 <= end_s ORDER BY end_s-start_s ASC";
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("SELECT graph_ID FROM wishbone_recal WHERE start_s <= ?1 AND ?1 <= end_s ORDER BY end_s-start_s ASC");
     
     sqlite3_bind_int(stmt, 1, combo_runid(rn));
     sqlite3_int64 gid = 0;
@@ -116,13 +122,8 @@ TGraphErrors* AcornDB::getRecal(RunID rn) {
 }
 
 void AcornDB::uploadPeak(const CalPeak& pk, bool replace) {
-    static const char* dqry = "DELETE FROM calib_peaks WHERE series = ?1 AND pktype = ?2 AND dttype = ?3";
-    static sqlite3_stmt* dstmt = NULL;
-    if(!dstmt) setQuery(dqry, dstmt);
-    
-    static const char* iqry = "INSERT INTO calib_peaks(series, pktype, dttype, center, sigma, height, dcenter, dsigma, dheight) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)";
-    static sqlite3_stmt* istmt = NULL;
-    if(!istmt) setQuery(iqry, istmt);
+    static sqlite3_stmt* dstmt = loadStatement("DELETE FROM calib_peaks WHERE series = ?1 AND pktype = ?2 AND dttype = ?3");
+    static sqlite3_stmt* istmt = loadStatement("INSERT INTO calib_peaks(series, pktype, dttype, center, sigma, height, dcenter, dsigma, dheight) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)");
     
     if(replace) {
         sqlite3_bind_int(dstmt, 1, pk.series);
@@ -146,9 +147,7 @@ void AcornDB::uploadPeak(const CalPeak& pk, bool replace) {
 }
 
 TGraphErrors* AcornDB::getGraph(sqlite3_int64 gID) {
-    static const char* qry = "SELECT x,dx,y,dy FROM graph_points WHERE graph_id = ?1";    
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("SELECT x,dx,y,dy FROM graph_points WHERE graph_id = ?1");
     
     TGraphErrors* g = new TGraphErrors();
     
@@ -165,9 +164,7 @@ TGraphErrors* AcornDB::getGraph(sqlite3_int64 gID) {
 }
 
 sqlite3_int64 AcornDB::createNamed(const string& tp, const string& name, const string& descrip) {
-    static const char* qry = "INSERT INTO named_object(type, name, descrip) VALUES (?1, ?2, ?3)";
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("INSERT INTO named_object(type, name, descrip) VALUES (?1, ?2, ?3)");
     
     sqlite3_bind_text(stmt, 1, tp.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, name.c_str(), -1, SQLITE_STATIC); 
@@ -183,9 +180,7 @@ sqlite3_int64 AcornDB::uploadGraph(const TGraph* g, const string& name, const st
     sqlite3_int64 gid = createNamed("graph",name,descrip);
     printf("Uploading graph '%s' [%s] with ID %lli\n", name.c_str(), descrip.c_str(), gid);
     
-    static const char* qry = "INSERT INTO graph_points(graph_id,x,dx,y,dy) VALUES (?1, ?2, ?3, ?4, ?5)";
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("INSERT INTO graph_points(graph_id,x,dx,y,dy) VALUES (?1, ?2, ?3, ?4, ?5)");
 
     double x,y,dx,dy;
     dx = dy = 0;
@@ -211,9 +206,7 @@ sqlite3_int64 AcornDB::uploadGraph(const TGraph* g, const string& name, const st
 }
 
 sqlite3_int64 AcornDB::uploadRecal(const TGraph* g, RunID r0, RunID r1) {
-    static const char* qry = "INSERT INTO wishbone_recal(start_s, end_s, graph_ID) VALUES (?1, ?2, ?3)";
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("INSERT INTO wishbone_recal(start_s, end_s, graph_ID) VALUES (?1, ?2, ?3)");
     
     sqlite3_int64 gid = uploadGraph(g, "energyRecal", "Energy re-calibration curve for " + to_str(r0) + " -- " + to_str(r1));
     sqlite3_bind_int(stmt, 1, combo_runid(r0));
@@ -226,9 +219,7 @@ sqlite3_int64 AcornDB::uploadRecal(const TGraph* g, RunID r0, RunID r1) {
 }
 
 sqlite3_int64 AcornDB::getAnaResultType(const string& name, const string& descrip) {
-    static const char* qry = "SELECT rowid FROM named_object WHERE type = 'AnaResult' AND name = ?1";    
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("SELECT rowid FROM named_object WHERE type = 'AnaResult' AND name = ?1");
     
     sqlite3_bind_text(stmt, 1, name.c_str(), -1, SQLITE_STATIC);
     sqlite3_int64 id = 0;
@@ -239,9 +230,7 @@ sqlite3_int64 AcornDB::getAnaResultType(const string& name, const string& descri
 }
 
 void AcornDB::uploadAnaResult(sqlite3_int64 type_id, AnaResult R) {
-    static const char* qry = "INSERT INTO analysis_results(type_id, start_s, end_s, time, value, err) VALUES (?1, ?2, ?3, ?4, ?5, ?6)";    
-    static sqlite3_stmt* stmt = NULL;
-    if(!stmt) setQuery(qry, stmt);
+    static sqlite3_stmt* stmt = loadStatement("INSERT INTO analysis_results(type_id, start_s, end_s, time, value, err) VALUES (?1, ?2, ?3, ?4, ?5, ?6)");
     
     sqlite3_bind_int64(stmt, 1, type_id);
     sqlite3_bind_int(stmt, 2, combo_runid(R.start));
