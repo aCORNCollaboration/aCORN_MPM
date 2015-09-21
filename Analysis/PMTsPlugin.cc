@@ -8,8 +8,8 @@
 #include "PMTsPlugin.hh"
 #include <TStyle.h>
 
-PMTsPlugin::PMTsPlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname):
-RunAccumulatorPlugin(RA, pnt, nm, inflname) {
+PMTsPlugin::PMTsPlugin(RunAccumulator* RA, const string& nm, const string& inflname):
+RunAccumulatorPlugin(RA, nm, inflname) {
     unsigned int nEnBins = 400;
     double E0 = 0;
     double E1 = 3000;

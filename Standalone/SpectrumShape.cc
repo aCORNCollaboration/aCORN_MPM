@@ -69,10 +69,12 @@ public:
     
     /// momentum deflection from endcap mismatch [cm V/cm]
     void radial_momentum_deflection(double x, double y, double& Vx, double& Vy) const {
-        // TODO correct values here!!
-        double r = sqrt(x*x + y*y);
-        Vx = x*r*0.6;
-        Vy = y*r*0.6;
+        double rr = x*x + y*y;
+        double r = sqrt(rr);
+        double rrrr = rr*rr;
+        double V = 2.2448849661791521*r -2.9050621707806816*rr +2.6299318261736704*r*rr -0.92526200476343934*rrrr +0.11656399140431706*r*rrrr;
+        Vx = x*V/r;
+        Vy = y*V/r;
     }
     
     double E0 = 70;     ///< mirror field [V/cm]
@@ -112,7 +114,7 @@ int main(int, char**) {
     printf("Min proton TOF %.2f us, mid %.2f us, max %.2f us\n", tof_min*1e6, tof_mid*1e6, tof_max*1e6);
     tof_mid = 3.4e-6;
     
-    int npts = 1e7;
+    int npts = 1e8;
     
     TH1F* hSpec = OM.registeredTH1F("hSpec","Corrected beta spectrum",200,0,800);
     
@@ -214,9 +216,9 @@ int main(int, char**) {
         pTOF.calcPos();      // position at mirror crossing
         double Vx = 0, Vy = 0;
         MD.radial_momentum_deflection(pTOF.xx[0], pTOF.xx[1], Vx, Vy);
-        //Vx += MD.wires_momentum_deflection(pTOF.xx[0]);
-        double dpx = Vx / pTOF.v_exit * 3e7;
-        double dpy = Vy / pTOF.v_exit * 3e7;
+        Vx += MD.wires_momentum_deflection(pTOF.xx[0]); // V
+        double dpx = Vx / pTOF.v_exit * 2.9979e7; // keV/c
+        double dpy = Vy / pTOF.v_exit * 2.9979e7;
         pTOF.kickMomentum(dpx, dpy);
         wt = e_passprob * pCol.pass(pTOF) * G.evt_w * G.c_2_wt;
         if(wt) haCorn[upper][false]->Fill(E_e, wt);

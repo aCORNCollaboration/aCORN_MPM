@@ -17,7 +17,7 @@
 class SourceCalAnalyzer: public RunAccumulator {
 public:
     SourceCalAnalyzer(OutputManager* pnt, const std::string& nm = "SourceCal", const std::string& inflname = ""):
-    RunAccumulator(pnt, nm, inflname), mySourceCalPluginBuilder(this) {
+    RunAccumulator(pnt, nm, inflname) {
         myBuilders["SourceCalPlugin"] = &mySourceCalPluginBuilder;
         buildPlugins();
     }

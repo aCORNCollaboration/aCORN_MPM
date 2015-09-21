@@ -22,7 +22,7 @@
 class WishboneAnalyzer: public RunAccumulator {
 public:
     WishboneAnalyzer(OutputManager* pnt, const std::string& nm = "Wishbone", const std::string& inflname = ""):
-    RunAccumulator(pnt, nm, inflname), myWishbonePluginBuilder(this) {
+    RunAccumulator(pnt, nm, inflname) {
         myBuilders["WishbonePlugin"] = &myWishbonePluginBuilder;
         buildPlugins();
     }
@@ -52,12 +52,11 @@ int main(int argc, char** argv) {
         return 0;
     }
     
-    OutputManager OM("Wishbone", getEnvSafe("ACORN_WISHBONE"));
+    string wbname = "Series_"+to_str(abs(series));
+    OutputManager OM("NameUnused", getEnvSafe("ACORN_WISHBONE"));
     
     // negative series number: re-process output plots
     if(series < 0) {
-        series = -series;
-        string wbname = "Series_"+to_str(series);
         WishboneAnalyzer WA(&OM, wbname, OM.basePath+"/"+wbname+"/"+wbname+".root");
         WA.makeOutput();
         return 0;
@@ -65,7 +64,7 @@ int main(int argc, char** argv) {
     
     ReducedDataScanner RDS(series >= 1519);
     if(!RDS.addRuns(AcornDB::ADB().seriesRuns(series))) {
-        if(series > 3000) {
+        if(series > -3000) {
             auto v = RDS.findSeriesRuns(series);
             if(series == 3044) v.resize(420);
             RDS.addRuns(v);
@@ -76,8 +75,8 @@ int main(int argc, char** argv) {
         }
     }
     
-    WishboneAnalyzer WA(&OM, "/Series_"+to_str(series));
-        
+    WishboneAnalyzer WA(&OM, wbname);
+
     WA.loadProcessedData(RDS);
     WA.makeOutput();
     

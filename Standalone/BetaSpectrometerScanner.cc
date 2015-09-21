@@ -18,7 +18,7 @@
 class PMTsAnalyzer: public RunAccumulator {
 public:
     PMTsAnalyzer(OutputManager* pnt, const std::string& nm = "PMTs", const std::string& inflname = ""):
-    RunAccumulator(pnt, nm, inflname), myPMTsPluginBuilder(this) {
+    RunAccumulator(pnt, nm, inflname) {
         myBuilders["PMTsPlugin"] = &myPMTsPluginBuilder;
         buildPlugins();
     }

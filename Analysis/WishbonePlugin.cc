@@ -47,8 +47,8 @@ TH2* TH2Slicer::subtractProfile(const TH1* p, double s) const {
 ////////////
 ////////////
 
-WishbonePlugin::WishbonePlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname):
-RunAccumulatorPlugin(RA, pnt, nm, inflname),
+WishbonePlugin::WishbonePlugin(RunAccumulator* RA, const string& nm, const string& inflname):
+RunAccumulatorPlugin(RA, nm, inflname),
 hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this),
 hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(this) {
     

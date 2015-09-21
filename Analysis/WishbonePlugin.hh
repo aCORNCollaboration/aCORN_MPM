@@ -14,6 +14,7 @@
 
 #include <vector>
 #include <utility>
+#include <cassert>
 using std::vector;
 using std::pair;
 
@@ -38,7 +39,7 @@ protected:
 class WishbonePlugin: public RunAccumulatorPlugin {
 public:
     /// Constructor
-    WishbonePlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname = "");
+    WishbonePlugin(RunAccumulator* RA, const string& nm, const string& inflname = "");
     
     /// Fill core histograms from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
@@ -90,9 +91,9 @@ protected:
 class WishbonePluginBuilder: public RunAccumulatorPluginBuilder {
 public:
     /// Constructor
-    WishbonePluginBuilder(RunAccumulator* R): RunAccumulatorPluginBuilder(R) { }
+    WishbonePluginBuilder() { }
     /// instantiate plugin SegmentSaver
-    virtual void makePlugin(OutputManager* pnt, const string& inflName = "") { thePlugin = new WishbonePlugin(RA, pnt, "Wishbone", inflName); }
+    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) { return new WishbonePlugin(RA, "WishbonePlugin", inflName); }
 };
 
 #endif

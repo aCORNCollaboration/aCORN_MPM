@@ -12,8 +12,8 @@
 #include <TF1.h>
 #include <TLatex.h>
 
-SourceCalPlugin::SourceCalPlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname):
-RunAccumulatorPlugin(RA, pnt, nm, inflname) {    
+SourceCalPlugin::SourceCalPlugin(RunAccumulator* RA, const string& nm, const string& inflname):
+RunAccumulatorPlugin(RA, nm, inflname) {    
     hEnergy = registerSavedHist("hEnergy", "electron energy", 200, 0, 2);
     hEnergy->GetXaxis()->SetTitle("Energy [MeV]");
     

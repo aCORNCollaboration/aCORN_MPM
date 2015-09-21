@@ -14,7 +14,7 @@
 class SourceCalPlugin: public RunAccumulatorPlugin {
 public:
     /// Constructor
-    SourceCalPlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname = "");
+    SourceCalPlugin(RunAccumulator* RA, const string& nm, const string& inflname = "");
     
     /// Fill core histograms from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
@@ -33,9 +33,9 @@ public:
 class SourceCalPluginBuilder: public RunAccumulatorPluginBuilder {
 public:
     /// Constructor
-    SourceCalPluginBuilder(RunAccumulator* R): RunAccumulatorPluginBuilder(R) { }
+    SourceCalPluginBuilder() { }
     /// instantiate plugin SegmentSaver
-    virtual void makePlugin(OutputManager* pnt, const string& inflName = "") { thePlugin = new SourceCalPlugin(RA, pnt, "SourceCal", inflName); }
+    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) { return new SourceCalPlugin(RA, "SourceCal", inflName); }
 };
 
 #endif

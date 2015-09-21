@@ -47,7 +47,8 @@ void LarmorSpiral::kickMomentum(double dpx, double dpy) {
     // new Larmor radius
     rL = normTwo(dx);
     
-    // spiral phase CHEAT assuming frequency unchanged.
+    // spiral phase CHEAT assuming frequency unchanged (gamma unchanged)
+    // TODO recalculate gamma (need to know p_z)
     phi0 = atan2(dx[1], dx[0]) - omega*t;
 }
 

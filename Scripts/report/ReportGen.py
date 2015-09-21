@@ -6,7 +6,7 @@ class ReportGenerator:
     
     def __init__(self):
         self.missing = []
-        self.slist = [3102, 3109, 3116, 3124, 3126, 3127, 3128, 3129, 3135, 3137] #self. get_series_list()
+        self.slist = [3102, 3109, 3116, 3124, 3126, 3127, 3128, 3129, 3135, 3137, 3138, 3143, 3147] #self. get_series_list()
         self.outPath = os.environ["ACORN_WISHBONE"]+"/Report/"
         os.system("mkdir -p "+self.outPath)
         
@@ -22,7 +22,7 @@ class ReportGenerator:
                 nprev = m[2]
                 sdir = os.environ["ACORN_WISHBONE"]+"/Series_%i/"%s
                 if not os.path.exists(sdir):
-                    print "Missing",sdir
+                    print "Missing", sdir
                     self.missing.append(sdir)
                     continue
                 slist.append(s)
@@ -35,6 +35,7 @@ class ReportGenerator:
             page_settings = {"series":s, "sdir":os.environ["ACORN_WISHBONE"]+"/Series_%i/"%s}
             if not os.path.exists(page_settings["sdir"]):
                 print "Missing",page_settings["sdir"]
+                os.system("../../WishboneScanner %i"%s)
                 continue
             pgs += btext%page_settings
         page_settings = {"series":9999, "sdir":os.environ["ACORN_WISHBONE"]}

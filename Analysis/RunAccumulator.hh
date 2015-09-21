@@ -71,8 +71,8 @@ protected:
 class RunAccumulatorPlugin: public SegmentSaver {
 public:
     /// constructor
-    RunAccumulatorPlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname = ""):
-    SegmentSaver(pnt, nm, inflname), myA(RA) { }
+    RunAccumulatorPlugin(RunAccumulator* RA, const string& nm, const string& inflname = ""):
+    SegmentSaver(RA, nm, inflname), myA(RA) { }
 
     /// virtual routine for filling core histograms from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight) = 0;
@@ -88,8 +88,15 @@ public:
 class RunAccumulatorPluginBuilder: public PluginBuilder {
 public:
     /// Constructor
-    RunAccumulatorPluginBuilder(RunAccumulator* R): RA(R) { }
-    RunAccumulator* RA;  ///< main plotter to associate plugin with
+    RunAccumulatorPluginBuilder() { }
+    
+    virtual void makePlugin(OutputManager* pnt, const string& inflName = "") {
+        RunAccumulator* RA = dynamic_cast<RunAccumulator*>(pnt);
+        assert(RA);
+        thePlugin = _makePlugin(RA,inflName);
+    }
+    
+    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) = 0;
 };
 
 //////////////////////////////

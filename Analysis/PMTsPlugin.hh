@@ -14,7 +14,7 @@
 class PMTsPlugin: public RunAccumulatorPlugin {
 public:
     /// Constructor
-    PMTsPlugin(RunAccumulator* RA, OutputManager* pnt, const string& nm, const string& inflname = "");
+    PMTsPlugin(RunAccumulator* RA, const string& nm, const string& inflname = "");
     
     /// Fill core histograms from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
@@ -38,9 +38,9 @@ protected:
 class PMTsPluginBuilder: public RunAccumulatorPluginBuilder {
 public:
     /// Constructor
-    PMTsPluginBuilder(RunAccumulator* R): RunAccumulatorPluginBuilder(R) { }
+    PMTsPluginBuilder() { }
     /// instantiate plugin SegmentSaver
-    virtual void makePlugin(OutputManager* pnt, const string& inflName = "") { thePlugin = new PMTsPlugin(RA, pnt, "PMTs", inflName); }
+    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) { return new PMTsPlugin(RA, "PMTs", inflName); }
 };
 
 #endif
