@@ -51,6 +51,11 @@ cd Scripts/launchers
 # Analyze one wishbone series
 ./WishboneScanner <series>
 
+valgrind --suppressions=$ROOTSYS/etc/valgrind-root.supp --tool=callgrind ./WishboneScanner 531
+callgrind_annotate callgrind.out.5907
+valgrind --suppressions=$ROOTSYS/etc/valgrind-root.supp --leak-check=full ./WishboneScanner 531
+
+
 #############
 # Analyze all wishbone data
 cd Scripts/launchers

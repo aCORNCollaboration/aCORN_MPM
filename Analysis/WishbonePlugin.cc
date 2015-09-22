@@ -84,7 +84,8 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     hTemplate.GetXaxis()->SetTitle("Electron energy [keV]");
     hTemplate.GetYaxis()->SetTitle("Proton TOF [#mus]");
     hWishbone = (TH2F*)registerSavedHist("hWishbone",hTemplate);
-    hWishbone->SetTitle("aCORN NG-C Wishbone");
+    //if(dataMode == NG6) hWishbone->SetTitle("aCORN NG-6 Wishbone");
+    if(dataMode == NGC) hWishbone->SetTitle("aCORN NG-C Wishbone");
     hWishbone->GetYaxis()->SetRange();
     
     TH2F hNETemplate("hNE","PMT trigger counts", 100, 0, 1000, 20, -0.5, 19.5);
@@ -250,6 +251,8 @@ void WishbonePlugin::calculateResults() {
         hWishboneEProj[i]->Scale(1./nrebin);
     }
     hWishboneEProj[false]->GetYaxis()->SetTitle("Background rate [Hz/MeV]");
+    
+    isCalculated = true;
 }
 
 void WishbonePlugin::makeAnaResults() {
@@ -280,7 +283,7 @@ void WishbonePlugin::makeAnaResults() {
 }
 
 void WishbonePlugin::makePlots() {
-    
+    assert(isCalculated);
     defaultCanvas->SetRightMargin(0.20);
 
     bool isCombined = myA->runTimes.nTags() > 1000;

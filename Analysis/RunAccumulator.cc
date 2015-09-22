@@ -30,14 +30,15 @@ PluginSaver(pnt,nm,inflName), isSimulated(false) {
 
 void RunAccumulator::buildPlugins() {
     PluginSaver::buildPlugins();
-    for(auto it = myBuilders.begin(); it != myBuilders.end(); it++) {
-        auto P = dynamic_cast<RunAccumulatorPlugin*>(it->second->thePlugin);
+    /// identify RunAccumulatorPlugins
+    for(auto& kv: myBuilders) {
+        auto P = dynamic_cast<RunAccumulatorPlugin*>(kv.second->thePlugin);
         if(P) myRAPs.push_back(P);
     }
 }
 
 void RunAccumulator::fillCoreHists(BaseDataScanner& PDS, double weight) {
-    for(auto it = myRAPs.begin(); it != myRAPs.end(); it++) (*it)->fillCoreHists(PDS,weight);
+    for(auto RAP: myRAPs) RAP->fillCoreHists(PDS,weight);
 }
 
 AnaResult RunAccumulator::makeBaseResult() const {
@@ -58,7 +59,7 @@ void RunAccumulator::makeAnaResults() {
     AcornDB::ADB().uploadAnaResult("total_counts", "Total analyzed counts", baseResult);
     baseResult.value = runTimes.total();
     AcornDB::ADB().uploadAnaResult("total_time", "Total analyzed time [s]", baseResult);
-    for(auto it = myRAPs.begin(); it != myRAPs.end(); it++) (*it)->makeAnaResults();
+    for(auto RAP: myRAPs) RAP->makeAnaResults();
     AcornDB::ADB().endTransaction();
 }
 
@@ -132,20 +133,12 @@ void RunAccumulator::makeOutput(bool doPlots) {
     writeROOT();
 }
 
-unsigned int RunAccumulator::mergeDir() {
-    vector<string> fnames = listdir(basePath);
-    unsigned int nMerged = 0;
-    for(vector<string>::iterator it = fnames.begin(); it != fnames.end(); it++) {
-        // check whether data directory contains cloneable subdirectories
-        string datinfl = basePath+"/"+(*it)+"/"+(*it);
-        if(!fileExists(datinfl)) continue;
-        SegmentSaver* subRA = makeAnalyzer(*it,datinfl);
-        addSegment(*subRA);
-        delete(subRA);
-        nMerged++;
-    }
+unsigned int RunAccumulator::mergeDir(const string& d) {
+    vector<string> inflnames;
+    for(auto const& f: listdir(d)) inflnames.push_back(d+"/"+f+"/"+f+".root");
+    size_t nmerged = addFiles(inflnames);
     makeOutput();
-    return nMerged;
+    return nmerged;
 }
 
 TH1* RunAccumulator::hToRate(TH1* h, int scaleAxes) {
@@ -200,8 +193,8 @@ void FGBGRegionsHist::addRegion(double x0, double x1, bool fg) {
 void FGBGRegionsHist::fill(double cutval, double x, double w) {
     for(int i=0; i<2; i++) {
         if(!h[i]) continue;
-        for(auto it = regions[i].begin(); it != regions[i].end(); it++)
-            if(it->first < cutval && cutval <= it->second)
+        for(auto const& cut: regions[i])
+            if(cut.first < cutval && cutval <= cut.second)
                 h[i]->Fill(x,w);
     }
 }
@@ -209,8 +202,8 @@ void FGBGRegionsHist::fill(double cutval, double x, double w) {
 void FGBGRegionsHist::fill(double cutval, double x, double y, double w) {
     for(int i=0; i<2; i++) {
         if(!h[i]) continue;
-        for(auto it = regions[i].begin(); it != regions[i].end(); it++)
-            if(it->first < cutval && cutval <= it->second)
+        for(auto const& cut: regions[i])
+            if(cut.first < cutval && cutval <= cut.second)
                 dynamic_cast<TH2*>(h[i])->Fill(x,y,w);
     }
 }

@@ -42,14 +42,14 @@ public:
     WishbonePlugin(RunAccumulator* RA, const string& nm, const string& inflname = "");
     
     /// Fill core histograms from data point
-    virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
+    virtual void fillCoreHists(BaseDataScanner& PDS, double weight) override;
     
     /// generate calculated hists
-    virtual void calculateResults();
+    virtual void calculateResults() override;
     /// calculate, upload analysis results
-    virtual void makeAnaResults();
+    virtual void makeAnaResults() override;
     /// Generate output plots
-    virtual void makePlots();
+    virtual void makePlots() override;
     
     
     FGBGRegionsHist hProtonSignal;      ///< proton detector signal
@@ -101,7 +101,7 @@ public:
     /// Constructor
     WishbonePluginBuilder() { }
     /// instantiate plugin SegmentSaver
-    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) { return new WishbonePlugin(RA, "WishbonePlugin", inflName); }
+    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) override { return new WishbonePlugin(RA, "WishbonePlugin", inflName); }
 };
 
 #endif

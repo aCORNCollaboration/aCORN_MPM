@@ -27,6 +27,9 @@ public:
         buildPlugins();
     }
     
+    /// create a new instance of this object (cloning self settings) for given directory
+    virtual SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) override { return new WishboneAnalyzer(this,nm,inflname); }
+    
     WishbonePluginBuilder myWishbonePluginBuilder;
 };
 
@@ -38,18 +41,29 @@ int main(int argc, char** argv) {
         printf("Please supply a series number for analysis.\n");
         return 0;
     }
-    int series = atoi(argv[1]);
-    
+
     setupSlideStyle();
     gROOT->ForceStyle();
     
+    int series = atoi(argv[1]);
+    
     // series 0: merge all wishbone data into run total
     if(series == 0) {
-        OutputManager OM("Wishbone", dropLast("/"+strip(getEnvSafe("ACORN_WISHBONE"),"/"),"/"));
-        WishboneAnalyzer WA(&OM,"Wishbone");
-        printf("Merging series data in '%s'...\n", WA.basePath.c_str());
-        WA.mergeDir();
-        return 0;
+        printf("Merging series data...\n");
+        OutputManager OM("Wishbone", getEnvSafe("ACORN_WISHBONE")+"/Combined/");
+        string setname = argv[1];
+        if(setname == "0") {
+            WishboneAnalyzer WA(&OM,"Wishbone");
+            WA.mergeDir(getEnvSafe("ACORN_WISHBONE"));
+        } else {
+            WishboneAnalyzer WA(&OM,"Wishbone_"+setname);
+            vector<string> flist;
+            for(auto s: AcornDB::ADB().groupSeries(setname))
+                flist.push_back(getEnvSafe("ACORN_WISHBONE")+"/Series_"+to_str(s)+"/Series_"+to_str(s)+".root");
+            WA.addFiles(flist);
+            WA.makeOutput();
+        }
+        return EXIT_SUCCESS;
     }
     
     string wbname = "Series_"+to_str(abs(series));
@@ -65,20 +79,26 @@ int main(int argc, char** argv) {
     ReducedDataScanner RDS(series >= 1519);
     if(!RDS.addRuns(AcornDB::ADB().seriesRuns(series))) {
         if(series > -3000) {
+            printf("No wishbone runs in DB for series %u;",series);
             auto v = RDS.findSeriesRuns(series);
+            if(!v.size()) {
+                printf(" neither any runs on disk! Aaack!\n");
+                return EXIT_FAILURE;
+            }
             if(series == 3044) v.resize(420);
             RDS.addRuns(v);
-            printf("No wishbone runs in DB for series %u; adding %zu runs found on disk.\n",series,v.size());
+            printf(" adding %zu runs found on disk.\n",v.size());
         } else {
             printf("Series %u contains no useful runs. Analysis stopped.\n", series);
-            return 0;
+            return EXIT_FAILURE;
         }
     }
+    if(!RDS.nEvents) return EXIT_FAILURE;
     
     WishboneAnalyzer WA(&OM, wbname);
 
     WA.loadProcessedData(RDS);
     WA.makeOutput();
     
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -26,11 +26,11 @@ public:
     RunAccumulator(OutputManager* pnt, const std::string& nm = "RunAccumulator", const std::string& inflName = "");
         
     /// add histograms from another RunAccumulator of the same type
-    virtual void addSegment(const SegmentSaver& S);
+    virtual void addSegment(const SegmentSaver& S) override;
     /// zero out run times
     void zeroCounters();
     /// scale all saved histograms by a factor
-    virtual void scaleData(double s);
+    virtual void scaleData(double s) override;
         
     /// write to SMFile
     virtual void write(string outName = "");
@@ -50,11 +50,8 @@ public:
     /// run calculations and plots, save output files
     virtual void makeOutput(bool doPlots = true);
         
-    /// create a new instance of this object (cloning self settings) for given directory
-    virtual SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) { return new RunAccumulator(this,nm,inflname); }
-        
-    /// merge every subdirectory of basePath containing analyzed data
-    unsigned int mergeDir();
+    /// merge every subdirectory of d containing analyzed data
+    unsigned int mergeDir(const string& d);
     
     /// make rate-scaled copy of histogram; optionally divide by bin size on number of scale axes
     TH1* hToRate(TH1* h, int scaleAxes);
