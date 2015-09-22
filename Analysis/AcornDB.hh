@@ -30,6 +30,8 @@ class AcornDB: public SQLite_Helper {
 public:
     /// get singleton instance
     static AcornDB& ADB();
+    /// close and delete instance
+    static void closeDB();
     
     enum DataTier {
         UNKNOWN   = 0,

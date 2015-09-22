@@ -11,6 +11,7 @@
 #include <cmath>
 #include <vector>
 using std::vector;
+#include "GraphicsUtils.hh"
 
 /// Extract position information from PMT hit distribution
 class Positioner {
@@ -18,7 +19,7 @@ public:
     /// Constructor
     Positioner();
     /// Destructor
-    virtual ~Positioner() {}
+    virtual ~Positioner() { for(auto p: deleteDrawn) delete p; }
     
     /// calculate center-of-mass position and spread
     void calcPos(const double* L);
@@ -30,12 +31,15 @@ public:
     double sigma() const { return sqrt(sx[0]*sx[0]+sx[1]*sx[1]); }
     
     /// draw PMT positions on plot
-    void drawPMTs(int color = 6, bool drawnum = false) const;
+    void drawPMTs(int color = 6, bool drawnum = false);
     
     static const unsigned int N = 19;  ///< number of PMTs
     double v[2][2];             ///< lattice vectors in x,y
     int vpos[2][N];             ///< PMT positions in lattice vectors
     double pos[2][N];           ///< PMT positions in x,y
+    
+protected:
+    vector<TObject*> deleteDrawn;  ///< drawn items to delete
 };
 
 #endif

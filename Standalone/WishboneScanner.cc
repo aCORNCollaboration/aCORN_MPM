@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     
     if(argc != 2) {
         printf("Please supply a series number for analysis.\n");
-        return 0;
+        return EXIT_FAILURE;
     }
 
     setupSlideStyle();
@@ -63,6 +63,7 @@ int main(int argc, char** argv) {
             WA.addFiles(flist);
             WA.makeOutput();
         }
+        AcornDB::closeDB();
         return EXIT_SUCCESS;
     }
     
@@ -73,7 +74,8 @@ int main(int argc, char** argv) {
     if(series < 0) {
         WishboneAnalyzer WA(&OM, wbname, OM.basePath+"/"+wbname+"/"+wbname+".root");
         WA.makeOutput();
-        return 0;
+        AcornDB::closeDB();
+        return EXIT_SUCCESS;
     }
     
     ReducedDataScanner RDS(series >= 1519);
@@ -100,5 +102,6 @@ int main(int argc, char** argv) {
     WA.loadProcessedData(RDS);
     WA.makeOutput();
     
+    AcornDB::closeDB();
     return EXIT_SUCCESS;
 }

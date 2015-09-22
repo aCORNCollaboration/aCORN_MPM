@@ -20,6 +20,13 @@ AcornDB& AcornDB::ADB() {
     return *myDB;
 }
 
+void AcornDB::closeDB() {
+    if(myDB) {
+        delete myDB;
+        myDB = NULL;
+    }
+}
+
 AcornDB::AcornDB(): SQLite_Helper(getEnvSafe("ACORN_DB")) {
 }
 

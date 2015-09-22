@@ -26,6 +26,8 @@ class BaseDataScanner: public RunSetScanner {
 public:
     /// Constructor
     BaseDataScanner(const std::string& treeName, bool fp);
+    /// Destructor
+    virtual ~BaseDataScanner();
     
     bool is4p;                  ///< whether this is "4-proton" style data
     
@@ -54,7 +56,7 @@ public:
     Short_t E_Max_PMT;          ///< energy of max PMT signal
     
     TriggerCategory flags;      ///< Event category flags
-    UInt_t nFiredMod[N_MODULES];///< count of triggers in each module
+    UInt_t nFiredMod[N_MODULES+1];      ///< count of triggers in each module
     bool modDropoutEvt;         ///< whether this is a suspect "module dropout" event
     
     double L_PMT[N_E_PMT];      ///< (calibrated) PMT light signals
@@ -74,8 +76,10 @@ public:
     const AcornCalibrator* getCal() const { return currentCal; }
    
 protected:
-    map<RunID, AcornCalibrator*> cals;     ///< calibrators for each run
-    AcornCalibrator* currentCal;                ///< calibrator for current run
+    size_t module_map[NCH_MAX];         ///< which channels go in which modules
+    
+    map<RunID, AcornCalibrator*> cals;  ///< calibrators for each run
+    AcornCalibrator* currentCal;        ///< calibrator for current run
                              
     /// at run load time, figure out run total time
     virtual double _getRunTime(RunID);

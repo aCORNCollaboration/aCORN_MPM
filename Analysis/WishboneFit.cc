@@ -18,10 +18,8 @@
 #include <gsl/gsl_roots.h>
 
 void WeightBins::intoHist(TH1* h) {
-    for(auto it = xs.begin(); it != xs.end(); it++)
-        h->SetBinContent(it->first, it->second);
-    for(auto it = dx2s.begin(); it != dx2s.end(); it++)
-        h->SetBinError(it->first, sqrt(it->second));
+    for(auto const& bv: xs) h->SetBinContent(bv.first, bv.second);
+    for(auto const& bv: dx2s) h->SetBinError(bv.first, sqrt(bv.second));
 }
 
 /////////////////////
@@ -32,11 +30,15 @@ void WishboneSeparator::setWishbone(TH2* h) {
     assert(h && !hWishbone);
     hWishbone = h;
     
-    for(auto it = hSlices.begin(); it != hSlices.end(); it++) delete *it;
+    for(auto sl: hSlices) delete sl;
     hSlices = sliceTH2(*hWishbone, X_DIRECTION, true);
     for(int i=0; i<=hWishbone->GetNbinsX()+1; i++) {
         hSlices[i]->SetTitle(("Wishbone Slice " + to_str(binE(i)) + " keV").c_str());
     }
+}
+
+WishboneSeparator::~WishboneSeparator() { 
+    for(auto sl: hSlices) delete sl;
 }
 
 void WishboneSeparator::extractAsymmetry() {
@@ -217,7 +219,7 @@ void WishboneFit::fitModel() {
         hSlices[b]->SetMinimum(-0.2);
         if(hSlices[b]->GetMaximum() < 1.2) hSlices[b]->SetMaximum(1.2);
         hSlices[b]->Draw();
-        drawVLine(cx,defaultCanvas,6);
+        addDeletable(drawVLine(cx,defaultCanvas,6));
         cf->Draw("Same");
         string hname = "Slice_"+to_str(b);
         printCanvas(hname);
@@ -385,12 +387,15 @@ void WishboneFit::calcGapFill() {
     wby.intoHist(filly);
     
     fillx->Draw();
-    drawHLine(0, defaultCanvas, 1, 2);
+    addDeletable(drawHLine(0, defaultCanvas, 1, 2));
     printCanvas("hWishboneFill_E");
     
     filly->Draw();
-    drawHLine(0, defaultCanvas, 1, 2);
+    addDeletable(drawHLine(0, defaultCanvas, 1, 2));
     printCanvas("hWishboneFill_t");
+    
+    delete fillx;
+    delete filly;
 }
 
 //////////////////

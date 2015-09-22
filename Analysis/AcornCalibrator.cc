@@ -19,6 +19,10 @@ AcornCalibrator::AcornCalibrator(RunID r): rn(r) {
     setIgnoreOuter(false);
 }
 
+AcornCalibrator::~AcornCalibrator() {
+    if(gRecal) delete gRecal;
+}
+
 void AcornCalibrator::setIgnoreOuter(bool ig) {
     ignoreOuter = ig;
     

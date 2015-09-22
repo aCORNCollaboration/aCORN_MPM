@@ -35,6 +35,8 @@ class WishboneSeparator: public OutputManager {
 public:
     /// Constructor
     WishboneSeparator(const string& n, OutputManager* pnt): OutputManager(n,pnt) { }
+    /// Destructor
+    ~WishboneSeparator();
     
     /// set up to analyze supplied wishbone plot
     virtual void setWishbone(TH2* h);

@@ -297,10 +297,10 @@ void WishbonePlugin::makePlots() {
     hWishboneBGSub->GetYaxis()->SetRangeUser(2,5);
     makeRBpalette();
     hWishboneBGSub->Draw("Col Z");
-    drawHLine(T_p_lo/1000., defaultCanvas, 2);
-    drawHLine(T_p_hi/1000., defaultCanvas, 2);
-    drawHLine(T_p_min/1000., defaultCanvas, 4);
-    drawHLine(T_p_max/1000., defaultCanvas, 4);
+    addDeletable(drawHLine(T_p_lo/1000., defaultCanvas, 2));
+    addDeletable(drawHLine(T_p_hi/1000., defaultCanvas, 2));
+    addDeletable(drawHLine(T_p_min/1000., defaultCanvas, 4));
+    addDeletable(drawHLine(T_p_max/1000., defaultCanvas, 4));
     printCanvas("Wishbone");
     
     defaultCanvas->SetRightMargin(0.15);
@@ -364,8 +364,8 @@ void WishbonePlugin::makePlots() {
     hProtonSignal.hRates[false]->SetMaximum(50);
     hProtonSignal.hRates[false]->Draw();
     hProtonSignal.hRates[true]->Draw("Same");
-    drawVLine(E_p_lo/1000., defaultCanvas, 2);
-    drawVLine(E_p_hi/1000., defaultCanvas, 2);
+    addDeletable(drawVLine(E_p_lo/1000., defaultCanvas, 2));
+    addDeletable(drawVLine(E_p_hi/1000., defaultCanvas, 2));
     printCanvas("ProtonSignal");
   
     defaultCanvas->SetLogy(false);
@@ -373,7 +373,7 @@ void WishbonePlugin::makePlots() {
     hVetoSum.hRates[false]->SetMinimum(-20);
     hVetoSum.hRates[false]->SetMaximum(200);
     hVetoSum.hRates[false]->Draw();
-    drawHLine(0, defaultCanvas, 1);
+    addDeletable(drawHLine(0, defaultCanvas, 1));
     hVetoSum.hRates[true]->Draw("Same");
     printCanvas("VetoSum");
     
@@ -382,16 +382,16 @@ void WishbonePlugin::makePlots() {
     hWishboneEProj[true]->GetXaxis()->SetRangeUser(0,1000);
     hWishboneEProj[true]->Draw();
     hWishboneEProj[false]->Draw("Same");
-    drawHLine(0., defaultCanvas, 1);
+    addDeletable(drawHLine(0., defaultCanvas, 1));
     printCanvas("WishboneEnergy");
     
     hWishboneTProj->SetMinimum(0);
     hWishboneTProj->SetMaximum(20);
     hWishboneTProj->Draw("E0");
-    drawVLine(T_p_lo/1000., defaultCanvas, 2);
-    drawVLine(T_p_hi/1000., defaultCanvas, 2);
-    drawVLine(T_p_min/1000., defaultCanvas, 4);
-    drawVLine(T_p_max/1000., defaultCanvas, 4);
+    addDeletable(drawVLine(T_p_lo/1000., defaultCanvas, 2));
+    addDeletable(drawVLine(T_p_hi/1000., defaultCanvas, 2));
+    addDeletable(drawVLine(T_p_min/1000., defaultCanvas, 4));
+    addDeletable(drawVLine(T_p_max/1000., defaultCanvas, 4));
     printCanvas("WishboneTime");
     
     hWishboneFiducialTProj->Draw();

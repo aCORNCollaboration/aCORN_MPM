@@ -18,6 +18,8 @@ class AcornCalibrator {
 public:
     /// Constructor
     AcornCalibrator(RunID r);
+    /// Destructor
+    ~AcornCalibrator();
     
     /// Calibrate electron energy from PMT sum
     double calPMTSum(double ADC) const { return slope*ADC + intercept; }

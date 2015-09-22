@@ -10,7 +10,25 @@
 #include <stdio.h>
 
 BaseDataScanner::BaseDataScanner(const std::string& treeName, bool fp):
-RunSetScanner(treeName), is4p(fp), physicsWeight(1.) { }
+RunSetScanner(treeName), is4p(fp), physicsWeight(1.) { 
+    
+    // 0b0101000000000111111111100001111,
+    // 0b1010111111111000000000011110000
+    //const UInt_t mod_mask[N_MODULES] = { 671350543, 1476133104 };
+    // 0b0101000000000111111111100000000,
+    // 0b1010111111111000000000000000000
+    const UInt_t mod_mask[N_MODULES] = { 671350528, 1476132864 };
+    for(size_t i=0; i<NCH_MAX; i++) module_map[i] = N_MODULES;
+    for(unsigned int m=0; m<N_MODULES; m++) {
+        for(unsigned int c=0; c<NCH_MAX; c++)
+            if(mod_mask[m] & 1<<c) module_map[c] = m;
+    }
+    
+}
+
+BaseDataScanner::~BaseDataScanner() {
+    for(auto kv: cals) delete kv.second;
+}
 
 void BaseDataScanner::makeFlags() {
     flags = TriggerCategory(0);
@@ -55,17 +73,8 @@ void BaseDataScanner::calibrate() {
 }
 
 void BaseDataScanner::nFiredModule() {
-    // 0b0101000000000111111111100001111,
-    // 0b1010111111111000000000011110000
-    //const UInt_t mod_mask[N_MODULES] = { 671350543, 1476133104 };
-    // 0b0101000000000111111111100000000,
-    // 0b1010111111111000000000000000000
-    const UInt_t mod_mask[N_MODULES] = { 671350528, 1476132864 };
-    for(unsigned int m=0; m<N_MODULES; m++) {
-        nFiredMod[m] = 0;
-        for(unsigned int i=0; i<NCH_MAX; i++)
-            nFiredMod[m] += ((mod_mask[m] & (1<<i)) && (DetFired & (1<<i)));
-    }
+    for(unsigned int m=0; m<=N_MODULES; m++) nFiredMod[m] = 0;
+    for(unsigned int i=0; i<NCH_MAX; i++) if(DetFired & (1<<i)) nFiredMod[module_map[i]]++;
 }
 
 void BaseDataScanner::displayEvt() const {

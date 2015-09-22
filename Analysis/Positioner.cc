@@ -6,7 +6,6 @@
 // -- Michael P. Mendenhall, 2015
 
 #include "Positioner.hh"
-#include "GraphicsUtils.hh"
 #include <cstdio>
 
 //         (-2)(-1)( 0)  x
@@ -66,9 +65,9 @@ void Positioner::calcPos(const double* L) {
     }
 }
 
-void Positioner::drawPMTs(int color, bool drawnum) const {
+void Positioner::drawPMTs(int color, bool drawnum) {
     for(unsigned int n=0; n<N; n++) {
-        drawCircle(0.45, color, 1, pos[0][n], pos[1][n]);
+        deleteDrawn.push_back(drawCircle(0.45, color, 1, pos[0][n], pos[1][n]));
         if(drawnum) { }
     }
 }
