@@ -38,7 +38,7 @@ endif
 
 VPATH = ./:IOUtils/:Physics/:Standalone/:BaseTypes/:Analysis/:${MPMUTILS}/GeneralUtils/
 
-IOUtils = sqlite3.o
+IOUtils = sqlite3.o TextTableReader.o
 
 Physics = PolarizedBetaAsym.o ElectronBindingEnergy.o NuclEvtGen.o UnpolarizedBeta.o UnpolarizedNeutronDecay.o Collimator.o
 

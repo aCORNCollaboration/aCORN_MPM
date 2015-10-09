@@ -127,7 +127,7 @@ ConversionGamma::ConversionGamma(NucLevel& f, NucLevel& t, const Stringmap& m): 
     // load conversion electron and subshell probabilities
     unsigned int nshells = BindingEnergyTable::shellnames.size();
     for(unsigned int i=0; i<nshells; i++) {
-        vector<string> v = split(m.getDefault("CE_"+ctos(BindingEnergyTable::shellnames[i]),""),"@");
+        vector<string> v = split(m.getDefault("CE_"+c_to_str(BindingEnergyTable::shellnames[i]),""),"@");
         if(!v.size()) break;
                                            float_err shprob(v[0]);
         shells.addProb(shprob.x);

@@ -104,4 +104,19 @@ public:
     virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) override { return new WishbonePlugin(RA, "WishbonePlugin", inflName); }
 };
 
+/// Analyzer class using WishbonePlugin
+class WishboneAnalyzer: public RunAccumulator {
+public:
+    WishboneAnalyzer(OutputManager* pnt, const std::string& nm = "Wishbone", const std::string& inflname = ""):
+    RunAccumulator(pnt, nm, inflname) {
+        myBuilders["WishbonePlugin"] = &myWishbonePluginBuilder;
+        buildPlugins();
+    }
+    
+    /// create a new instance of this object (cloning self settings) for given directory
+    virtual SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) override { return new WishboneAnalyzer(this,nm,inflname); }
+    
+    WishbonePluginBuilder myWishbonePluginBuilder;
+};
+
 #endif

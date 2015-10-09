@@ -152,7 +152,7 @@ int main(int, char**) {
     
     TH1F hw("hw","weighting",200,0,1e-29);
    
-    ProgressBar* PB = new ProgressBar(npts, npts/50);
+    ProgressBar* PB = new ProgressBar(npts, 50);
     for(int i=0; i<npts; i++) {
         PB->update(i);
         

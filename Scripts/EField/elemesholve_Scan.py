@@ -9,6 +9,8 @@ from pyx import style
 from pyx import graph
 from pyx.color import rgb, hsb
 from pyx.graph.style import symbol
+import cPickle
+from numpy import *
 
 def rainbow(n, b=1.0):
     return [ hsb((1.0*x)/n,1,b) for x in range(n) ]
@@ -21,16 +23,33 @@ def rainbowDict(keys, b=1.0):
         
 class GridPt:
     """Grid scan point in field map"""
-    def __init__(self, fline):
+    def __init__(self, fline = "", mode="mpm"):
+        if fline.strip():
+            if mode == "mpm":
+                self.from_mpmline(fline)
+            elif mode == "brian":
+                self.from_brianline(fline)
+                
+    def from_mpmline(self, fline):
         d = [float(x) for x in fline.split()]
         self.x = d[:3]
         self.phi = d[3]
         self.E = d[4:]
+        self.init_calculated()
+            
+    def from_brianline(self, fline):
+        d = [float(x) for x in fline.split()]
+        self.x = d[:3]
+        self.phi = 0
+        self.E = d[3:]
+        self.init_calculated()
+        
+    def init_calculated(self):
         self.Er = 0
         r = self.r()
         if r:
             self.Er = (self.E[0]*self.x[0] + self.E[1]*self.x[1])/r
-            
+        
     def dist(self, gp):
         """Distance from another point"""
         return sqrt(sum([(self.x[i]-gp.x[i])**2 for i in range(3)]))
@@ -49,7 +68,7 @@ class GridPt:
         self.Er *= c
         for i in range(3):
             self.E[i] *= c
-            
+    
 class ScanLine:
     def __init__(self, pts):
         self.pts = pts
@@ -166,4 +185,5 @@ def plot_scans(fname):
     
 if __name__ == "__main__":
     plot_scans(os.environ["APP_DIR"]+"/elemesholve-bld/scan.txt")
+
     
