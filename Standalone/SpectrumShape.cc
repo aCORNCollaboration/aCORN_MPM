@@ -6,6 +6,7 @@
 // -- Michael P. Mendenhall, 2015
 
 #include "UnpolarizedNeutronDecay.hh"
+#include "Uncorrelated_3Body.hh"
 #include "Collimator.hh"
 #include "GraphicsUtils.hh"
 #include "StringManip.hh"
@@ -20,6 +21,7 @@
 #include <TH2F.h>
 #include <TPad.h>
 #include <cassert>
+#include <TF1.h>
 
 using namespace ROOT::Math;
 
@@ -35,7 +37,13 @@ public:
     RootQRandom(): QR_8(11) { }
     virtual void next() { assert(QR_8.Next(u0)); }
     QuasiRandomSobol QR_8;
-    double b;
+};
+
+class U3QRnd: public U3Body_Rndm_Src {
+public:
+    U3QRnd(): QR_8(8) { }
+    virtual void next() { assert(QR_8.Next(u0)); }
+    QuasiRandomSobol QR_8;
 };
 
 void circle_the_square(double* x, double r0) {
@@ -72,7 +80,8 @@ public:
         double rr = x*x + y*y;
         double r = sqrt(rr);
         double rrrr = rr*rr;
-        double V = 2.2448849661791521*r -2.9050621707806816*rr +2.6299318261736704*r*rr -0.92526200476343934*rrrr +0.11656399140431706*r*rrrr;
+        double V = 1.1703106983790565*r -0.54657810070685897*rr +0.51766136215597991*r*rr -0.18217095995451557*rrrr +0.025820766945784723*r*rrrr;
+        //double V = 2.2448849661791521*r -2.9050621707806816*rr +2.6299318261736704*r*rr -0.92526200476343934*rrrr +0.11656399140431706*r*rrrr;
         Vx = x*V/r;
         Vy = y*V/r;
     }
@@ -87,9 +96,13 @@ int main(int, char**) {
     OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated/");
     
     // kinematics generator
-    RootQRandom* RQR = new RootQRandom();
-    Gluck_beta_MC G(RQR);
-    G.test_calc_P_H();
+    //RootQRandom* RQR = new RootQRandom();
+    //Gluck_beta_MC G(RQR);
+    //G.test_calc_P_H();
+    
+    U3QRnd* RQR = new U3QRnd();
+    Uncorrelated_3Body G(RQR);
+    
     
     const double B0 = 364;      // field [Gauss]
     const double r_beam = 3.0;  // beam radius [cm]
@@ -240,7 +253,7 @@ int main(int, char**) {
         hAsym[j]->Rebin(nrebin);
         hAsym[j]->Scale(1./nrebin);
         hAsym[j]->SetLineColor(4-2*j);
-        hAsym[j]->SetMaximum(0);
+        hAsym[j]->SetMaximum(0.01);
         hAsym[j]->GetXaxis()->SetTitle("electron energy [keV]");
         hAsym[j]->GetYaxis()->SetTitle("wishbhone asymmetry");
         hAsym[j]->SetTitle("aCORN simulation");
@@ -249,10 +262,13 @@ int main(int, char**) {
     }
     OM.printCanvas("Asymmetry");
     
+    
+    TF1 fFredCxn("fFredCxn", "-100*(0.01277 - 4.58e-05*x + 4.13e-08*x*x)", 100, 400); // eLog 135
     hAsym[0]->Add(hAsym[1], -1);
     hAsym[0]->Scale(100);
     hAsym[0]->GetYaxis()->SetTitle("false asymmetry [%]");
     hAsym[0]->Draw("HIST");
+    fFredCxn.Draw("Same");
     OM.printCanvas("DeltaAsymmetry");
     
     

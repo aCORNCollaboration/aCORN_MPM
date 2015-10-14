@@ -24,13 +24,23 @@ def sphere_toy_plot():
     
     g.writetofile("twosphere.pdf")
     gR.writetofile("twosphere_resid.pdf")
-    
-if __name__=="__main__":
-    lns = open("../../Aux/elemesholve_analytical_transverse_integrated_fields.txt").readlines()
+
+def trace_compare():
+    lns = open("../../Aux/Brian_v_Analytical_trace.txt").readlines()
     gdat = [ [float(x) for x in l.split()] for l in lns if l[0] != "#"]
     
-    lnsF = open("../../Aux/elemesholve_analytical_transverse_integrated_fields_r0.01.txt").readlines()
-    gdatF = [ [float(x) for x in l.split()] for l in lnsF if l[0] != "#"]
+    g = graph.graphxy(width=10,height=6,
+        x=graph.axis.lin(title="z [cm]", min=-6, max=6),
+        y=graph.axis.lin(title="transverse field [V]", min = -1, max = 1.5),
+        key=graph.key.key(pos="tl"))
+    
+    g.plot(graph.data.points(gdat, x=1, y=2, title = "Brian model"), [graph.style.line(lineattrs=[rgb.red])])
+    g.plot(graph.data.points(gdat, x=1, y=5, title = "Analytical, r=50um"), [graph.style.line(lineattrs=[rgb.blue])])
+    g.writetofile("FieldTrace.pdf")
+    
+def integral_compare():
+    lns = open("../../Aux/elemesholve_analytical_transverse_integrated_fields.txt").readlines()
+    gdat = [ [float(x) for x in l.split()] for l in lns if l[0] != "#"]
     
     lnsM = open("../../Aux/elemesholve_transverse_integrated_fields.txt").readlines()
     gdatM = [ [float(x) for x in l.split()] for l in lnsM if l[0] != "#"]
@@ -40,26 +50,32 @@ if __name__=="__main__":
     
     g = graph.graphxy(width=10,height=6,
         x=graph.axis.lin(title="radius [cm]", min=0, max=4),
-        y=graph.axis.lin(title="integrated transverse field $\\int E_r dz$ [V]", min=0, max=5),
+        y=graph.axis.lin(title="integrated transverse field $\\int E_r dz$ [V]", min=0, max=8),
         key=graph.key.key(pos="tl"))
     
-    g.plot(graph.data.points(gdat, x=1, y=2, title = "Analytical inside mirror (r=50um)"), [graph.style.line(lineattrs=[rgb.blue, style.linewidth.THIck])])
-    #g.plot(graph.data.points(gdat, x=1, y=3, title = "outside mirror"), [graph.style.line(lineattrs=[style.linestyle.dotted, rgb.red])])
-    #g.plot(graph.data.points(gdat, x=1, y=4, title = "total"), [graph.style.line(lineattrs=[rgb.red])])
+    g.plot(graph.data.points(gdatM, x=1, y=2, title = "Mesh inside mirror"), [graph.style.symbol(symbol.circle, size = 0.05, symbolattrs=[rgb.green])])
+    #g.plot(graph.data.points(gdatM, x=1, y=3, title = "Mesh outside mirror"), [graph.style.symbol(symbol.triangle, size = 0.05, symbolattrs=[rgb.green])])
     
-    g.plot(graph.data.points(gdatM, x=1, y=2, title = "Mesh inside mirror"), [graph.style.symbol(symbol.circle, size = 0.1, symbolattrs=[rgb.blue])])
+    inattrs = [style.linestyle.dashed, style.linewidth.thick]
+    g.plot(graph.data.points(gdatB, x=1, y=5, title = "Analytical inside mirror"), [graph.style.line(lineattrs=inattrs+[rgb.blue])])
+    g.plot(graph.data.points(gdatB, x=1, y=2, title = "Brian inside mirror"), [graph.style.line(lineattrs=inattrs+[rgb.red])])
     
-    g.plot(graph.data.points(gdatF, x=1, y=2, title = "Analytical inside mirror (r=100um)"), [graph.style.line(lineattrs=[rgb.red])])
-    g.plot(graph.data.points(gdatB, x=1, y=2, title = "Brian inside mirror"), [graph.style.line(lineattrs=[style.linestyle.dashed, rgb.red])])
+    oattrs = [style.linewidth.thick]
+    g.plot(graph.data.points(gdatB, x=1, y=6, title = "Analytical outside mirror"),[graph.style.line(lineattrs=oattrs+[rgb.blue])])
+    g.plot(graph.data.points(gdatB, x=1, y=3, title = "Brian outside mirror"), [graph.style.line(lineattrs=oattrs+[rgb.red])])
     
-    #g.plot(graph.data.points(gdatB, x=1, y=3, title = "Brian outer"), [graph.style.line(lineattrs=[style.linestyle.dotted, rgb.blue])])
-    #g.plot(graph.data.points(gdatB, x=1, y=4, title = "Brian total"), [graph.style.line(lineattrs=[rgb.blue])])
+    #g.plot(graph.data.points(gdatB, x=1, y=7, title = "Analytical total"), [graph.style.line(lineattrs=[rgb.blue])])
+    g.plot(graph.data.points(gdatB, x=1, y=4, title = "Brian total"), [graph.style.line(lineattrs=[rgb.red])])
     
     LF = LinearFitter([polyterm(n) for n in range(6)][1:])
-    LF.fit(gdat, cols = (0,3))
-    #g.plot(graph.data.points(LF.fittedpoints(), x=1, y=3, title = None), [graph.style.line()])
+    LF.fit([p for p in gdatB if 0 <= p[0] <= 3.95], cols = (0,3))
+    g.plot(graph.data.points(LF.fittedpoints(), x=1, y=3, title = None), [graph.style.line()])
     print LF.toLatex()
     print LF.coeffs
     
     g.writetofile("Etransverse.pdf")
+    
+if __name__=="__main__":
+    trace_compare()
+    integral_compare()
     
