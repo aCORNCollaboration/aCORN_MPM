@@ -22,7 +22,7 @@ endif
 
 # compiler flags
 CXXFLAGS = -O3 --std=c++11 -fPIC `root-config --cflags` -I. -pedantic -Wall -Wextra \
-	-I${MPMUTILS}/GeneralUtils/ -I${MPMUTILS}/Matrix/ -I${MPMUTILS}/ROOTUtils/ \
+	-I${MPMUTILS}/GeneralUtils/ -I${MPMUTILS}/Physics/ -I${MPMUTILS}/Matrix/ -I${MPMUTILS}/ROOTUtils/ \
 	-IIOUtils -IROOTUtils -IBaseTypes -ICalibration -IAnalysis -IStudies -IPhysics
 LDFLAGS =  -L. -L${MPMUTILS}/GeneralUtils/ -L${MPMUTILS}/ROOTUtils/ \
 	-laCORN_MPM -lMPMROOTUtils -lMPMGeneralUtils -lSpectrum -lMLP `root-config --libs` -lMathMore -lgsl -lblas
@@ -36,11 +36,11 @@ endif
 # things to build
 #
 
-VPATH = ./:IOUtils/:Physics/:Standalone/:BaseTypes/:Analysis/:${MPMUTILS}/GeneralUtils/
+VPATH = ./:IOUtils/:Physics/:Standalone/:BaseTypes/:Analysis/:${MPMUTILS}/GeneralUtils/:${MPMUTILS}/Physics/
 
 IOUtils = sqlite3.o TextTableReader.o
 
-Physics = PolarizedBetaAsym.o ElectronBindingEnergy.o NuclEvtGen.o Uncorrelated_3Body.o \
+Physics = PolarizedBetaAsym.o ElectronBindingEnergy.o NuclEvtGen.o \
 	UnpolarizedBeta.o UnpolarizedNeutronDecay.o Collimator.o
 
 ROOTUtils = SQLite_Helper.o

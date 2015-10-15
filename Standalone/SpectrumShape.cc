@@ -51,11 +51,11 @@ class GSLQRandom: public NKine_Rndm_Src {
 public:
     GSLQRandom(size_t n = 8): nrnd(n) {
         // choices:
-        // gsl_qrng_niederreiter_2
+        // gsl_qrng_niederreiter_2: fails for n+3 = 11
         // gsl_qrng_sobol
         // gsl_qrng_halton
         // gsl_qrng_reversehalton 
-        myQRNG = gsl_qrng_alloc(gsl_qrng_reversehalton, n+3);
+        myQRNG = gsl_qrng_alloc(gsl_qrng_sobol, n+3);
     }
     ~GSLQRandom() { gsl_qrng_free(myQRNG); }
     virtual void next() { gsl_qrng_get(myQRNG, u0); }
@@ -132,15 +132,14 @@ int main(int, char**) {
     OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated/");
     
     // kinematics generator
-    //RootQRandom RQR(5);
+    //RootQRandom RQR(8);
     //RootRandom RQR(5);
-    GSLQRandom RQR(5);
+    GSLQRandom RQR(8);
     
-    //Gluck_beta_MC G(RQR);
-    //G.test_calc_P_H();
+    Gluck_beta_MC G(&RQR);
+    G.test_calc_P_H();
     
-    //N3BodyUncorrelated G(&RQR);
-    NuFlipper G(&RQR);
+    //NuFlipper G(&RQR);
     
     assert(G.n_random() <= RQR.n_random());
     
@@ -250,7 +249,10 @@ int main(int, char**) {
         if(wt) {
             hWishbone[upper]->Fill(E_e, 1e6*dt, wt);
             haCorn[upper][true]->Fill(E_e, wt);
-            //if(G.K==0) haCorn[upper][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
+            
+            // non-radiative-corrected component of spectrum
+            if(G.K==0) haCorn[upper][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
+            
             hPassPos->Fill(RQR.u0[0],RQR.u0[1],wt);
 
             hAccept->Fill(E_e, cos_th_enu, wt);
@@ -259,16 +261,18 @@ int main(int, char**) {
         }
         
         // re-calculate with grid deflection
-        pTOF.t = pTOF.t_mr;  // time at mirror crossing
-        pTOF.calcPos();      // position at mirror crossing
-        double Vx = 0, Vy = 0;
-        MD.radial_momentum_deflection(pTOF.xx[0], pTOF.xx[1], Vx, Vy);
-        Vx += MD.wires_momentum_deflection(pTOF.xx[0]); // V
-        double dpx = Vx / pTOF.v_exit * 2.9979e7; // keV/c
-        double dpy = Vy / pTOF.v_exit * 2.9979e7;
-        pTOF.kickMomentum(dpx, dpy);
-        wt = e_passprob * pCol.pass(pTOF) * G.evt_w * G.c_2_wt;
-        if(wt) haCorn[upper][false]->Fill(E_e, wt);
+        if(false) {
+            pTOF.t = pTOF.t_mr;  // time at mirror crossing
+            pTOF.calcPos();      // position at mirror crossing
+            double Vx = 0, Vy = 0;
+            MD.radial_momentum_deflection(pTOF.xx[0], pTOF.xx[1], Vx, Vy);
+            Vx += MD.wires_momentum_deflection(pTOF.xx[0]); // V
+            double dpx = Vx / pTOF.v_exit * 2.9979e7; // keV/c
+            double dpy = Vy / pTOF.v_exit * 2.9979e7;
+            pTOF.kickMomentum(dpx, dpy);
+            wt = e_passprob * pCol.pass(pTOF) * G.evt_w * G.c_2_wt;
+            if(wt) haCorn[upper][false]->Fill(E_e, wt);
+        }
     }
     delete PB;
     
@@ -296,17 +300,26 @@ int main(int, char**) {
         hAsym[j]->GetYaxis()->SetTitle("wishbhone asymmetry");
         hAsym[j]->SetTitle("aCORN simulation");
         hAsym[j]->Draw(j?"HIST Same":"HIST");
+        OM.addObject(hAsym[j]);
         printf("Asymmetry %i %.4f\n",j,hAsym[j]->Integral());
     }
+    TF1 lineFit("lineFit", "pol0", 100, 400);
+    hAsym[true]->Fit(&lineFit, "R+");
     OM.printCanvas("Asymmetry");
     
     
-    TF1 fFredCxn("fFredCxn", "-100*(0.01277 - 4.58e-05*x + 4.13e-08*x*x)", 100, 400); // eLog 135
-    hAsym[0]->Add(hAsym[1], -1);
-    hAsym[0]->Scale(100);
-    hAsym[0]->GetYaxis()->SetTitle("false asymmetry [%]");
-    hAsym[0]->Draw("HIST");
-    fFredCxn.Draw("Same");
+    
+    TH1* hDelta = (TH1*)hAsym[0]->Clone("hDelta");
+    hDelta->Add(hAsym[1], -1);
+    hDelta->Scale(100);
+    hDelta->GetYaxis()->SetTitle("false asymmetry [%]");
+    hDelta->Draw("HIST");
+    OM.addObject(hDelta);
+    
+    // Fred's eLog 135 mirror correction curve
+    //TF1 fFredCxn("fFredCxn", "-100*(0.01277 - 4.58e-05*x + 4.13e-08*x*x)", 100, 400);
+    //fFredCxn.Draw("Same");
+    
     OM.printCanvas("DeltaAsymmetry");
     
     
