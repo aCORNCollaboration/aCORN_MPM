@@ -23,6 +23,8 @@ public:
     
     /// get next random u[8] for electron, nu, gamma kinematics
     virtual void next() = 0;
+    /// number of random slots supplied in u
+    virtual size_t n_random() const = 0;
         
     double u0[11];      ///< kinematics random array, with optional first 3 position
     double* u;          ///< kinematics array starting at u0[3]
@@ -41,7 +43,7 @@ public:
     const double Delta = m_n - m_p;     ///< decay energy m - m_f;
     
     /// Generate weighted event
-    virtual double gen_evt_weighted() = 0;
+    virtual void gen_evt_weighted() = 0;
     /// calculate cos theta between electron, neutrino
     double cos_theta_e_nu() const { return dot3(n_1, n_2); }
     
@@ -68,6 +70,9 @@ public:
     double c_2_min;     ///< optional minimum electron cos theta, calculated from pt2_max
     double c_2_wt;      ///< extra weight for c_2 selection
     
+    /// number of random entries required
+    virtual size_t n_random() const = 0;  
+    
 protected:
     
     NKine_Rndm_Src* myR;        ///< random number source
@@ -86,10 +91,13 @@ public:
     /// Constructor
     N3BodyUncorrelated(NKine_Rndm_Src* R): NeutronDecayKinematics(R) { }
     /// Generate weighted event
-    virtual double gen_evt_weighted() override;
+    virtual void gen_evt_weighted() override;
 
     double c_1, c_2;    ///< phase-space cosines
     double phi_1, phi_2;///< phase-space azimuths
+
+    /// number of random entries required
+    virtual size_t n_random() const override { return 5; }
 };
 
 /// Event generator for unpolarized neutron decays, including radiative corrections
@@ -102,7 +110,7 @@ public:
     zeta(M2_F + lambda*lambda*M2_GT), a( (M2_F - lambda*lambda*M2_GT/3.)/zeta ) { calc_rho(); }
         
     /// Generate weighted event
-    virtual double gen_evt_weighted() override;
+    virtual void gen_evt_weighted() override;
     
     /// Show "efficiency" of MC (5.22)
     void showEffic();
@@ -137,7 +145,10 @@ public:
     double Mtilde;      ///< (3.2)
     double M_VS;        ///< virtual and soft brem amplitude (3.9)
     double M_BR;        ///< hard brem amplitude (4.4)
-        
+    
+    /// number of random entries required
+    virtual size_t n_random() const override { return 8; }
+    
 protected:
 
     double N;           ///< N(beta) (3.3)

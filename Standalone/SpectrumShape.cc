@@ -22,20 +22,65 @@
 #include <cassert>
 #include <TF1.h>
 
+#include <gsl/gsl_qrng.h>
+
 using namespace ROOT::Math;
 
 class RootRandom: public NKine_Rndm_Src {
 public:
-    RootRandom() { }
-    virtual void next() { R.RndmArray(8,u); }
+    RootRandom(size_t n = 8): nrnd(n) { }
+    virtual void next() { R.RndmArray(nrnd+3,u0); }
+    virtual size_t n_random() const override { return nrnd; }
+    
+    const size_t nrnd;
     TRandom3 R;
 };
 
 class RootQRandom: public NKine_Rndm_Src {
 public:
-    RootQRandom(): QR_8(11) { }
-    virtual void next() { assert(QR_8.Next(u0)); }
-    QuasiRandomSobol QR_8;
+    RootQRandom(size_t n = 8): nrnd(n), QR(nrnd+3) { }
+    virtual void next() { QR.Next(u0); }
+    virtual size_t n_random() const override { return nrnd; }
+    
+    const size_t nrnd;
+    QuasiRandomSobol QR;
+    //QuasiRandomNiederreiter QR;
+};
+
+class GSLQRandom: public NKine_Rndm_Src {
+public:
+    GSLQRandom(size_t n = 8): nrnd(n) {
+        // choices:
+        // gsl_qrng_niederreiter_2
+        // gsl_qrng_sobol
+        // gsl_qrng_halton
+        // gsl_qrng_reversehalton 
+        myQRNG = gsl_qrng_alloc(gsl_qrng_reversehalton, n+3);
+    }
+    ~GSLQRandom() { gsl_qrng_free(myQRNG); }
+    virtual void next() { gsl_qrng_get(myQRNG, u0); }
+    virtual size_t n_random() const override { return nrnd; }
+    
+    const size_t nrnd;
+    gsl_qrng* myQRNG;
+};
+
+/// 3-body decay generator that pairs "flipped" neutrino directions
+class NuFlipper: public N3BodyUncorrelated {
+public:
+    /// Constructor
+    NuFlipper(NKine_Rndm_Src* R): N3BodyUncorrelated(R) { }
+    
+    /// Generate weighted event
+    virtual void gen_evt_weighted() override {
+        if(!(nflip++ % 2)) N3BodyUncorrelated::gen_evt_weighted();
+        else {
+            n_1[2] *= -1;
+            calc_proton();
+        }
+    }
+    
+    size_t nflip = 0;
 };
 
 void circle_the_square(double* x, double r0) {
@@ -87,13 +132,17 @@ int main(int, char**) {
     OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated/");
     
     // kinematics generator
-    RootQRandom* RQR = new RootQRandom();
+    //RootQRandom RQR(5);
+    //RootRandom RQR(5);
+    GSLQRandom RQR(5);
     
     //Gluck_beta_MC G(RQR);
     //G.test_calc_P_H();
     
-    N3BodyUncorrelated G(RQR);
+    //N3BodyUncorrelated G(&RQR);
+    NuFlipper G(&RQR);
     
+    assert(G.n_random() <= RQR.n_random());
     
     const double B0 = 364;      // field [Gauss]
     const double r_beam = 3.0;  // beam radius [cm]
@@ -117,15 +166,13 @@ int main(int, char**) {
     double tof_mid = 0.5*(tof_max+tof_min);
     printf("Min proton TOF %.2f us, mid %.2f us, max %.2f us\n", tof_min*1e6, tof_mid*1e6, tof_max*1e6);
     tof_mid = 3.4e-6;
+
+    TH1D* hSpec = OM.registeredTH1D("hSpec","Corrected beta spectrum",200,0,800);
     
-    int npts = 1e8;
-    
-    TH1F* hSpec = OM.registeredTH1F("hSpec","Corrected beta spectrum",200,0,800);
-    
-    TH1F* haCorn[2][2]; // energy spectrum for [branch][radiative corrected?]
+    TH1D* haCorn[2][2]; // energy spectrum for [branch][radiative corrected?]
     for(int i=0; i<2; i++) {
         for(int j=0; j<2; j++) {
-            haCorn[i][j] = OM.registeredTH1F("haCorn_"+to_str(i)+"_"+to_str(j), "asymmetry beta spectrum", 200,0,800);
+            haCorn[i][j] = OM.registeredTH1D("haCorn_"+to_str(i)+"_"+to_str(j), "asymmetry beta spectrum", 200,0,800);
             haCorn[i][j]->SetLineColor(2+2*i);
         }
     }
@@ -151,14 +198,15 @@ int main(int, char**) {
     hnuAccept->GetXaxis()->SetTitle("Electron energy [keV]");
     hnuAccept->GetYaxis()->SetTitle("cos #theta_{#nu}");
     
-    TH1F* hNu  = OM.registeredTH1F("hNu","Neutrino spectrum",200,0,800);
+    TH1D* hNu  = OM.registeredTH1D("hNu","Neutrino spectrum",200,0,800);
     hNu->SetLineColor(3);
     
     TH1F hw("hw","weighting",200,0,1e-29);
    
+    size_t npts = 1e8;
     ProgressBar* PB = new ProgressBar(npts, 50);
-    for(int i=0; i<npts; i++) {
-        PB->update(i);
+    for(size_t n=0; n<npts; n++) {
+        PB->update(n);
         
         // generate new event
         G.gen_evt_weighted();
@@ -166,16 +214,15 @@ int main(int, char**) {
        
         double E_e = G.E_2-G.m_2; // electron KE
         // electron-nu cos angle
-        double cos_th_enu = 0;
-        for(int i=0; i<3; i++) cos_th_enu += G.n_1[i]*G.n_2[i];
+        double cos_th_enu = G.cos_theta_e_nu();
         
         hSpec->Fill(E_e, G.evt_w);
         hNu->Fill(G.E_1, G.evt_w);
         if(G.K) hw.Fill(G.evt_w);
         
         // vertex position
-        RQR->u0[0] = (2*RQR->u0[0]-1)*eCol.r;
-        circle_the_square(RQR->u0+1, r_beam);
+        RQR.u0[0] = (2*RQR.u0[0]-1)*eCol.r;
+        circle_the_square(RQR.u0+1, r_beam);
         
         // momenta, with sign convention reversed
         double p_e[3];
@@ -187,8 +234,8 @@ int main(int, char**) {
         
         if(p_e[2] > 0) continue; // lose upward-going electrons
         
-        pTOF.setInitial(RQR->u0, p_p);
-        eTOF.setInitial(RQR->u0, p_e);
+        pTOF.setInitial(RQR.u0, p_p);
+        eTOF.setInitial(RQR.u0, p_e);
         
         double e_passprob = eCol.pass(eTOF);
         if(!e_passprob) continue;
@@ -198,13 +245,13 @@ int main(int, char**) {
         // proton-to-electron time
         double dt = pTOF.calcTOF(pDet_z) - eTOF.calcTOF(eDet_z);
         // wishbone true branch
-        bool upper = G.cos_theta_e_nu() < 0;
+        bool upper = cos_th_enu < 0;
         
         if(wt) {
             hWishbone[upper]->Fill(E_e, 1e6*dt, wt);
             haCorn[upper][true]->Fill(E_e, wt);
             //if(G.K==0) haCorn[upper][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
-            hPassPos->Fill(RQR->u0[0],RQR->u0[1],wt);
+            hPassPos->Fill(RQR.u0[0],RQR.u0[1],wt);
 
             hAccept->Fill(E_e, cos_th_enu, wt);
             hpAccept->Fill(E_e, p_p[2]/G.mag_p_f, wt);

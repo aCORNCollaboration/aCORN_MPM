@@ -28,7 +28,7 @@ void NeutronDecayKinematics::n_from_angles(double c, double phi, double n[3]) {
 ////////////////////////////////////
 ////////////////////////////////////
 
-double N3BodyUncorrelated::gen_evt_weighted() {
+void N3BodyUncorrelated::gen_evt_weighted() {
     assert(myR);
     myR->next(); // random seed
     
@@ -64,8 +64,6 @@ double N3BodyUncorrelated::gen_evt_weighted() {
         mag_p_f += p_f[i]*p_f[i];
     }
     mag_p_f = sqrt(mag_p_f);
-    
-    return evt_w;
 }
 
 ////////////////////////////////////
@@ -219,7 +217,7 @@ void Gluck_beta_MC::calc_n_2() {
     npp_2[0] = -c_2*cos(phi_2); npp_2[1] = -c_2*sin(phi_2);     npp_2[2] = s_2;
 }
 
-double Gluck_beta_MC::gen_evt_weighted() {
+void Gluck_beta_MC::gen_evt_weighted() {
     assert(myR);
     myR->next(); // random seed
     
@@ -235,8 +233,6 @@ double Gluck_beta_MC::gen_evt_weighted() {
         evt_w0 = 0;
     }
     calc_proton();
-    
-    return evt_w;
 }
 
 void Gluck_beta_MC::calc_rho() {
