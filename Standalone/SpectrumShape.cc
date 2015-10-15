@@ -6,7 +6,6 @@
 // -- Michael P. Mendenhall, 2015
 
 #include "UnpolarizedNeutronDecay.hh"
-#include "Uncorrelated_3Body.hh"
 #include "Collimator.hh"
 #include "GraphicsUtils.hh"
 #include "StringManip.hh"
@@ -25,23 +24,16 @@
 
 using namespace ROOT::Math;
 
-class RootRandom: public Gluck_MC_Rndm_Src {
+class RootRandom: public NKine_Rndm_Src {
 public:
     RootRandom() { }
     virtual void next() { R.RndmArray(8,u); }
     TRandom3 R;
 };
 
-class RootQRandom: public Gluck_MC_Rndm_Src {
+class RootQRandom: public NKine_Rndm_Src {
 public:
     RootQRandom(): QR_8(11) { }
-    virtual void next() { assert(QR_8.Next(u0)); }
-    QuasiRandomSobol QR_8;
-};
-
-class U3QRnd: public U3Body_Rndm_Src {
-public:
-    U3QRnd(): QR_8(8) { }
     virtual void next() { assert(QR_8.Next(u0)); }
     QuasiRandomSobol QR_8;
 };
@@ -81,7 +73,6 @@ public:
         double r = sqrt(rr);
         double rrrr = rr*rr;
         double V = 1.1703106983790565*r -0.54657810070685897*rr +0.51766136215597991*r*rr -0.18217095995451557*rrrr +0.025820766945784723*r*rrrr;
-        //double V = 2.2448849661791521*r -2.9050621707806816*rr +2.6299318261736704*r*rr -0.92526200476343934*rrrr +0.11656399140431706*r*rrrr;
         Vx = x*V/r;
         Vy = y*V/r;
     }
@@ -96,12 +87,12 @@ int main(int, char**) {
     OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated/");
     
     // kinematics generator
-    //RootQRandom* RQR = new RootQRandom();
+    RootQRandom* RQR = new RootQRandom();
+    
     //Gluck_beta_MC G(RQR);
     //G.test_calc_P_H();
     
-    U3QRnd* RQR = new U3QRnd();
-    Uncorrelated_3Body G(RQR);
+    N3BodyUncorrelated G(RQR);
     
     
     const double B0 = 364;      // field [Gauss]
@@ -307,7 +298,7 @@ int main(int, char**) {
     //hWishbone[1]->Draw("Col Same");
     OM.printCanvas("Wishbone");
     
-    G.showEffic();
+    //G.showEffic();
     
     OM.writeROOT();
     

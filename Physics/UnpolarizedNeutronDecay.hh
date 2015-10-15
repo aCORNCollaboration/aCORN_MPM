@@ -5,60 +5,115 @@
 //
 // -- Michael P. Mendenhall, 2015
 
-#ifndef ASPECTRUM_HH
-#define ASPECTRUM_HH
+#ifndef UNPOLARIZEDNEUTRONDECAY_HH
+#define UNPOLARIZEDNEUTRONDECAY_HH
 
 #include "UnpolarizedBeta.hh"
 #include <cstddef>
 #include <cassert>
 #include <stdint.h>
 
-/// virtual class for providing random number vectors
-class Gluck_MC_Rndm_Src {
+/// virtual class for providing random number vectors for decay kinematics
+class NKine_Rndm_Src {
 public:
     /// constructor
-    Gluck_MC_Rndm_Src(): u(u0+3) { }
+    NKine_Rndm_Src(): u(u0+3) { }
     /// destructor
-    virtual ~Gluck_MC_Rndm_Src() { }
+    virtual ~NKine_Rndm_Src() { }
     
     /// get next random u[8] for electron, nu, gamma kinematics
     virtual void next() = 0;
-    
+        
     double u0[11];      ///< kinematics random array, with optional first 3 position
     double* u;          ///< kinematics array starting at u0[3]
 };
 
-/// Event generator for unpolarized neutron decays, including radiative corrections
-/// Implementation of F. Gl\"uck, Computer Physics Communications 101 (1997) 223--231 ,
-/// plus coulomb, recoil, and weak magnetism corrections
-class Gluck_beta_MC  {
+/// Base class for neutron decay kinematics generators
+class NeutronDecayKinematics {
 public:
-    /// constructor
-    Gluck_beta_MC(Gluck_MC_Rndm_Src* R, double M2_F = 1, double M2_GT = 3):
-    zeta(M2_F + lambda*lambda*M2_GT), a( (M2_F - lambda*lambda*M2_GT/3.)/zeta ), myR(R) { assert(R); calc_rho(); }
-        
-    /// Generate weighted event
-    double gen_evt_weighted();
-    
-    /// Show "efficiency" of MC (5.22)
-    void showEffic();
-    /// test calculate hard photon decay probability by MC
-    void test_calc_P_H();
-    /// set random number source
-    void SetRandom(Gluck_MC_Rndm_Src* R) { myR = R; }
-    
-    /// additional recoil, weak magnetism weight factor, from Bilenki'i 1959 Eq. (10)
-    double rwm_cxn() const;
-    /// additional Coulomb correction weight factor
-    double coulomb_cxn() const { return WilkinsonF0(1, E_2/m_e); }
-    /// calculate cos theta between electron, neutrino
-    double cos_theta_e_nu() const { return n_1[0]*n_2[0] + n_1[1]*n_2[1] + n_1[2]*n_2[2]; }
+    /// Constructor
+    NeutronDecayKinematics(NKine_Rndm_Src* R): myR(R) { assert(R); }
     
     const double G_F = 1.1663787e-17;   ///< Fermi coupling constant, [/keV^2]
     const double G2_V = G_F*G_F*0.94920; ///< |G_V|^2 = |V_ud G_F g_V|^2
     const double m = m_n;               ///< initial nucleus mass
     const double m_2 = m_e;             ///< mass of charged lepton
     const double Delta = m_n - m_p;     ///< decay energy m - m_f;
+    
+    /// Generate weighted event
+    virtual double gen_evt_weighted() = 0;
+    /// calculate cos theta between electron, neutrino
+    double cos_theta_e_nu() const { return dot3(n_1, n_2); }
+    
+    double E_2;         ///< electron total energy [keV]
+    double p_2;         ///< electron momentum magnitude [keV/c]
+    double n_2[3];      ///< electron unit direction
+    double beta;        ///< electron velocity v/c
+    
+    double E0_1;        ///< antineutrino energy in center-of-mass frame [keV]
+    double E_1;         ///< antineutrino energy minus photon [keV]
+    double p_1;         ///< neutrino momentum magnitude [keV/c]
+    double n_1[3];      ///< neutrino momentum unit direction
+    
+    double K = 0;       ///< hard photon energy
+    double n_gamma[3];  ///< gamma unit direction
+    
+    double p_f[3];      ///< recoil nucleon momentum
+    double mag_p_f;     ///< magnitude of recoil momentum
+    
+    double evt_w;       ///< calculated event weight for kinematics
+    double evt_w0;      ///< weight coming from uncorrected spectrum shape
+    
+    double pt2_max = 0; ///< optional limit on maximum electron transverse momentum
+    double c_2_min;     ///< optional minimum electron cos theta, calculated from pt2_max
+    double c_2_wt;      ///< extra weight for c_2 selection
+    
+protected:
+    
+    NKine_Rndm_Src* myR;        ///< random number source
+    
+    /// calculate proton kinematics from electron, neutrino, gamma
+    void calc_proton();
+    /// unit vector from z cosine and x,y azimuth
+    static void n_from_angles(double c, double phi, double n[3]);
+    /// 3-vector dot product
+    static inline double dot3(const double a[3], const double b[3]) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
+};
+
+/// Angular-uncorrelated 3-body neutron decay generator
+class N3BodyUncorrelated: public NeutronDecayKinematics {
+public:
+    /// Constructor
+    N3BodyUncorrelated(NKine_Rndm_Src* R): NeutronDecayKinematics(R) { }
+    /// Generate weighted event
+    virtual double gen_evt_weighted() override;
+
+    double c_1, c_2;    ///< phase-space cosines
+    double phi_1, phi_2;///< phase-space azimuths
+};
+
+/// Event generator for unpolarized neutron decays, including radiative corrections
+/// Implementation of F. Gl\"uck, Computer Physics Communications 101 (1997) 223--231 ,
+/// plus coulomb, recoil, and weak magnetism corrections
+class Gluck_beta_MC: public NeutronDecayKinematics {
+public:
+    /// constructor
+    Gluck_beta_MC(NKine_Rndm_Src* R, double M2_F = 1, double M2_GT = 3): NeutronDecayKinematics(R),
+    zeta(M2_F + lambda*lambda*M2_GT), a( (M2_F - lambda*lambda*M2_GT/3.)/zeta ) { calc_rho(); }
+        
+    /// Generate weighted event
+    virtual double gen_evt_weighted() override;
+    
+    /// Show "efficiency" of MC (5.22)
+    void showEffic();
+    /// test calculate hard photon decay probability by MC
+    void test_calc_P_H();
+    
+    /// additional recoil, weak magnetism weight factor, from Bilenki'i 1959 Eq. (10)
+    double rwm_cxn() const;
+    /// additional Coulomb correction weight factor
+    double coulomb_cxn() const { return WilkinsonF0(1, E_2/m_e); }
+    
     const double C_S = 0.001;           ///< hard photon production cutoff fraction 
     const double zeta;                  ///< spectrum weighting (2.13)
     const double a;                     ///< a_0 (2.13)
@@ -72,43 +127,19 @@ public:
     double P_H;         ///< probability of hard photon decay (5.21)
     double E_0VS;       ///< MC efficiency for virtual-soft events (5.22)
     double E_H;         ///< MC efficiency for hard decay events (5.22)
-
-    double E_2;         ///< electron total energy [keV]
-    double p_2;         ///< electron momentum magnitude [keV/c]
-    double n_2[3];      ///< electron unit direction
-    double beta;        ///< electron velocity v/c (2.10)
     
-    double pt2_max = 0; ///< optional limit on maximum electron transverse momentum
-    double c_2_min;     ///< optional minimum electron cos theta
-    double c_2_wt;      ///< extra weight for c_2 selection
-    
-    double E0_1;        ///< antineutrino energy in center-of-mass frame [keV] (2.10)
-    double E_1;         ///< antineutrino energy minus photon [keV] (4.9)
-    double p_1;         ///< neutrino momentum magnitude [keV/c]
-    double n_1[3];      ///< neutrino momentum unit direction (5.8)
-    
-    double K;           ///< hard photon energy (5.5)
-    double n_gamma[3];  ///< gamma unit direction (5.8)
     double c_gamma;     ///< cos(theta_gamma) (5.6)
     double c_1, c_2;    ///< phase-space cosines
     double phi_gamma;   ///< gamma azimuth relative to electron
     double phi_1, phi_2;///< phase-space azimuths
     
-    double p_f[3];      ///< recoil nucleon momentum
-    double mag_p_f;     ///< magnitude of recoil momentum
-    
     double M_0;         ///< uncorrected decay amplitude (2.11, 2.12)
     double Mtilde;      ///< (3.2)
     double M_VS;        ///< virtual and soft brem amplitude (3.9)
     double M_BR;        ///< hard brem amplitude (4.4)
-    
-    double evt_w;       ///< calculated event weight for kinematics
-    double evt_w0;      ///< weight coming from uncorrected spectrum shape
-    
+        
 protected:
-    
-    Gluck_MC_Rndm_Src* myR;     ///< random number source
-    
+
     double N;           ///< N(beta) (3.3)
     double omega;       ///< hard photon cutoff energy (3.8)
     double np_2[3];     ///< coordinate transform vector (5.10)
@@ -132,8 +163,6 @@ protected:
     void vec_rel_n_2(double c, double phi, double* v) const;
     /// calculate beta and N(beta)
     void calc_beta_N();
-    /// calculate proton kinematics
-    void calc_proton();
     
     /// corrected spectrum probability for virtual and soft brem photons
     double calc_soft();
@@ -151,7 +180,7 @@ protected:
 /// Recoil, weak magnetism weight factor, from Bilenki'i 1959 Eq. (10)
 double B59_rwm_cxn(double E, double cos_thn);
 
-/// Radiative correction according to Garcia, Maya, Phys. Rev. D, 1978
+/// Radiative correction according to Garcia, Maya, Phys. Rev. D, 1978 (irrelevant for lab (proton) observables)
 double GM78_radiative_cxn(double E, double cos_thn);
 
 
