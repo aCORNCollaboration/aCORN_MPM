@@ -123,23 +123,24 @@ public:
     }
     
     double E0 = 70;     ///< mirror field [V/cm]
-    double d = 0.2;     ///< wire spacing
+    double d = 0.19;    ///< wire spacing
 };
 
 int main(int, char**) {
     setupSlideStyle();
     
-    OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated/");
+    OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated_test/");
     
     // kinematics generator
-    //RootQRandom RQR(8);
-    //RootRandom RQR(5);
-    GSLQRandom RQR(8);
+    GSLQRandom RQR(5);
     
-    Gluck_beta_MC G(&RQR);
-    G.test_calc_P_H();
+    //Gluck_beta_MC G(&RQR);
+    //G.test_calc_P_H();
+    //G.P_H.q = 0.5;
     
-    //NuFlipper G(&RQR);
+    N3BodyUncorrelated G(&RQR);
+    
+    const double a0 = calc_a0();
     
     assert(G.n_random() <= RQR.n_random());
     
@@ -202,7 +203,7 @@ int main(int, char**) {
     
     TH1F hw("hw","weighting",200,0,1e-29);
    
-    size_t npts = 1e8;
+    size_t npts = 1e9;
     ProgressBar* PB = new ProgressBar(npts, 50);
     for(size_t n=0; n<npts; n++) {
         PB->update(n);
@@ -247,30 +248,40 @@ int main(int, char**) {
         bool upper = cos_th_enu < 0;
         
         if(wt) {
+            /// uncorrected base asymmetry
+            wt *= 1 + a0*G.beta*cos_th_enu;
+            
             hWishbone[upper]->Fill(E_e, 1e6*dt, wt);
             haCorn[upper][true]->Fill(E_e, wt);
             
-            // non-radiative-corrected component of spectrum
-            if(G.K==0) haCorn[upper][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
+            // non-radiative-corrected component of spectrum:
+            // no hard gamma, and evt_w0 (without soft/virtual gamma correction) instead of evt_w
+            //if(G.K==0) haCorn[upper][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
+            
+            // [Glu93] parametrized radiative correction
+            //haCorn[upper][false]->Fill(E_e, wt*G.Gluck93_radcxn_wt());
+            // recoil, weak magnetism correction
+            //haCorn[upper][false]->Fill(E_e, wt*G.B59_rwm_cxn_wt());
             
             hPassPos->Fill(RQR.u0[0],RQR.u0[1],wt);
-
+            
             hAccept->Fill(E_e, cos_th_enu, wt);
             hpAccept->Fill(E_e, p_p[2]/G.mag_p_f, wt);
             hnuAccept->Fill(E_e, G.n_1[2], wt);
         }
         
         // re-calculate with grid deflection
-        if(false) {
+        if(true) {
             pTOF.t = pTOF.t_mr;  // time at mirror crossing
             pTOF.calcPos();      // position at mirror crossing
             double Vx = 0, Vy = 0;
-            MD.radial_momentum_deflection(pTOF.xx[0], pTOF.xx[1], Vx, Vy);
+            //MD.radial_momentum_deflection(pTOF.xx[0], pTOF.xx[1], Vx, Vy);
             Vx += MD.wires_momentum_deflection(pTOF.xx[0]); // V
             double dpx = Vx / pTOF.v_exit * 2.9979e7; // keV/c
             double dpy = Vy / pTOF.v_exit * 2.9979e7;
             pTOF.kickMomentum(dpx, dpy);
             wt = e_passprob * pCol.pass(pTOF) * G.evt_w * G.c_2_wt;
+            wt *= 1 + a0*G.beta*cos_th_enu;
             if(wt) haCorn[upper][false]->Fill(E_e, wt);
         }
     }
@@ -290,30 +301,43 @@ int main(int, char**) {
     
     TH1* hAsym[2];
     int nrebin = 4;
+   
     for(int j=0; j<2; j++) {
         hAsym[j] = calcAsym(haCorn[0][j],haCorn[1][j]);
         hAsym[j]->Rebin(nrebin);
-        hAsym[j]->Scale(1./nrebin);
+        hAsym[j]->Scale(100./nrebin);
         hAsym[j]->SetLineColor(4-2*j);
-        hAsym[j]->SetMaximum(0.01);
+        hAsym[j]->SetMaximum(0);
         hAsym[j]->GetXaxis()->SetTitle("electron energy [keV]");
-        hAsym[j]->GetYaxis()->SetTitle("wishbhone asymmetry");
+        hAsym[j]->GetYaxis()->SetTitle("wishbhone asymmetry [%]");
         hAsym[j]->SetTitle("aCORN simulation");
         hAsym[j]->Draw(j?"HIST Same":"HIST");
         OM.addObject(hAsym[j]);
         printf("Asymmetry %i %.4f\n",j,hAsym[j]->Integral());
     }
-    TF1 lineFit("lineFit", "pol0", 100, 400);
-    hAsym[true]->Fit(&lineFit, "R+");
+    
+    TF1 fBeta("fBeta", "[0]*sqrt(x*x+2*511*x)/(511+x)", 100, 400);
+    hAsym[true]->Fit(&fBeta, "R+");
+    fBeta.SetLineColor(6);
+    fBeta.Draw("Same");
+    
     OM.printCanvas("Asymmetry");
     
-    
-    
+    TF1 lineFit("lineFit", "pol0", 100, 400);
     TH1* hDelta = (TH1*)hAsym[0]->Clone("hDelta");
+    hDelta->SetTitle("aCORN near-wires correction");
     hDelta->Add(hAsym[1], -1);
-    hDelta->Scale(100);
     hDelta->GetYaxis()->SetTitle("false asymmetry [%]");
+    hDelta->GetYaxis()->SetTitleOffset(1.4);
+    
+    //hDelta->Divide(hAsym[1]);
+    //hDelta->Scale(100);
+    hDelta->SetMinimum(-0.5);
+    hDelta->SetMaximum(0.5);
+    
+    hDelta->Fit(&lineFit, "WWR+");
     hDelta->Draw("HIST");
+    lineFit.Draw("Same");
     OM.addObject(hDelta);
     
     // Fred's eLog 135 mirror correction curve
@@ -324,7 +348,7 @@ int main(int, char**) {
     
     
     gPad->SetCanvasSize(300,300);
-    hPassPos->Draw("Col");
+    hPassPos->Draw("Col Z");
     OM.printCanvas("Positions");
     
     makeRBpalette();
