@@ -29,7 +29,7 @@ using namespace ROOT::Math;
 class RootRandom: public NKine_Rndm_Src {
 public:
     RootRandom(size_t n = 8): nrnd(n) { }
-    virtual void next() { R.RndmArray(nrnd+3,u0); }
+    virtual void next() override { R.RndmArray(nrnd+3,u0); }
     virtual size_t n_random() const override { return nrnd; }
     
     const size_t nrnd;
@@ -39,7 +39,7 @@ public:
 class RootQRandom: public NKine_Rndm_Src {
 public:
     RootQRandom(size_t n = 8): nrnd(n), QR(nrnd+3) { }
-    virtual void next() { QR.Next(u0); }
+    virtual void next() override { QR.Next(u0); }
     virtual size_t n_random() const override { return nrnd; }
     
     const size_t nrnd;
@@ -58,7 +58,7 @@ public:
         myQRNG = gsl_qrng_alloc(gsl_qrng_sobol, n+3);
     }
     ~GSLQRandom() { gsl_qrng_free(myQRNG); }
-    virtual void next() { gsl_qrng_get(myQRNG, u0); }
+    virtual void next() override { gsl_qrng_get(myQRNG, u0); }
     virtual size_t n_random() const override { return nrnd; }
     
     const size_t nrnd;

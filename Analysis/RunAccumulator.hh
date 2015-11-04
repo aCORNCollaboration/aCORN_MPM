@@ -60,7 +60,7 @@ public:
     
 protected:
     /// build plugins appropriate for input file; call in subclass after setting up myBuilders
-    virtual void buildPlugins();
+    virtual void buildPlugins() override;
     vector<RunAccumulatorPlugin*> myRAPs;       ///< properly typecast active plugins
 };
 
