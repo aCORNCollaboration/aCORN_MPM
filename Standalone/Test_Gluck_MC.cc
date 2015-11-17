@@ -5,6 +5,8 @@
 //
 // -- Michael P. Mendenhall, 2015
 
+// make Test_Gluck_MC -j4
+
 #include "UnpolarizedNeutronDecay.hh"
 
 #include "OutputManager.hh"
@@ -173,12 +175,25 @@ void GluckBetaCompare() {
     printf("Integral error: %g\n", hBeta_MC[0]->Integral("width"));
 }
 
+void GluckSirlinCompare() {
+    RootQRandom RQR;
+    Gluck_beta_MC G(&RQR);
+    for(double E2 = 550; E2 < 782+m_e; E2 += 50) {
+        double gS = Sirlin_g_a2pi(E2-m_e, neutronBetaEp);
+        double gW = Wilkinson_g_a2pi(E2/m_e);
+        double gG = G.recalc_Sirlin_g_a2pi(E2);
+        printf("%g\t%g\t%g\t%g\n", E2, gS, gW, gG);
+    }
+}
+
+
 int main(int, char**) {
  
     //Gluck93_Table_V();
     //Gluck93_Table_I();
     //Gluck93_distrib();
-    GluckBetaCompare();
+    //GluckBetaCompare();
+    GluckSirlinCompare();
     
     
     return EXIT_SUCCESS;

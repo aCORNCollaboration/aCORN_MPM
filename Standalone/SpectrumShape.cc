@@ -132,13 +132,13 @@ int main(int, char**) {
     OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated_test/");
     
     // kinematics generator
-    GSLQRandom RQR(5);
+    GSLQRandom RQR(8);
     
-    //Gluck_beta_MC G(&RQR);
-    //G.test_calc_P_H();
-    //G.P_H.q = 0.5;
+    Gluck_beta_MC G(&RQR);
+    G.test_calc_P_H();
+    G.P_H.q = 0.2;      // more stats for hard gamma component
     
-    N3BodyUncorrelated G(&RQR);
+    //N3BodyUncorrelated G(&RQR);
     
     const double a0 = calc_a0();
     
@@ -203,7 +203,7 @@ int main(int, char**) {
     
     TH1F hw("hw","weighting",200,0,1e-29);
    
-    size_t npts = 1e9;
+    size_t npts = 1e8;
     ProgressBar* PB = new ProgressBar(npts, 50);
     for(size_t n=0; n<npts; n++) {
         PB->update(n);
@@ -244,24 +244,28 @@ int main(int, char**) {
         
         // proton-to-electron time
         double dt = pTOF.calcTOF(pDet_z) - eTOF.calcTOF(eDet_z);
-        // wishbone true branch
-        bool upper = cos_th_enu < 0;
+        // wishbone true branch: not quite what we want for hard RC!
+        //bool upper = cos_th_enu < 0;
+        // proton-inferred wishbone true branch (what we "really" measure)
+        bool upper = G.proton_ctheta() < 0;
         
         if(wt) {
             /// uncorrected base asymmetry
-            wt *= 1 + a0*G.beta*cos_th_enu;
+            //wt *= 1 + a0*G.beta*cos_th_enu;
             
             hWishbone[upper]->Fill(E_e, 1e6*dt, wt);
             haCorn[upper][true]->Fill(E_e, wt);
             
             // non-radiative-corrected component of spectrum:
             // no hard gamma, and evt_w0 (without soft/virtual gamma correction) instead of evt_w
-            //if(G.K==0) haCorn[upper][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
+            if(G.K==0) haCorn[upper][false]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob);
             
             // [Glu93] parametrized radiative correction
             //haCorn[upper][false]->Fill(E_e, wt*G.Gluck93_radcxn_wt());
             // recoil, weak magnetism correction
             //haCorn[upper][false]->Fill(E_e, wt*G.B59_rwm_cxn_wt());
+            // both!
+            //haCorn[upper][false]->Fill(E_e, wt*G.B59_rwm_cxn_wt()*G.Gluck93_radcxn_wt());
             
             hPassPos->Fill(RQR.u0[0],RQR.u0[1],wt);
             
@@ -271,7 +275,7 @@ int main(int, char**) {
         }
         
         // re-calculate with grid deflection
-        if(true) {
+        if(false) {
             pTOF.t = pTOF.t_mr;  // time at mirror crossing
             pTOF.calcPos();      // position at mirror crossing
             double Vx = 0, Vy = 0;
@@ -325,15 +329,15 @@ int main(int, char**) {
     
     TF1 lineFit("lineFit", "pol0", 100, 400);
     TH1* hDelta = (TH1*)hAsym[0]->Clone("hDelta");
-    hDelta->SetTitle("aCORN near-wires correction");
+    //hDelta->SetTitle("aCORN near-wires correction");
     hDelta->Add(hAsym[1], -1);
     hDelta->GetYaxis()->SetTitle("false asymmetry [%]");
     hDelta->GetYaxis()->SetTitleOffset(1.4);
     
     //hDelta->Divide(hAsym[1]);
     //hDelta->Scale(100);
-    hDelta->SetMinimum(-0.5);
-    hDelta->SetMaximum(0.5);
+    //hDelta->SetMinimum(-0.5);
+    //hDelta->SetMaximum(0.5);
     
     hDelta->Fit(&lineFit, "WWR+");
     hDelta->Draw("HIST");
