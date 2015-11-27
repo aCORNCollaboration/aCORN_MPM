@@ -195,7 +195,6 @@ int main(int, char**) {
     //GluckBetaCompare();
     GluckSirlinCompare();
     
-    
     return EXIT_SUCCESS;
     
 }
