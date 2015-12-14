@@ -126,10 +126,99 @@ public:
     double d = 0.19;    ///< wire spacing
 };
 
-int main(int, char**) {
-    setupSlideStyle();
+void setShortPlot(OutputManager& OM) {
+    OM.defaultCanvas->SetCanvasSize(200, 100);
+    OM.defaultCanvas->SetBottomMargin(0.22);
+    OM.defaultCanvas->SetTopMargin(0.03);
+    gStyle->SetLabelSize(0.1, "XYZ");
+    gStyle->SetTitleSize(0.1,"xyz");
+    gStyle->SetTitleOffset(0.7,"y");
+    gStyle->SetTitleOffset(0.95,"x");
+}
+
+void divide_out_beta(TH1* h) {
+    for(int i=1; i<=h->GetNbinsX(); i++) {
+        double E = h->GetBinCenter(i);
+        h->SetBinContent(i, h->GetBinContent(i)/beta(E));
+    }
+}
+
+double asym(double a, double b) { return (a-b)/(a+b); }
+
+/// narrow-collimator-limit radiative delta a using parametrized Gluck93
+double Gluck93_narrowlimit_delta(double Ee) {
+    double b = beta(Ee);
+    double x = Ee/(delta_mn_mp-m_e);
+    double g =  Wilkinson_g_a2pi((Ee+m_e)/m_e);
+    double aa0 = calc_a0();
     
-    OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated_test/");
+    double n0p = 1+aa0*b;
+    double nRCp = n0p*(1 + g + 0.01*Gluck93_r_enu(x, 1));
+    double n0m = 1-aa0*b;
+    double nRCm = n0m*(1 + g + 0.01*Gluck93_r_enu(x, -1));
+    
+    double a0 = asym(n0p,n0m)/b;
+    double aRC = asym(nRCp,nRCm)/b;
+    printf("%g\t%g\t%g\n", Ee, a0, aRC);
+    return aRC-a0;
+}
+
+TH1* Gluck93_narrowlimit_histogram(TH1* hTemplate) {
+    TH1* h = (TH1*)hTemplate->Clone("hPerfectAcornRC");
+    for(int i=1; i<=h->GetNbinsX(); i++) {
+        double E = h->GetBinCenter(i);
+        h->SetBinContent(i, 1000 * Gluck93_narrowlimit_delta(E));
+    }
+    h->SetLineStyle(2);
+    return h;
+}
+
+TH1* scale_x_keV_to_MeV(TH1* h) {
+    const int nbins = h->GetXaxis()->GetNbins();
+    vector<double> new_bins(nbins+1);
+    for(int i=0; i<=nbins; i++){
+        new_bins[i] = h->GetBinLowEdge(i+1)/1000;
+    }
+    h->SetBins(nbins, new_bins.data());
+    return h;
+}
+
+void compile_RadCxn_plot() {
+    setupSlideStyle();
+    OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/RadCxnPlot/");
+    setShortPlot(OM);
+    
+    TFile f1((getEnvSafe("ACORN_SUMMARY")+"/Simulated_RC_FullMC/Simulated.root").c_str(), "READ");
+    TH1* h0 = (TH1*)f1.Get("hDelta");
+    TFile f2((getEnvSafe("ACORN_SUMMARY")+"/Simulated_RC_ParamMC/Simulated.root").c_str(), "READ");
+    TH1* h1 = (TH1*)f2.Get("hDelta");
+    
+    scale_x_keV_to_MeV(h0);
+    TH1* hs[] = {h0, h1};
+    for(auto h: hs) h->SetBinContent(h->GetNbinsX(),  h->GetBinContent(h->GetNbinsX()-1));
+
+    TF1 f("linefit", "pol1", 0.1, 0.4);
+    h0->Fit(&f,"R");
+    
+    h0->GetXaxis()->SetTitle("electron kinetic energy [MeV]");
+    h0->SetMinimum(-0.7);
+    h0->SetMarkerStyle(33);
+    h0->SetMarkerSize(0.5);
+    h0->Draw("HIST P");
+    //f.Draw("Same");
+    scale_x_keV_to_MeV(Gluck93_narrowlimit_histogram(h1))->Draw("HIST L Same");
+    scale_x_keV_to_MeV(h1);
+    h1->Draw("HIST L SAME");   
+    
+    OM.printCanvas("aCORN_radiative_correction");
+}
+
+int main(int, char**) {
+    compile_RadCxn_plot(); return EXIT_SUCCESS;
+    
+    setupSlideStyle();
+    OutputManager OM("Simulated", getEnvSafe("ACORN_SUMMARY")+"/Simulated_RC_FullMC/");
+    setShortPlot(OM);
     
     // kinematics generator
     GSLQRandom RQR(8);
@@ -203,7 +292,7 @@ int main(int, char**) {
     
     TH1F hw("hw","weighting",200,0,1e-29);
    
-    size_t npts = 1e8;
+    size_t npts = 1e9;
     ProgressBar* PB = new ProgressBar(npts, 50);
     for(size_t n=0; n<npts; n++) {
         PB->update(n);
@@ -254,6 +343,8 @@ int main(int, char**) {
             //wt *= 1 + a0*G.beta*cos_th_enu;
             
             hWishbone[upper]->Fill(E_e, 1e6*dt, wt);
+            
+            // Gluck MC with corrections
             haCorn[upper][true]->Fill(E_e, wt);
             
             // non-radiative-corrected component of spectrum:
@@ -262,6 +353,8 @@ int main(int, char**) {
             
             // [Glu93] parametrized radiative correction
             //haCorn[upper][false]->Fill(E_e, wt*G.Gluck93_radcxn_wt());
+            //if(G.K==0) haCorn[upper][true]->Fill(E_e, G.evt_w0 * G.c_2_wt * passprob * G.Gluck93_radcxn_wt());
+            
             // recoil, weak magnetism correction
             //haCorn[upper][false]->Fill(E_e, wt*G.B59_rwm_cxn_wt());
             // both!
@@ -291,8 +384,8 @@ int main(int, char**) {
     }
     delete PB;
     
-    OM.defaultCanvas->SetLeftMargin(0.17);
-    OM.defaultCanvas->SetRightMargin(0.04);
+    //OM.defaultCanvas->SetLeftMargin(0.17);
+    //OM.defaultCanvas->SetRightMargin(0.04);
     
     hSpec->Draw();
     double acs = 0.8*hSpec->GetMaximum()/haCorn[0][true]->GetMaximum();
@@ -326,32 +419,15 @@ int main(int, char**) {
     fBeta.Draw("Same");
     
     OM.printCanvas("Asymmetry");
-    
-    TF1 lineFit("lineFit", "pol0", 100, 400);
-    TH1* hDelta = (TH1*)hAsym[0]->Clone("hDelta");
-    //hDelta->SetTitle("aCORN near-wires correction");
-    hDelta->Add(hAsym[1], -1);
-    hDelta->GetYaxis()->SetTitle("false asymmetry [%]");
-    hDelta->GetYaxis()->SetTitleOffset(1.4);
-    
-    //hDelta->Divide(hAsym[1]);
-    //hDelta->Scale(100);
-    //hDelta->SetMinimum(-0.5);
-    //hDelta->SetMaximum(0.5);
-    
-    hDelta->Fit(&lineFit, "WWR+");
-    hDelta->Draw("HIST");
-    lineFit.Draw("Same");
-    OM.addObject(hDelta);
-    
+        
     // Fred's eLog 135 mirror correction curve
     //TF1 fFredCxn("fFredCxn", "-100*(0.01277 - 4.58e-05*x + 4.13e-08*x*x)", 100, 400);
     //fFredCxn.Draw("Same");
     
-    OM.printCanvas("DeltaAsymmetry");
+   
     
     
-    gPad->SetCanvasSize(300,300);
+    //gPad->SetCanvasSize(300,300);
     hPassPos->Draw("Col Z");
     OM.printCanvas("Positions");
     
@@ -387,6 +463,26 @@ int main(int, char**) {
     OM.printCanvas("Wishbone");
     
     //G.showEffic();
+    
+    
+    TF1 lineFit("lineFit", "pol1", 100, 400);
+    TH1* hDelta = (TH1*)hAsym[0]->Clone("hDelta");
+    hDelta->Add(hAsym[1], -1);
+    hDelta->Scale(-10); // corrected - uncorrected
+    hDelta->SetMinimum(-1);
+    hDelta->SetMaximum(2);
+    hDelta->SetLineColor(1);
+    hDelta->SetTitle("");
+    hDelta->GetYaxis()->SetTitle("#delta a^{RC} #times 10^{3}");
+    //hDelta->GetYaxis()->SetTitleOffset(1.4);
+    divide_out_beta(hDelta);
+    
+    hDelta->Fit(&lineFit, "WWR+");
+    hDelta->Draw("HIST L");
+    //lineFit.Draw("Same");
+    OM.addObject(hDelta);
+    Gluck93_narrowlimit_histogram(hDelta)->Draw("HIST L Same");
+    OM.printCanvas("DeltaAsymmetry");
     
     OM.writeROOT();
     
