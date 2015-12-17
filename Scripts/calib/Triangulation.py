@@ -73,9 +73,8 @@ class ReticlePos:
         self.angular_cxn = (0,0)
     def offset_from(self,rpos):
         return ( (self.h-(rpos.h + rpos.angular_cxn[0]))*self.r, (self.v-(rpos.v + rpos.angular_cxn[1]))*self.r )
-        
-if __name__ == "__main__":
-    if 0:
+
+def theodolite_band_reading():
         w_band = 1./2.54    # width of copper band, inches
         
         # theodolite readings at top and bottom of band
@@ -93,47 +92,50 @@ if __name__ == "__main__":
         (x,y) = T.xypos(t0p,t1p)
         (a1,a2) = T.angles(x,y)
         print "angles",(t0p,t1p),"-> position",(x,y),"-> angles",(a1,a2)
+        
+if __name__ == "__main__":
 
-    r_BC = -14000.
-    r_BEC = 0.
-    r_TEC = 14750.
-    r_BM = 17250.
-    r_TM = 34625.
-    r_BPC = 40000.
-    r_TPC = 95000.
-    r_TC = 120000.
+    # distances [inches] relative to bottom electron collimator
+    r_BC = -14      # bottom bearing cage
+    r_BEC = 0.          # bottom electron collimator
+    r_TEC = 14.750      # top electron collimator
+    r_BM = 17.250       # bottom mirror
+    r_TM = 34.625       # top mirror
+    r_BPC = 40.000      # bottom proton collimator
+    r_TPC = 95.000      # top proton collimator
+    r_TC = 120.000      # top collimator
     
-    r0 = 33820
+    r0 = 33.820
     center_line = ReticlePos((0,0,32),(90,0,28),1)
-    rets = [ReticlePos((0,0,33),(90,0,23),r0+14750),
-            ReticlePos((0,1,33),(90,0,28),r0+17250),
-            ReticlePos((0,0,54),(90,0,5),r0+34625),
-            ReticlePos((0,0,36),(90,0,32),r0+40000),
-            ReticlePos((0,0,33),(90,0,31),r0+95000)]
+    rets = [ReticlePos((0,0,33),(90,0,23),r0+r_TEC),
+            ReticlePos((0,1,33),(90,0,28),r0+r_BM),
+            ReticlePos((0,0,54),(90,0,5),r0+r_TM),
+            ReticlePos((0,0,36),(90,0,32),r0+r_BPC),
+            ReticlePos((0,0,33),(90,0,31),r0+r_TPC)]
     
     center_line = ReticlePos((0,0,14),(90,0,32),1)
-    rets = [ReticlePos((0,0,15),(90,0,41),r0),          # bottom EC
-            ReticlePos((0,0,19),(90,0,35),r0+14750),    # top EC
-            ReticlePos((0,1,14),(90,0,36),r0+17250),    # bottom mirror
-            ReticlePos((0,0,33),(90,0,10),r0+34625),    # top mirror
-            ReticlePos((0,0,18),(90,0,41),r0+40000),    # bottom proton
-            ReticlePos((0,0,14),(90,0,36),r0+95000)]    # top proton
+    rets = [ReticlePos((0,0,15),(90,0,41),r0),
+            ReticlePos((0,0,19),(90,0,35),r0+r_TEC),
+            ReticlePos((0,1,14),(90,0,36),r0+r_BM),
+            ReticlePos((0,0,33),(90,0,10),r0+r_TM),
+            ReticlePos((0,0,18),(90,0,41),r0+r_BPC),
+            ReticlePos((0,0,14),(90,0,36),r0+r_TPC)]
     names = ["bottom electron", "top electron","bottom mirror","top mirror","bottom proton","top proton"]
     symbs = [symbol.triangle, symbol.circle, symbol.plus, symbol.cross, symbol.square, symbol.diamond]
     
     # alignement in bore
-    r0 = 54745.8
-    center_line = ReticlePos((360,0,2),(89,56,24),1)            # top bearing cage
-    rets = [ReticlePos((359,59,34),(89,56,32),r0),              # bottom E
-            ReticlePos((359,59,18),(89,57,0),r0+17250),         # bottom EM
-            ReticlePos((359,59,38),(89,57,1),r0+34625),         # top EM
-            ReticlePos((359,59,51),(89,56,42),r0+40000),        # bottom P
-            ReticlePos((359,59,57),(89,56,36),r0+95000)]        # top P
+    r0 = 54.7458
+    center_line = ReticlePos((360,0,2),(89,56,24),1)
+    rets = [ReticlePos((359,59,34),(89,56,32),r0),
+            ReticlePos((359,59,18),(89,57,0),r0+r_BM),
+            ReticlePos((359,59,38),(89,57,1),r0+r_TM),
+            ReticlePos((359,59,51),(89,56,42),r0+r_BPC),
+            ReticlePos((359,59,57),(89,56,36),r0+r_TPC)]
     names = ["bottom electron", "bottom mirror", "top mirror", "bottom proton", "top proton"]
     symbs = [symbol.triangle, symbol.plus, symbol.cross, symbol.square, symbol.diamond]
     
     # re-alignment in bore after removing bottom proton reticule
-    r0 = 51156.
+    r0 = 51.156
     center_line = ReticlePos((360,0,0),(89,54,24),1)            # ???
     rets = [ReticlePos((360,0,0),(89,54,25),r0+r_BC),
             ReticlePos((359,58,59),(89,54,25),r0+r_BEC),
@@ -141,11 +143,11 @@ if __name__ == "__main__":
             ReticlePos((359,59,21),(89,54,57),r0+r_TM),
             ReticlePos((359,59,39),(89,54,25),r0+r_TPC),
             ReticlePos((359,59,59),(89,54,24),r0+r_TC)]
-    names = ["bottom cage", "bottom electron", "bottom mirror", "top mirror",  "top proton",   "top cage"]
-    symbs = [symbol.diamond, symbol.triangle,  symbol.plus,    symbol.cross, symbol.circle, symbol.square]
+    names = ["bottom cage",  "bottom electron", "bottom mirror", "top mirror",  "top proton",   "top cage"]
+    symbs = [symbol.diamond, symbol.triangle,   symbol.plus,     symbol.cross,  symbol.circle,  symbol.square]
 
     # re-alignment check MPM
-    r0 = 51156.
+    r0 = 51.156
     center_line = ReticlePos((0,43,39),(89,54,24),1)            # nominal centerline
     rets = [ReticlePos((0,43,37),(89,54,30),r0+r_BC),
             ReticlePos((0,42,37),(89,54,29),r0+r_BEC),
@@ -155,7 +157,7 @@ if __name__ == "__main__":
             ReticlePos((0,43,38),(89,54,26),r0+r_TC)]
     
     # re-alignment check MPM 20150131
-    r0 = 50704.
+    r0 = 50.704
     center_line = ReticlePos((0,4,15),(89,53,29),1)            # arb.
     rets = [ReticlePos((0,4,23),(89,53,15),r0+r_BC),
             ReticlePos((0,4,57),(89,53,54),r0+r_BEC),
@@ -184,7 +186,7 @@ if __name__ == "__main__":
             ReticlePos((0,0,0),(89,55,07),r0+r_TC)]
     
     # insert alignment 20150608
-    r0 = 48102 - r_BC
+    r0 = 48.102 - r_BC
     center_line = ReticlePos((0,9,33),(89,53,57),1)
     rets = [ReticlePos((0,9,31),(89,53,47),r0+r_BC),
             ReticlePos((0,9,50),(89,54,43),r0+r_BEC),
@@ -192,22 +194,56 @@ if __name__ == "__main__":
             ReticlePos((0,10,0), (89,54,20),r0+r_TM),
             ReticlePos((0,9,41),(89,54,12),r0+r_TPC),
             ReticlePos((0,9,33),(89,53,57),r0+r_TC)]
-    center_line.angular_cxn = [ (rets[-1].offset_from(center_line)[i]-rets[0].offset_from(center_line)[i])/(r_TC-r_BC) for i in range(2)]
-
+    
+    if 0:
+        # 20151216 in-bore alignment after opening up (TH); theodolite viewing from NNE
+        r0 = 53.34 - r_BC
+        center_line = ReticlePos((0,0,0),(89,53,40),1)
+        rets = [ReticlePos((0,0,0),(89,53,40),r0+r_BC),
+                ReticlePos((0,0,0),(89,54,36),r0+r_BEC),
+                ReticlePos((0,0,28),(89,54,42),r0+r_BM),
+                ReticlePos((0,0,27), (89,54,23),r0+r_TM),
+                ReticlePos((0,0,5),(89,54,12),r0+r_TPC),
+                ReticlePos((0,0,3),(89,54,0),r0+r_TC)]
+    elif 0:
+        # 20151216 re-check (MPM)
+        center_line = ReticlePos((0,0,12),(89,53,28),1)
+        rets = [ReticlePos((0,0,12),(89,53,28),r0+r_BC),
+                ReticlePos((0,0,13),(89,54,31),r0+r_BEC),
+                ReticlePos((0,0,38),(89,54,38),r0+r_BM),
+                ReticlePos((0,0,34), (89,54,15),r0+r_TM),
+                ReticlePos((0,0,21),(89,54,10),r0+r_TPC),
+                ReticlePos((0,0,14),(89,53,57),r0+r_TC)]
+    elif 0:
+        # redone on more solid base (MPM)
+        center_line = ReticlePos((0,14,45),(89,53,15),1)
+        rets = [ReticlePos((0,14,45),(89,53,15),r0+r_BC),
+                ReticlePos((0,15,13),(89,54,22),r0+r_BEC),
+                ReticlePos((0,15,58),(89,54,34),r0+r_BM),
+                ReticlePos((0,16,14), (89,54,8),r0+r_TM),
+                ReticlePos((0,16,25),(89,54,4),r0+r_TPC),
+                ReticlePos((0,16,24),(89,53,51),r0+r_TC)]
+    
+    ############################################
+    # re-set centerline along bearing cage axis!
+    center_line.angular_cxn = [ (rets[-1].offset_from(center_line)[i]-rets[0].offset_from(center_line)[i])/(r_TC-r_BC) for i in range(2) ]
+    
     g = graph.graphxy(width=10,height=10,
         x=graph.axis.lin(title="horizontal offset [mils]", min=-20, max=20),
-        y=graph.axis.lin(title="vertical offset [mils]", min=-10, max=30),
+        y=graph.axis.lin(title="vertical offset [mils]", min=-5, max=35),
         key = graph.key.key(pos="tc",columns=2))
     
+    ret0 = rets[0].offset_from(center_line)
     for (n,r) in enumerate(rets):
-        gdat = [r.offset_from(center_line)]
+        gdat = r.offset_from(center_line)
+        gdat = [ (1000*(gdat[0]-ret0[0]), 1000*(gdat[1]-ret0[1])) ] # inches to mils
         symb = symbs[n]
         ttl = names[n] + ": (%.1f, %.1f)"%gdat[0]
         g.plot(graph.data.points(gdat, x=1, y=2, title=ttl),[graph.style.symbol(symb)])
     
     if 0:
         # compare previous set    
-        r0 = 51156.
+        r0 = 51.156
         center_line = ReticlePos((0,43,39),(89,54,24),1)            # nominal centerline
         rets = [ReticlePos((0,43,37),(89,54,30),r0+r_BC),
                 ReticlePos((0,42,37),(89,54,29),r0+r_BEC),
@@ -223,5 +259,5 @@ if __name__ == "__main__":
             g.plot(graph.data.points(gdat, x=1, y=2, title=None),[graph.style.symbol(symb,symbolattrs=[rgb.red])])
         
         
-    g.writetofile("/home/mpmendenhall/Desktop/crosshairs.pdf")
+    g.writetofile("/home/mpmendenhall/Desktop/crosshairs_20150608.pdf")
     
