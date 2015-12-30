@@ -100,8 +100,8 @@ public:
     };
     vector<probe_coords> probes;
     
-    ConstBModel myB;
-    //BModel myB;
+    //ConstBModel myB;
+    BModel myB;
     int ncalls = 0;
     
     /// minimization criterea
@@ -149,7 +149,7 @@ public:
             probes.resize(2); // z probe is dead.
             for(int i=0; i<2; i++) {
                 for(int a=0; a<3; a++) {
-                    probes[i].x0[a] = (a==0)? 5 : 0;
+                    probes[i].x0[a] = (a == 1)? (i?-1 : 0.3) : 0;
                     probes[i].v0[a] = (a==i)? (i?-1:1) : 0;
                 }
             }
@@ -212,9 +212,9 @@ public:
         assert(myMin);
         f = ROOT::Math::Functor(this, &MapFitter::minFunc, nparam);
         
-        myMin->SetMaxFunctionCalls(10000);  // for Minuit
+        myMin->SetMaxFunctionCalls(100000);  // for Minuit
         myMin->SetMaxIterations(1000);     // for GSL
-        myMin->SetTolerance(0.01);
+        myMin->SetTolerance(0.0001);
         myMin->SetFunction(f);
         
         set_init_params();
@@ -230,13 +230,13 @@ public:
             if(i==2) {
                 if(offcenter) myMin->SetFixedVariable(i, "Bz", 368.);
                 else myMin->SetVariable(i, "Bz", 368., 1.0);
-            } else myMin->SetVariable(i, ("B"+to_str(i)).c_str(), 0, 0.1);
+            } else myMin->SetVariable(i, ("B"+to_str(i)).c_str(), 0, i < 3? 0.1 : 0.001);
         }
         
         for(size_t n = 0; n < probes.size(); n++) {
             for(int i=0; i<3; i++) {
                 if((!n && i==1) || (n==1 && i==0))  myMin->SetFixedVariable(3*n + i + myB.nparams(), ("p"+to_str(n)+"_"+to_str(i)).c_str(), probes[n].v0[i]);
-                else myMin->SetVariable(3*n + i + myB.nparams(), ("p"+to_str(n)+"_"+to_str(i)).c_str(), probes[n].v0[i], 0.01);
+                else myMin->SetVariable(3*n + i + myB.nparams(), ("p"+to_str(n)+"_"+to_str(i)).c_str(), probes[n].v0[i], 0.001);
             }
         }
     }
