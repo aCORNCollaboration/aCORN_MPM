@@ -14,6 +14,26 @@ class MapData:
 		self.cols["T"] = 2
 		print "data array",self.dat.shape
 
+def plot_axial(mapname, basedir):
+	m = MapData(basedir+"/MapData_Bmap%s.txt"%mapname)
+
+	n = m.dat.shape[0]
+	nn = 20
+	b0 = sum(m.dat[n/2-nn : n/2+nn, 3])/(2*nn)
+	s = b0 / (sum(m.dat[n/2 - nn - 16 : n/2 + nn - 16, 5]) / (2*nn))
+
+	g = graph.graphxy(width=10, height=8,
+		x=graph.axis.lin(title="probe distance from top [cm]", min = 0, max = 300),
+		y=graph.axis.lin(title="$B_z$ field [Gauss]", min = b0-1, max = b0+1))
+
+	g.plot(graph.data.points([(x[0], x[3]) for x in m.dat], x=1, y=2, title=None),[graph.style.line([rgb.red])])
+	
+
+	g.plot(graph.data.points([(x[0]+33, s*x[5]) for x in m.dat], x=1, y=2, title=None),[graph.style.line([rgb.blue])])
+	g.writetofile(basedir+"/B_axial_%s.pdf"%mapname)
+
+
+
 def plot_processed(mapname, basedir):
 
 	m = MapData(basedir+"/Processed_%s.txt"%mapname, {"Bx":3, "By": 4, "Bz": 5})
@@ -55,21 +75,23 @@ def plot_temperature(mapname, basedir):
 		y=graph.axis.lin(title="temperature [$^\\circ$C]"))
 
 	g.plot(graph.data.points([(x[0], x[2]) for x in m.dat], x=1, y=2), [graph.style.line()])
-	g.writetofile("Temperature_%s.pdf"%mapname)
+	g.writetofile(basedir+"/Temperature_%s.pdf"%mapname)
 
 def plot_raw_30(mapname, basedir, nskip = 1):
 	m = MapData(basedir+"/MapData_Bmap%s.txt"%mapname)
+	#m.dat[:, 4::4] *= -1
+
 
 	g = graph.graphxy(width=10, height=8,
 		x=graph.axis.lin(title="probe distance from top [cm]", min = 0, max = 250),
 		#y=graph.axis.lin(title="field reading [Gauss]"))
-		y=graph.axis.lin(title="field reading [Gauss]", min = -5, max = 15))
+		y=graph.axis.lin(title="field reading [Gauss]", min=-5, max=5))
 
 	thcols = rainbow(13)
 	for i in range(13)[::nskip]:
 		g.plot(graph.data.points([(x[0], x[3 + 4*i + 0]) for x in m.dat], x=1, y=2), [graph.style.line([thcols[i]])])
-		g.plot(graph.data.points([(x[0], x[3 + 4*i + 1]) for x in m.dat], x=1, y=2), [graph.style.line([style.linestyle.dashed,thcols[i]])])
-		g.plot(graph.data.points([(x[0], x[3 + 4*i + 2]) for x in m.dat], x=1, y=2), [graph.style.line([style.linestyle.dotted,thcols[i]])])
+		g.plot(graph.data.points([(x[0], x[3 + 4*i + 1]) for x in m.dat], x=1, y=2), [graph.style.line([style.linewidth.thin,thcols[i]])])
+		#g.plot(graph.data.points([(x[0], x[3 + 4*i + 2]) for x in m.dat], x=1, y=2), [graph.style.line([style.linestyle.dotted,thcols[i]])])
 
 	g.writetofile(basedir+"/RawScan_%s.pdf"%mapname)
 
@@ -110,7 +132,7 @@ def plot_raw_30(mapname, basedir, nskip = 1):
 
 		g.writetofile(basedir+"/RawScan_theta_%i_%s.pdf"%(ia,mapname))
 
-		fncols = [[],[style.linestyle.dashed],[style.linestyle.dashdotted],[style.linestyle.dotted]]
+		fncols = [[],[style.linestyle.dashed],[style.linestyle.dotted],[style.linestyle.dashdotted]]
 		for i in range(4):
 			if i+2 >= len(fftdat[0]):
 				continue
@@ -120,9 +142,9 @@ def plot_raw_30(mapname, basedir, nskip = 1):
 			gFFT.plot(graph.data.points([(x[0],2*1000*abs(x[i+2])) for x in fftdat], x=1, y=2, title=gtitle), lsty)
 			if i >= 2:
 				continue
-			dph = -90
-			phdat = [(x[0], (cmath.phase(x[i+2])*180/pi + dph)%360, (cmath.phase(x[i+2])*180/pi - 90 + dph)%360, (cmath.phase(x[i+2])*180/pi + dph)%360) for x in fftdat]
-			gPhase.plot(graph.data.points(phdat, x=1, y=2+ia, title=gtitle), lsty)
+			dph = [90,45,0,0][i]
+			phdat = [(x[0], (cmath.phase(x[i+2])*180/pi + dph)%360, (cmath.phase(x[i+2])*180/pi - 90 + dph)%360) for x in fftdat]
+			gPhase.plot(graph.data.points(phdat, x=1, y=2+(ia%2), title=gtitle), lsty)
 
 	gFFT.writetofile(basedir+"/RawScan_FFT_%s.pdf"%(mapname))
 	gPhase.writetofile(basedir+"/RawScan_Phase_%s.pdf"%(mapname))
@@ -130,13 +152,27 @@ def plot_raw_30(mapname, basedir, nskip = 1):
 if __name__ == "__main__":
 	basedir = "/home/mpmendenhall/Documents/aCORN/FieldMaps"
 	
+	#plot_raw_30("735",basedir)
+	#plot_raw_30("749",basedir)
+	#plot_raw_30("191",basedir)
+	#plot_raw_30("1127",basedir)
+
 	# 1105: 90 degree, centered
 	# 1107: 30 degree, off-center
+	# 1178, 118: field DOWN axial no trims
 	
 	#plot_processed("1105")
 	
 	#plot_raw_30("1105", basedir, 3)
-	plot_raw_30("1107", basedir)
+	#plot_raw_30("1107", basedir)
+	#plot_raw_30("1157", basedir, 3)
+        plot_raw_30("1168", basedir)
+	
 	#plot_temperature("1105")
 	#plot_temperature("1107")
+
+	# un-shimmed field-down axial
+	#plot_axial(1117, basedir)
+	#plot_axial(1118, basedir)
+	#plot_axial(1119, basedir)
 
