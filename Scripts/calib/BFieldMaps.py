@@ -12,7 +12,7 @@ class MapData:
 		self.cols["z"] = 0
 		self.cols["t"] = 1
 		self.cols["T"] = 2
-		print "data array",self.dat.shape
+		print("data array",self.dat.shape)
 
 def plot_axial(mapname, basedir):
 	m = MapData(basedir+"/MapData_Bmap%s.txt"%mapname)
@@ -77,7 +77,7 @@ def plot_temperature(mapname, basedir):
 	g.plot(graph.data.points([(x[0], x[2]) for x in m.dat], x=1, y=2), [graph.style.line()])
 	g.writetofile(basedir+"/Temperature_%s.pdf"%mapname)
 
-def plot_raw_30(mapname, basedir, nskip = 1):
+def plot_raw_30(mapname, basedir, nskip = 1, npts = 13, thetamin = 0., thetamax = 360.):
 	m = MapData(basedir+"/MapData_Bmap%s.txt"%mapname)
 	#m.dat[:, 4::4] *= -1
 
@@ -87,8 +87,8 @@ def plot_raw_30(mapname, basedir, nskip = 1):
 		#y=graph.axis.lin(title="field reading [Gauss]"))
 		y=graph.axis.lin(title="field reading [Gauss]", min=-5, max=5))
 
-	thcols = rainbow(13)
-	for i in range(13)[::nskip]:
+	thcols = rainbow(npts)
+	for i in range(npts)[::nskip]:
 		g.plot(graph.data.points([(x[0], x[3 + 4*i + 0]) for x in m.dat], x=1, y=2), [graph.style.line([thcols[i]])])
 		g.plot(graph.data.points([(x[0], x[3 + 4*i + 1]) for x in m.dat], x=1, y=2), [graph.style.line([style.linewidth.thin,thcols[i]])])
 		#g.plot(graph.data.points([(x[0], x[3 + 4*i + 2]) for x in m.dat], x=1, y=2), [graph.style.line([style.linestyle.dotted,thcols[i]])])
@@ -104,23 +104,25 @@ def plot_raw_30(mapname, basedir, nskip = 1):
 	gPhase = graph.graphxy(width=10, height=8,
 			x=graph.axis.lin(title="probe distance from top [cm]", min = 0, max = 250),
 			y=graph.axis.lin(title="Fourier components phase [degrees]", min = 0, max = 360),
-			key = graph.key.key(pos="tc",columns=4))
-
+			key = graph.key.key(pos="tl",columns=2))
+        
 	for ia in range(3):
 		axname = "xyz"[ia]
-		if ia == 2 and nskip == 1:
+		if ia == 2 and nskip == 1: # z probe dead on 30deg off-axis
 			continue
 
 		g = graph.graphxy(width=10, height=8,
-			x=graph.axis.lin(title="probe angle [degrees]", min = 0, max = 360),
+			x=graph.axis.lin(title="probe angle [degrees]", min = thetamin, max = thetamax),
 			y=graph.axis.lin(title="field reading [Gauss]", min = -0.1, max = 0.1))
-	
+
 		fftdat = []
+		nfft = (npts-1)//nskip
+		print("FFT for",nfft,"points.")
 		for iz in range(m.dat.shape[0]):
 			# load theta scans
-			scdat = [(30*i, m.dat[iz, 3 + 4*i + ia]) for i in range(13)[::nskip]]
-			tdat = array([s[1] for s in scdat[:12/nskip]])
-			z = m.dat[iz,0]			
+			scdat = [(thetamin + (thetamax-thetamin)/(npts-1)*i, m.dat[iz, 3 + 4*i + ia]) for i in range(npts)[::nskip]]
+			tdat = array([s[1] for s in scdat[:nfft]]) # data for FFT, excluding final points
+			z = m.dat[iz,0]	
 			fftdat.append([z,] + list(fft.rfft(tdat)/len(tdat)))
 
 			if not 25 < z < 225:
@@ -142,7 +144,7 @@ def plot_raw_30(mapname, basedir, nskip = 1):
 			gFFT.plot(graph.data.points([(x[0],2*1000*abs(x[i+2])) for x in fftdat], x=1, y=2, title=gtitle), lsty)
 			if i >= 2:
 				continue
-			dph = [90,45,0,0][i]
+			dph = [45,45,0,0][i]
 			phdat = [(x[0], (cmath.phase(x[i+2])*180/pi + dph)%360, (cmath.phase(x[i+2])*180/pi - 90 + dph)%360) for x in fftdat]
 			gPhase.plot(graph.data.points(phdat, x=1, y=2+(ia%2), title=gtitle), lsty)
 
@@ -156,7 +158,7 @@ if __name__ == "__main__":
 	#plot_raw_30("749",basedir)
 	#plot_raw_30("191",basedir)
 	#plot_raw_30("1127",basedir)
-
+	
 	# 1105: 90 degree, centered
 	# 1107: 30 degree, off-center
 	# 1178, 118: field DOWN axial no trims
@@ -166,11 +168,13 @@ if __name__ == "__main__":
 	#plot_raw_30("1105", basedir, 3)
 	#plot_raw_30("1107", basedir)
 	#plot_raw_30("1157", basedir, 3)
-        plot_raw_30("1168", basedir)
+	#plot_raw_30("1168", basedir)
+	plot_raw_30("2002", basedir, npts = 9, thetamin = -360., thetamax = 360.)
+	plot_raw_30("2003", basedir, npts = 9, thetamin = -360., thetamax = 360.)
 	
 	#plot_temperature("1105")
 	#plot_temperature("1107")
-
+	
 	# un-shimmed field-down axial
 	#plot_axial(1117, basedir)
 	#plot_axial(1118, basedir)

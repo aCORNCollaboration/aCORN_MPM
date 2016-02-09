@@ -11,6 +11,8 @@
 #include "GraphicsUtils.hh"
 #include "GraphUtils.hh"
 #include "StringManip.hh"
+#include "IterRangeFitter.hh"
+
 #include <TStyle.h>
 #include <TColor.h>
 
@@ -210,6 +212,20 @@ void WishbonePlugin::calculateResults() {
     hWishboneEProj[false]->SetLineColor(4);
     hWishboneEProj[true]->SetLineColor(2);
     
+    // Energy projection endpoint fit
+    IterRangeErfc EF(782,100);
+    EF.myF->SetParameter(0,1.5);
+    EF.nsigmalo = 3;
+    EF.doFit(hWishboneEProj[true]);
+    Escale = 750./EF.myF->GetParameter(1); // energy re-scaling factor
+    double ierr;
+    double rE0 = 100/Escale;
+    double rE1 = 900/Escale;
+    double fgrate = integralAndErrorInterp(hWishboneEProj[true], rE0, rE1, ierr, true);
+    printf("Foreground rate 100--900keV: %g +- %g mHz\n", fgrate/Escale, ierr/Escale);
+    double bgrate = integralAndErrorInterp(hWishboneEProj[false], rE0, rE1, ierr, true);
+    printf("Background rate 100--900keV: %g +- %g mHz\n", bgrate/Escale, ierr/Escale);
+    
     hWishboneTProj = hWishbone->ProjectionY("_tproj", 0, -1, "e");
     hWishboneTProj->SetTitle("Wishbone time of flight projection");
     normalize_to_bin_width(hWishboneTProj, 1./myA->runTimes.total());
@@ -382,6 +398,8 @@ void WishbonePlugin::makePlots() {
     hWishboneEProj[true]->GetXaxis()->SetRangeUser(0,1000);
     hWishboneEProj[true]->Draw();
     hWishboneEProj[false]->Draw("Same");
+    addDeletable(drawVLine(100/Escale, defaultCanvas, 1, 2));
+    addDeletable(drawVLine(900/Escale, defaultCanvas, 1, 2));
     addDeletable(drawHLine(0., defaultCanvas, 1));
     printCanvas("WishboneEnergy");
     

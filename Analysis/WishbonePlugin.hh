@@ -73,6 +73,7 @@ public:
     double T_p_lo = 2750;               ///< proton TOF lower window for wishbone [ns]
     double T_p_hi = 4500;               ///< proton TOF lower window for wishbone [ns]
     double T_p_max = 9500;              ///< maximum TOF for background analysis [ns]
+    double Escale = 1.0;                ///< calculated energy re-scaling factor
     
     TH1* hWishboneEProj[2];             ///< Wishbone energy spectrum, background and background-subtracted
     TH1* hWishboneTProj;                ///< Wishbone time-axis projection [Hz/us]

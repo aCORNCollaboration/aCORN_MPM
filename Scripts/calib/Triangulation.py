@@ -111,6 +111,18 @@ if __name__ == "__main__":
     # distances [inches] relative to bottom electron collimator
     rdists = {"bottom cage":    -14.,
               "bottom electron":0,
+              "e.c. 3":         3.82-1.93,
+              "e.c. 4":         5.51-1.93,
+              "e.c. 5":         7.13-1.93,
+              "e.c. 6":         8.66-1.93,
+              "e.c. 7":         10.08-1.93,
+              "e.c. 8":         11.42-1.93,
+              "e.c. 9":         12.68-1.93,
+              "e.c. 10":        13.78-1.93,
+              "e.c. 11":        14.65-1.93,
+              "e.c. 12":        15.75-1.93,
+              "e.c. 13":        16.54-1.93,
+              "e.c. 14":        17.28-1.93,
               "top electron":   14.750,
               "bottom mirror":  17.250,
               "top mirror":     34.625,
@@ -225,7 +237,7 @@ if __name__ == "__main__":
                 ReticlePos((0,0,21),(89,54,10),"top proton"),
                 ReticlePos((0,0,14),(89,53,57),"top cage")]
         
-    elif 1:
+    elif 0:
         # redone on more solid base (MPM)
         r0 = 53.34 - rdists["bottom cage"]
         rets = [ReticlePos((0,14,45),(89,53,15),"bottom cage"),
@@ -235,9 +247,80 @@ if __name__ == "__main__":
                 ReticlePos((0,16,25),(89,54,4), "top proton"),
                 ReticlePos((0,16,24),(89,53,51),"top cage")]
         
-    #elif 0:
-        # 20160112 aligning insert outside bore
-    
+    elif 0:
+        # 20160112 aligning insert outside bore TH
+        r0 = 47.9 - rdists["bottom electron"]
+        rets = [ReticlePos((0,0,0),(90,0,4),"bottom electron"),
+                ReticlePos((359,59,25),(90,0,21),"bottom mirror"),
+                ReticlePos((359,59,54),(90,0,23), "top mirror"),
+                ReticlePos((0,0,5),(89,59,48), "bottom proton"),
+                ReticlePos((0,0,0),(89,59,57), "top proton")]
+    elif 0:
+        # 20160112 aligning insert outside bore recheck MPM
+        r0 = 47.9 - rdists["bottom electron"]
+        rets = [ReticlePos((0,25,44),(90,0,4),"bottom electron"),
+                ReticlePos((0,25,6),(90,0,24),"bottom mirror"),
+                ReticlePos((0,25,36),(90,0,26), "top mirror"),
+                ReticlePos((0,25,51),(89,59,53), "bottom proton"),
+                ReticlePos((0,25,47),(89,59,56), "top proton")]
+    elif 0:
+        # 20160113 electron collimators check MPM
+        r0 = 47.9 - rdists["bottom electron"]
+        rets = [ReticlePos((0,25,41),(90,0,7),"bottom electron"),
+                ReticlePos((0,25,41),(89,59,49),"e.c. 3"),
+                ReticlePos((0,25,28),(89,59,58),"e.c. 4"),
+                ReticlePos((0,25,31),(90,0,6),"e.c. 5"),
+                ReticlePos((0,25,32),(90,0,8),"e.c. 6"),
+                ReticlePos((0,25,33),(89,59,54),"e.c. 7"),
+                ReticlePos((0,25,32),(89,59,43),"e.c. 8"),
+                ReticlePos((0,25,32),(89,59,51),"e.c. 9"),
+                ReticlePos((0,25,42),(90,0,4),"e.c. 10"),
+                ReticlePos((0,25,37),(90,0,13),"e.c. 11"),
+                ReticlePos((0,25,42),(90,0,8),"e.c. 12"),
+                ReticlePos((0,25,39),(90,0,8),"e.c. 13"),
+                ReticlePos((0,24,57),(90,0,24),"bottom mirror"),
+                ReticlePos((0,25,31),(90,0,23), "top mirror"),
+                ReticlePos((0,25,42),(89,59,50), "bottom proton"),
+                ReticlePos((0,25,38),(89,59,58), "top proton")]
+        
+    elif 0:
+        # 20160113 electron collimators check TH
+        r0 = 47.9 - rdists["bottom electron"]
+        rets = [ReticlePos((0,25,39),(90,0,8),"bottom electron"),
+                ReticlePos((0,25,39),(89,59,55),"e.c. 3"),
+                ReticlePos((0,25,25),(89,59,54),"e.c. 4"),
+                ReticlePos((0,25,33),(90,0,9),"e.c. 5"),
+                ReticlePos((0,25,30),(90,0,4),"e.c. 6"),
+                ReticlePos((0,25,30),(89,59,58),"e.c. 7"),
+                ReticlePos((0,25,30),(89,59,47),"e.c. 8"),
+                ReticlePos((0,25,29),(89,59,48),"e.c. 9"),
+                ReticlePos((0,25,34),(90,0,0),"e.c. 10"),
+                ReticlePos((0,25,35),(90,0,9),"e.c. 11"),
+                ReticlePos((0,25,41),(90,0,0),"e.c. 12"),
+                ReticlePos((0,25,41),(90,0,0),"e.c. 13"),
+                ReticlePos((0,24,57),(90,0,20),"bottom mirror"),
+                ReticlePos((0,25,22),(90,0,22), "top mirror"),
+                ReticlePos((0,25,37),(89,59,49), "bottom proton"),
+                ReticlePos((0,25,28),(89,59,56), "top proton")]
+    elif 0:
+    # 20160115 inser in bore (MPM); theodolite viewing from NNE
+        r0 = 48.35 - rdists["bottom cage"] # TODO wrong value
+        rets = [ReticlePos((0,9,30), (89,54,7),"bottom cage"),
+                ReticlePos((0,9,41), (89,54,49),"bottom electron"),
+                ReticlePos((0,9,59),(89,55,1),"bottom mirror"),
+                ReticlePos((0,9,58),(89,54,38),"top mirror"),
+                ReticlePos((0,9,29), (89,54,25),"top proton"),
+                ReticlePos((0,9,36), (89,54,13), "top cage")]
+    elif 1:
+    # 20160115 re-measure TH
+        r0 = 48.35 - rdists["bottom cage"] # TODO wrong value
+        rets = [ReticlePos((0,9,22), (89,54,13),"bottom cage"),
+                ReticlePos((0,9,40), (89,54,51),"bottom electron"),
+                ReticlePos((0,10,0),(89,55,3),"bottom mirror"),
+                ReticlePos((0,9,56),(89,54,44),"top mirror"),
+                ReticlePos((0,9,30), (89,54,31),"top proton"),
+                ReticlePos((0,9,37), (89,54,12), "top cage")]
+        
     # assign distances
     for r in rets:
         if r.name in rdists:
@@ -267,13 +350,24 @@ if __name__ == "__main__":
               "top proton": symbol.circle,
               "top cage": symbol.square }
     
-    ret0 = rets[0].offset_from(center_line)
+    ret0 = rets[0].offset_from(center_line) # center position
     for (n,r) in enumerate(rets):
+        if not r.name in rsymbs:
+            continue
         gdat = r.offset_from(center_line)
         gdat = [ (1000*(gdat[0]-ret0[0]), 1000*(gdat[1]-ret0[1])) ] # inches to mils
-        symb = rsymbs.get(r.name, None)
+        sty = [graph.style.symbol(rsymbs[r.name]), ]
         ttl = r.name + ": (%.1f, %.1f)"%gdat[0]
-        g.plot(graph.data.points(gdat, x=1, y=2, title=ttl),[graph.style.symbol(symb)])
+        g.plot(graph.data.points(gdat, x=1, y=2, title=ttl), sty)
+    # middle electron collimators
+    ecrets = [r for r in rets if r.name[:4] == "e.c."]
+    if ecrets:
+        gdat = [r.offset_from(center_line) + (r.name,) for r in ecrets]
+        gdat = [ (1000*(p[0]-ret0[0]), 1000*(p[1]-ret0[1]), p[2]) for p in gdat ] # inches to mils
+        for p in gdat:
+            print "%.1f\t%.1f\t%s"%p
+        ecsty = [graph.style.symbol(symbol.circle, size = 0.07, symbolattrs = [deco.filled()]), graph.style.line([style.linestyle.dotted])]
+        g.plot(graph.data.points(gdat, x=1, y=2, title="electron collimators"), ecsty)
     
     if 0:
         # compare previous set    
@@ -293,5 +387,5 @@ if __name__ == "__main__":
             g.plot(graph.data.points(gdat, x=1, y=2, title=None),[graph.style.symbol(symb,symbolattrs=[rgb.red])])
         
         
-    g.writetofile("/home/mpmendenhall/Desktop/crosshairs_20150608.pdf")
+    g.writetofile("/home/mpmendenhall/Desktop/alignement_20160115_b.pdf")
     

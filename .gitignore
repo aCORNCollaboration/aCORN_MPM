@@ -5,3 +5,9 @@
 *.pyc
 html/
 latex/
+
+ReducedToROOT
+BetaSpectrometerScanner
+WishboneScanner
+PMT_Gainmatcher
+SpectrumShape
