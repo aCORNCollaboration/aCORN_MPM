@@ -229,9 +229,9 @@ void WishbonePlugin::calculateResults() {
     double rE0 = 100/Escale;
     double rE1 = 900/Escale;
     double fgrate = integralAndErrorInterp(hWishboneEProj[true], rE0, rE1, ierr, true);
-    printf("Foreground rate 100--900keV: %g +- %g mHz\n", fgrate/Escale, ierr/Escale);
+    printf("Foreground rate 100--900keV: %g +- %g mHz\n", fgrate, ierr);
     double bgrate = integralAndErrorInterp(hWishboneEProj[false], rE0, rE1, ierr, true);
-    printf("Background rate 100--900keV: %g +- %g mHz\n", bgrate/Escale, ierr/Escale);
+    printf("Background rate 100--900keV: %g +- %g mHz\n", bgrate, ierr);
     
     hWishboneTProj = hWishbone->ProjectionY("_tproj", 0, -1, "e");
     hWishboneTProj->SetTitle("Wishbone time of flight projection");

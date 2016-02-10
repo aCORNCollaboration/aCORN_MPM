@@ -33,8 +33,9 @@ void RunSetScanner::display() {
 
 void RunSetScanner::nextTreeLoaded() {
     assert((size_t)Tch->GetTreeNumber() < runlist.size());
-    evtRun = runlist[Tch->GetTreeNumber()];
-    loadNewRun(evtRun);
+    RunID rn = runlist[Tch->GetTreeNumber()];
+    loadNewRun(rn);
+    evtRun = rn;
 }
 
 void RunSetScanner::speedload(unsigned int e) {

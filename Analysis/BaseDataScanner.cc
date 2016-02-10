@@ -38,7 +38,7 @@ void BaseDataScanner::makeFlags() {
 }
 
 void BaseDataScanner::loadNewRun(RunID rn) {
-    if(currentCal) T_0 += runTimes[currentCal->getRunID()] * 1e9;
+    T_0 += runTimes[evtRun] * 1e9;
     auto it = cals.find(rn);
     if(it == cals.end()) {
         currentCal = cals[rn] = new AcornCalibrator(rn);
@@ -51,8 +51,8 @@ double BaseDataScanner::_getRunTime(RunID) {
     int nback = 1;
     T_p = 0;
     while(T_p <= 0) speedload(nEvents-(nback++));
-    //std::cout << rn << " Run time " << T_p << " ns" << "\n";
-    return T_p/1.e9;
+    //std::cout  << " Run time " << T_p << " ns" << "\n";
+    return T_p > 0 ? T_p/1.e9 : 144.; // TODO correct this!
 }
 
 void BaseDataScanner::calibrate() {
