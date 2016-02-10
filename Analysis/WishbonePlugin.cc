@@ -53,7 +53,7 @@ TH2* TH2Slicer::subtractProfile(const TH1* p, double s) const {
 WishbonePlugin::WishbonePlugin(RunAccumulator* RA, const string& nm, const string& inflname):
 RunAccumulatorPlugin(RA, nm, inflname),
 hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this),
-hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(this) {
+hChanSpec(this), hModuleMult(this), hRateHistory(this), hPos(this), hPosSigma(this), hEnergyRadius(this) {
     
     dataMode = BAD;
     string dsrc = split(strip(getEnvSafe("ACORN_REDUCED_ROOT"),"/"),"/").back();
@@ -126,6 +126,12 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     hEnergyRadiusTemplate.GetYaxis()->SetTitle("Energy [keV]");
     initRegions(hEnergyRadius);
     hEnergyRadius.setTemplate(hEnergyRadiusTemplate);
+    
+    TH1F hRateHistoryTemplate("hRateHistory","Event rate", 72*60/10., 0, 72);
+    hRateHistoryTemplate.GetXaxis()->SetTitle("run time [h]");
+    hRateHistoryTemplate.GetYaxis()->SetTitle("rate [Hz]");
+    initRegions(hRateHistory);
+    hRateHistory.setTemplate(hRateHistoryTemplate);
 }
 
 void WishbonePlugin::config_NGC_cuts() {
@@ -189,6 +195,7 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
         hPos.fill(PDS.T_e2p, PDS.Pos.px[0], PDS.Pos.px[1], weight);
         hPosSigma.fill(PDS.T_e2p, PDS.Pos.sx[0], PDS.Pos.sx[1], weight);
         hEnergyRadius.fill(PDS.T_e2p, PDS.Pos.r2(), PDS.E_recon, weight);
+        if(200 < PDS.E_recon && PDS.E_recon < 600) hRateHistory.fill(PDS.T_e2p, (PDS.T_0+PDS.T_p)*1e-9/3600., weight);
     }
 }
 
@@ -254,6 +261,7 @@ void WishbonePlugin::calculateResults() {
     hModuleMult.makeRates(0);
     hNVeto.makeRates(0);
     hNVeto.hRates[true]->GetYaxis()->SetTitle("rate [Hz]");
+    hRateHistory.makeRates(1, myA->runTimes.total()/3600.);
     
     hProtonSignal.makeRates(1);
     hProtonSignal.hRates[false]->GetYaxis()->SetTitle("rate [Hz/kchannel]");
@@ -411,6 +419,12 @@ void WishbonePlugin::makePlots() {
     addDeletable(drawVLine(T_p_min/1000., defaultCanvas, 4));
     addDeletable(drawVLine(T_p_max/1000., defaultCanvas, 4));
     printCanvas("WishboneTime");
+    
+    hRateHistory.hRates[false]->SetMinimum(0);
+    hRateHistory.hRates[false]->GetXaxis()->SetRangeUser(0,myA->runTimes.total()/3600.);
+    hRateHistory.hRates[false]->Draw();
+    hRateHistory.hRates[true]->Draw("Same");
+    printCanvas("RateHistory");
     
     hWishboneFiducialTProj->Draw();
     printCanvas("WishboneFiducialTime");

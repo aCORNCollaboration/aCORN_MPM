@@ -62,6 +62,7 @@ public:
     FGBGRegionsHist hPMTs;              ///< which PMTs fired, as a function of event
     FGBGRegionsHist hChanSpec;          ///< individual PMTs spectrum distribution
     FGBGRegionsHist hModuleMult;        ///< module multiplicity, for module dropout issues
+    FGBGRegionsHist hRateHistory;       ///< Wishbone coincidence event rate versus run time
     
     FGBGRegionsHist hPos;               ///< PMT hit center-of-mass positions
     FGBGRegionsHist hPosSigma;          ///< PMT hit RMS spread
@@ -79,7 +80,7 @@ public:
     TH1* hWishboneTProj;                ///< Wishbone time-axis projection [Hz/us]
     TH2* hWishboneBGSub;                ///< Background-subtracted wishbone [Hz/MeV/us]
     TH1* hWishboneFiducialTProj;        ///< Background-subtracted time profile in 100--300 keV region
-
+    
 protected:
     /// initialize foreground/background regions
     void initRegions(FGBGRegionsHist& h);

@@ -36,9 +36,9 @@ public:
     virtual string locateRun(RunID) const { assert(false); return ""; }
     
     /// speedload, keeping track of currently loaded run number
-    virtual void speedload(unsigned int e);
+    void speedload(unsigned int e) override;
     /// update calibrations when next TTree loaded
-    virtual void nextTreeLoaded();
+    void nextTreeLoaded() override;
     ///  subclass this for calibrations after loading event
     virtual void calibrate() { }
     /// subclass this for routines when new run is loaded

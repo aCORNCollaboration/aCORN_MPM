@@ -38,6 +38,7 @@ void BaseDataScanner::makeFlags() {
 }
 
 void BaseDataScanner::loadNewRun(RunID rn) {
+    if(currentCal) T_0 += runTimes[currentCal->getRunID()] * 1e9;
     auto it = cals.find(rn);
     if(it == cals.end()) {
         currentCal = cals[rn] = new AcornCalibrator(rn);

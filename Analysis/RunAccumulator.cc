@@ -104,6 +104,7 @@ void RunAccumulator::loadProcessedData(BaseDataScanner& PDS) {
     printf("Loading processed data...\n");
     if(!PDS.getnFiles())
         return;
+    PDS.T_0 = 0;
     PDS.startScan();
     unsigned int nScanned = 0;
     

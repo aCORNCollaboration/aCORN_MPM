@@ -48,6 +48,8 @@ public:
     
     /// whether PMT is in outer ring
     static bool isOuter(size_t i);
+    /// get Run ID
+    RunID getRunID() const { return rn; }
     
 protected:
     RunID rn;                   ///< Run ID being calibrated

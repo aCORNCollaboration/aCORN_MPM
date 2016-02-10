@@ -31,6 +31,7 @@ public:
     
     bool is4p;                  ///< whether this is "4-proton" style data
     
+    Long64_t T_0 = 0;           ///< accumulated run time from previously loaded runs [ns]
     Long64_t T_p;               ///< proton (energy pulse) arrival time, loaded in 10ns units, calibrated to [ns]
     Long64_t T_d;               ///< [4p] discriminator arrival time, loaded in 10ns units, calibrated to [ns]
     Int_t nPSig;                ///< [4p] number of proton signals
@@ -65,9 +66,9 @@ public:
     /// generate event flags
     virtual void makeFlags();
     /// load calibrations for new run
-    virtual void loadNewRun(RunID r);
+    void loadNewRun(RunID r) override;
     /// calibrations after loading event
-    virtual void calibrate();
+    void calibrate() override;
     /// print info about current event
     virtual void displayEvt() const;
     
@@ -79,10 +80,10 @@ protected:
     size_t module_map[NCH_MAX];         ///< which channels go in which modules
     
     map<RunID, AcornCalibrator*> cals;  ///< calibrators for each run
-    AcornCalibrator* currentCal;        ///< calibrator for current run
+    AcornCalibrator* currentCal = NULL; ///< calibrator for current run
                              
     /// at run load time, figure out run total time
-    virtual double _getRunTime(RunID);
+    double _getRunTime(RunID) override;
     /// load calibrator for current run
     void loadCal(RunID rn);
     /// calculate number of signals triggered in given module

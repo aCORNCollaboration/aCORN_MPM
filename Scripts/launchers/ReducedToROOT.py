@@ -15,7 +15,7 @@ if __name__ == "__main__":
     
     flist = os.listdir(datadir)
     flist.sort()
-    for f in flist:
+    for fnum,f in enumerate(flist):
         
         if "_spect" in f or not (f[0] in ["S","s"] and ".txt" in f):
             continue
@@ -30,7 +30,8 @@ if __name__ == "__main__":
         
         outfname = "%s/%s.root"%(outdir,f.replace(".txt","").replace(".gz",""))
         if os.path.isfile(outfname):
-            print outfname,"already exists. Skipping."
+            if not fnum%20:
+                print outfname,"already exists. Skipping."
             continue
                 
         if f[-2:] == "gz":
