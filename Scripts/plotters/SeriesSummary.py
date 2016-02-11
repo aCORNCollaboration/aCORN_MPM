@@ -58,11 +58,14 @@ class SeriesPlotSetup:
             self.make_gdat(curs)
         g = graph.graphxy(width=15, height=6, x=self.xaxis, y=self.yaxis, key=graph.key.key(pos="tl"))
         g.plot(graph.data.points(self.gdat,x=1,y=2,dy=3,title=None),
-               [graph.style.errorbar(), graph.style.symbol(symbol.circle,size=0.1,symbolattrs=[deco.filled([color.rgb(1,1,1)])])])
+               [graph.style.errorbar(errorbarattrs=[color.rgb.blue]),
+                graph.style.symbol(symbol.circle,size=0.1,symbolattrs=[color.rgb.blue, deco.filled([color.rgb(1,1,1)])])])
         
         self.auxfits(g)
         
-        g.writetofile(self.basepath+self.name+".pdf")
+        outf = self.basepath+self.name+".pdf"
+        print "Saving plot to",outf
+        g.writetofile(outf)
         
     def summarize_dat(self):
         sx = 0
@@ -78,9 +81,12 @@ class SeriesPlotSetup:
         print
         
     def auxfits(self,g):
-        if self.name in ["fid_asym","obs_asym"]:
-            self.fit_line(g)
-            
+        try:
+            if self.name in ["fid_asym","obs_asym"]:
+                self.fit_line(g)
+        except:
+            pass
+        
     def fit_line(self,g,nterms=1):
         LF = LinearFitter(terms=[polyterm(i) for i in range(nterms)])
         if self.gdat[0][2]:
@@ -146,17 +152,17 @@ if __name__ == "__main__":
     rtplist = get_result_types(curs)
     rtpdat = {}
     for rt in rtplist:
-        print rt
+        print "Found",rt
         rtpdat[rt[1]] = SeriesPlotSetup(rt)
         rtpdat[rt[1]].make_gdat(curs)
         
     rtpdat["fid_rate"],rtpdat["fid_asym"] = makeAsymmetrySeries(rtpdat["wb_fast_fiducial"], rtpdat["wb_slow_fiducial"])
     
     for k in rtpdat:
-        print k
+        print "Plotting",k
         rtpdat[k].make_graph(curs)
         rtpdat[k].summarize_dat()
-
+    
     cplots = [("wb_bg","wb_fg"),
               ("wb_fast_fiducial", "wb_slow_fiducial"),
               ("fid_rate","obs_asym"),

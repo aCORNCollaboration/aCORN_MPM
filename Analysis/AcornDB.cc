@@ -250,6 +250,6 @@ void AcornDB::uploadAnaResult(sqlite3_int64 type_id, AnaResult R) {
 }
 
 void AcornDB::uploadAnaResult(const string& name, const string& descrip, AnaResult R) {
-    printf("%s [%s]:\t%g ~ %g\n", descrip.c_str(), name.c_str(), R.value, R.err);
+    printf("%s [%s]:\t%.8g ~ %g\n", descrip.c_str(), name.c_str(), R.value, R.err);
     uploadAnaResult(getAnaResultType(name,descrip), R);
 }

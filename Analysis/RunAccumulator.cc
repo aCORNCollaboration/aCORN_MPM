@@ -14,6 +14,12 @@
 
 RunAccumulator::RunAccumulator(OutputManager* pnt, const std::string& nm, const std::string& inflName):
 PluginSaver(pnt,nm,inflName), isSimulated(false) {
+    dataMode = BAD;
+    string dsrc = split(strip(getEnvSafe("ACORN_REDUCED_ROOT"),"/"),"/").back();
+    if(dsrc == "ROOT_NG6") dataMode = NG6;
+    if(dsrc == "ROOT_NGC") dataMode = NGC;
+    assert(dataMode != BAD);
+    
     TH1::SetDefaultSumw2(true); // all histograms default to having errorbars
     
     // initialize blind time to 0

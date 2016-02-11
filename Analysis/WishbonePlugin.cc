@@ -15,6 +15,7 @@
 
 #include <TStyle.h>
 #include <TColor.h>
+#include <cassert>
 
 int TH2Slicer::pcount = 0;
     
@@ -55,11 +56,7 @@ RunAccumulatorPlugin(RA, nm, inflname),
 hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this),
 hChanSpec(this), hModuleMult(this), hRateHistory(this), hPos(this), hPosSigma(this), hEnergyRadius(this) {
     
-    dataMode = BAD;
-    string dsrc = split(strip(getEnvSafe("ACORN_REDUCED_ROOT"),"/"),"/").back();
-    if(dsrc == "ROOT_NG6") { dataMode = NG6; config_NG6_cuts(); }
-    if(dsrc == "ROOT_NGC") { dataMode = NGC; config_NGC_cuts(); }
-    assert(dataMode != BAD);
+    setAnalysisCuts();
     
     TH1F hProtonTemplate("hProtonSignal", "Proton detector signal", 200,0,20);
     hProtonTemplate.GetXaxis()->SetTitle("proton detector ADC channels (#times 10^{3})");
@@ -86,8 +83,8 @@ hChanSpec(this), hModuleMult(this), hRateHistory(this), hPos(this), hPosSigma(th
     hTemplate.GetXaxis()->SetTitle("Electron energy [keV]");
     hTemplate.GetYaxis()->SetTitle("Proton TOF [#mus]");
     hWishbone = (TH2F*)registerSavedHist("hWishbone",hTemplate);
-    //if(dataMode == NG6) hWishbone->SetTitle("aCORN NG-6 Wishbone");
-    if(dataMode == NGC) hWishbone->SetTitle("aCORN NG-C Wishbone");
+    //if(myA->dataMode == NG6) hWishbone->SetTitle("aCORN NG-6 Wishbone");
+    if(myA->dataMode == NGC) hWishbone->SetTitle("aCORN NG-C Wishbone");
     hWishbone->GetYaxis()->SetRange();
     
     TH2F hNETemplate("hNE","PMT trigger counts", 100, 0, 1000, 20, -0.5, 19.5);
@@ -127,6 +124,7 @@ hChanSpec(this), hModuleMult(this), hRateHistory(this), hPos(this), hPosSigma(th
     initRegions(hEnergyRadius);
     hEnergyRadius.setTemplate(hEnergyRadiusTemplate);
     
+    ignoreMissingHistos = true;
     TH1F hRateHistoryTemplate("hRateHistory","Event rate", 72*60/10., 0, 72);
     hRateHistoryTemplate.GetXaxis()->SetTitle("run time [h]");
     hRateHistoryTemplate.GetYaxis()->SetTitle("rate [Hz]");
@@ -134,22 +132,23 @@ hChanSpec(this), hModuleMult(this), hRateHistory(this), hPos(this), hPosSigma(th
     hRateHistory.setTemplate(hRateHistoryTemplate);
 }
 
-void WishbonePlugin::config_NGC_cuts() {
-    E_p_lo = 550;
-    E_p_hi = 1500;
-    T_p_min = 750;
-    T_p_lo = 3000;
-    T_p_hi = 4500;
-    T_p_max = 9500;
-}
-
-void WishbonePlugin::config_NG6_cuts() {
-    E_p_lo = 650;
-    E_p_hi = 2400;
-    T_p_min = 750;
-    T_p_lo = 2750;
-    T_p_hi = 4500;
-    T_p_max = 9500;
+void WishbonePlugin::setAnalysisCuts() {
+    DataMode dm = myA->dataMode;
+    if(dm == NGC) {
+        E_p_lo = 550;
+        E_p_hi = 1500;
+        T_p_min = 750;
+        T_p_lo = 3000;
+        T_p_hi = 4500;
+        T_p_max = 9500;
+    } else if(dm == NG6) {
+        E_p_lo = 650;
+        E_p_hi = 2400;
+        T_p_min = 750;
+        T_p_lo = 2750;
+        T_p_hi = 4500;
+        T_p_max = 9500;
+    }
 }
    
 void WishbonePlugin::initRegions(FGBGRegionsHist& h) {
@@ -170,9 +169,9 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
     if(PDS.E_p_0 <= 0) return;
     
     hProtonSignal.fill(PDS.T_e2p, PDS.E_p_0/1000., weight);
-    
+
+    // beta decay protons
     bool isProton = E_p_lo < PDS.E_p_0 && PDS.E_p_0 < E_p_hi;
-    
     if(isProton) {
         if(PDS.nE || PDS.nV)
             hModuleMult.fill(PDS.T_e2p, PDS.nFiredMod[0], PDS.nFiredMod[1], weight);
@@ -219,20 +218,6 @@ void WishbonePlugin::calculateResults() {
     hWishboneEProj[false]->SetLineColor(4);
     hWishboneEProj[true]->SetLineColor(2);
     
-    // Energy projection endpoint fit
-    IterRangeErfc EF(782,100);
-    EF.myF->SetParameter(0,1.5);
-    EF.nsigmalo = 3;
-    EF.doFit(hWishboneEProj[true]);
-    Escale = 750./EF.myF->GetParameter(1); // energy re-scaling factor
-    double ierr;
-    double rE0 = 100/Escale;
-    double rE1 = 900/Escale;
-    double fgrate = integralAndErrorInterp(hWishboneEProj[true], rE0, rE1, ierr, true);
-    printf("Foreground rate 100--900keV: %g +- %g mHz\n", fgrate, ierr);
-    double bgrate = integralAndErrorInterp(hWishboneEProj[false], rE0, rE1, ierr, true);
-    printf("Background rate 100--900keV: %g +- %g mHz\n", bgrate, ierr);
-    
     hWishboneTProj = hWishbone->ProjectionY("_tproj", 0, -1, "e");
     hWishboneTProj->SetTitle("Wishbone time of flight projection");
     normalize_to_bin_width(hWishboneTProj, 1./myA->runTimes.total());
@@ -265,7 +250,8 @@ void WishbonePlugin::calculateResults() {
     
     hProtonSignal.makeRates(1);
     hProtonSignal.hRates[false]->GetYaxis()->SetTitle("rate [Hz/kchannel]");
-   
+    normalize_to_bin_width(hWishboneTProj, 1./myA->runTimes.total());
+
     hVetoSum.makeRates(1,1000.);
     hVetoSum.hRates[false]->GetYaxis()->SetTitle("rate [#muHz/channel]");
     
@@ -299,6 +285,27 @@ void WishbonePlugin::makeAnaResults() {
     baseResult.value = integralAndError(hWishboneFiducialTProj, 3.7, 4.5, baseResult.err, "width");
     AcornDB::ADB().uploadAnaResult("wb_slow_fiducial", "slow protons in energy fiducial [Hz]", baseResult);
     
+    // Energy projection endpoint fit and rescaled energy range rate integrals
+    IterRangeErfc EF(650,75);
+    EF.myF->SetParameter(0,1.5);
+    EF.nsigmalo = 3;
+    EF.doFit(hWishboneEProj[true]);
+    baseResult.value = EF.myF->GetParameter(1);
+    baseResult.err = EF.myF->GetParError(1);
+    AcornDB::ADB().uploadAnaResult("spectrum_edge_center", "fit to center of spectrum upper edge", baseResult);
+    baseResult.value = EF.myF->GetParameter(2);
+    baseResult.err = EF.myF->GetParError(2);
+    AcornDB::ADB().uploadAnaResult("spectrum_edge_width", "fit to width of spectrum upper edge", baseResult);
+    Escale = 650./EF.myF->GetParameter(1); // energy re-scaling factor
+    double rE0 = 100/Escale;
+    double rE1 = 900/Escale;
+    baseResult.value = integralAndErrorInterp(hWishboneEProj[true], rE0, rE1, baseResult.err, true) / 1000.;
+    baseResult.err /= 1000;
+    AcornDB::ADB().uploadAnaResult("wb_erange_rate", "wishbone rate in ~100--900keV [Hz]", baseResult);
+    baseResult.value = integralAndErrorInterp(hWishboneEProj[false], rE0, rE1, baseResult.err, true) / 1000.;
+    baseResult.err /= 1000;
+    AcornDB::ADB().uploadAnaResult("bg_erange_rate", "background rate in ~100--900keV [Hz]", baseResult);
+        
     ManualWishboneSeparator MWS("WBFit", myA);
     MWS.setWishbone(hWishboneBGSub);
     MWS.extractAsymmetry();
@@ -391,7 +398,7 @@ void WishbonePlugin::makePlots() {
     addDeletable(drawVLine(E_p_lo/1000., defaultCanvas, 2));
     addDeletable(drawVLine(E_p_hi/1000., defaultCanvas, 2));
     printCanvas("ProtonSignal");
-  
+      
     defaultCanvas->SetLogy(false);
     
     hVetoSum.hRates[false]->SetMinimum(-20);
@@ -402,7 +409,7 @@ void WishbonePlugin::makePlots() {
     printCanvas("VetoSum");
     
     hWishboneEProj[true]->SetMinimum(-0.2);
-    hWishboneEProj[true]->SetMaximum(dataMode == NG6? 3 : 15);
+    hWishboneEProj[true]->SetMaximum(myA->dataMode == NG6? 3 : 15);
     hWishboneEProj[true]->GetXaxis()->SetRangeUser(0,1000);
     hWishboneEProj[true]->Draw();
     hWishboneEProj[false]->Draw("Same");

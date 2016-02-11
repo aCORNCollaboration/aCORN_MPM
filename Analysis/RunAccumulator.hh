@@ -20,6 +20,12 @@ using std::pair;
 
 class RunAccumulatorPlugin;
 
+enum DataMode {
+    BAD,
+    NG6,
+    NGC
+};
+
 class RunAccumulator: public PluginSaver {
 public:
     /// constructor
@@ -57,6 +63,8 @@ public:
     TH1* hToRate(TH1* h, int scaleAxes);
     /// generate base analysis result pre-filled with run range
     AnaResult makeBaseResult() const;
+    
+    DataMode dataMode = BAD;
     
 protected:
     /// build plugins appropriate for input file; call in subclass after setting up myBuilders
