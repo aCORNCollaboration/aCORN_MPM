@@ -3,7 +3,8 @@
 import os
 from optparse import OptionParser
 
-def get_series_list():
+def get_series_list_NG6():
+    """NG-6 series list from metadata"""
     md = open("/home/mpmendenhall/Documents/aCORN/Reference/MetaData_06102014.csv").readlines()[10:]
     md = [l.split(",") for l in md]
     nprev = ""
@@ -12,6 +13,13 @@ def get_series_list():
         if len(m)==10 and int(m[3])==1 and m[2]!=nprev:
             slist.append(int(m[2]))
             nprev = m[2]
+    slist.sort()
+    return slist
+
+def get_series_list_analyzed():
+    """Series list based on analyzed files"""
+    slist = [int(f.split("_")[-1]) for f in os.listdir(os.environ["ACORN_WISHBONE"]) if f[:7] == "Series_"]
+    slist.sort()
     return slist
 
 def check_missing():
@@ -39,7 +47,7 @@ if __name__ == "__main__":
     elif not options.replot:
         exit(0)
             
-    slist = get_series_list()
+    slist = get_series_list_analyzed()
     cmdlist = open("replay_cmds.txt","w")
     for s in slist:
         cmdlist.write(cmdbase%s)
