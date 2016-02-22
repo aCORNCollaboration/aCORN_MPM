@@ -9,6 +9,7 @@
 #define WISHBONEPLUGIN_HH
 
 #include "RunAccumulator.hh"
+#include "TRateCategories.hh"
 
 /// Utility class for wishbone plot backrgound subtraction and projections
 class TH2Slicer {
@@ -54,7 +55,16 @@ public:
     FGBGRegionsHist hPMTs;              ///< which PMTs fired, as a function of event
     FGBGRegionsHist hChanSpec;          ///< individual PMTs spectrum distribution
     FGBGRegionsHist hModuleMult;        ///< module multiplicity, for module dropout issues
-    FGBGRegionsHist hRateHistory;       ///< Wishbone coincidence event rate versus run time
+    
+    /// types of tabulated rates
+    enum RateType {
+        RATE_WB_BG = 0,                 ///< Wishbone background electron/proton coincidences
+        RATE_WB_FG = 1,                 ///< Wishbone foreground electron/proton coincidences
+        RATE_PROTON = 2,                ///< All proton detector events
+        RATE_VETO_BG = 3,               ///< veto-triggered background events
+        RATE_VETO_FG = 4                ///< veto-triggered foreground events
+    };
+    TRateCategories* hRateHistory;      ///< Tabulated event rates
     
     FGBGRegionsHist hPos;               ///< PMT hit center-of-mass positions
     FGBGRegionsHist hPosSigma;          ///< PMT hit RMS spread

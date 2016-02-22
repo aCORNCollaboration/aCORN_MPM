@@ -54,7 +54,7 @@ TH2* TH2Slicer::subtractProfile(const TH1* p, double s) const {
 WishbonePlugin::WishbonePlugin(RunAccumulator* RA, const string& nm, const string& inflname):
 RunAccumulatorPlugin(RA, nm, inflname),
 hProtonSignal(this), hNVeto(this), hVetoSum(this), hNE(this), hPMTs(this),
-hChanSpec(this), hModuleMult(this), hRateHistory(this), hPos(this), hPosSigma(this), hEnergyRadius(this) {
+hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(this) {
     
     setAnalysisCuts();
     
@@ -125,11 +125,8 @@ hChanSpec(this), hModuleMult(this), hRateHistory(this), hPos(this), hPosSigma(th
     hEnergyRadius.setTemplate(hEnergyRadiusTemplate);
     
     ignoreMissingHistos = true;
-    TH1F hRateHistoryTemplate("hRateHistory","Event rate", 72*60/10., 0, 72);
-    hRateHistoryTemplate.GetXaxis()->SetTitle("run time [h]");
-    hRateHistoryTemplate.GetYaxis()->SetTitle("rate [Hz]");
-    initRegions(hRateHistory);
-    hRateHistory.setTemplate(hRateHistoryTemplate);
+    TRateCategories hRateHistoryTemplate("hRateHistory","Event rate",1./6.);
+    hRateHistory = (TRateCategories*)registerObject("hRateHistory", hRateHistoryTemplate);
 }
 
 void WishbonePlugin::setAnalysisCuts() {
@@ -169,7 +166,9 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
     if(PDS.E_p_0 <= 0) return;
     
     hProtonSignal.fill(PDS.T_e2p, PDS.E_p_0/1000., weight);
-
+    Double_t t_proton_h = (PDS.T_0+PDS.T_p)*1e-9/3600.;
+    hRateHistory->AddPoint(RATE_PROTON, t_proton_h, weight);
+    
     // beta decay protons
     bool isProton = E_p_lo < PDS.E_p_0 && PDS.E_p_0 < E_p_hi;
     if(isProton) {
@@ -194,7 +193,17 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
         hPos.fill(PDS.T_e2p, PDS.Pos.px[0], PDS.Pos.px[1], weight);
         hPosSigma.fill(PDS.T_e2p, PDS.Pos.sx[0], PDS.Pos.sx[1], weight);
         hEnergyRadius.fill(PDS.T_e2p, PDS.Pos.r2(), PDS.E_recon, weight);
-        if(200 < PDS.E_recon && PDS.E_recon < 600) hRateHistory.fill(PDS.T_e2p, (PDS.T_0+PDS.T_p)*1e-9/3600., weight);
+        
+        if(200 < PDS.E_recon && PDS.E_recon < 600) {
+            for(int fg = 0; fg < 2; fg ++) {
+                for(auto cut: hNE.getRegions(fg)) { 
+                    if(cut.first < PDS.T_e2p && PDS.T_e2p <= cut.second) {
+                        hRateHistory->AddPoint(fg? RATE_WB_FG : RATE_WB_BG, t_proton_h, weight);
+                        if(PDS.nV) hRateHistory->AddPoint(fg? RATE_VETO_FG : RATE_VETO_BG, t_proton_h, weight);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -246,7 +255,6 @@ void WishbonePlugin::calculateResults() {
     hModuleMult.makeRates(0);
     hNVeto.makeRates(0);
     hNVeto.hRates[true]->GetYaxis()->SetTitle("rate [Hz]");
-    hRateHistory.makeRates(1, myA->runTimes.total()/3600.);
     
     hProtonSignal.makeRates(1);
     hProtonSignal.hRates[false]->GetYaxis()->SetTitle("rate [Hz/kchannel]");
@@ -261,6 +269,8 @@ void WishbonePlugin::calculateResults() {
         hWishboneEProj[i]->Scale(1./nrebin);
     }
     hWishboneEProj[false]->GetYaxis()->SetTitle("Background rate [Hz/MeV]");
+    
+    hRateHistory->SummarizeWindow();
     
     isCalculated = true;
 }
@@ -322,8 +332,8 @@ void WishbonePlugin::makePlots() {
         hWishboneBGSub->Rebin2D(2,2);
         hWishboneBGSub->Scale(1./4.);
     }
-    hWishboneBGSub->SetMinimum(-10.);
-    hWishboneBGSub->SetMaximum(10.);
+    hWishboneBGSub->SetMinimum(-2.);
+    hWishboneBGSub->SetMaximum(2.);
     hWishboneBGSub->GetXaxis()->SetRangeUser(0,1000);
     hWishboneBGSub->GetYaxis()->SetRangeUser(2,5);
     makeRBpalette();
@@ -427,11 +437,42 @@ void WishbonePlugin::makePlots() {
     addDeletable(drawVLine(T_p_max/1000., defaultCanvas, 4));
     printCanvas("WishboneTime");
     
-    hRateHistory.hRates[false]->SetMinimum(0);
-    hRateHistory.hRates[false]->GetXaxis()->SetRangeUser(0,myA->runTimes.total()/3600.);
-    hRateHistory.hRates[false]->Draw();
-    hRateHistory.hRates[true]->Draw("Same");
+    // scaled background and background-subtracted rate history plots
+    vector< pair<Int_t, Double_t> > rs;
+    rs.push_back(pair<Int_t, Double_t>(RATE_WB_BG, 1./3600*hChanSpec.getNormalization(true)/hChanSpec.getNormalization(false)));
+    TGraph* g0 = hRateHistory->MakeGraph(rs);
+    rs[0].first = RATE_VETO_BG;
+    TGraph* g2 = hRateHistory->MakeGraph(rs);
+    
+    rs[0].second *= -1.0;
+    rs.push_back(pair<Int_t, Double_t>(RATE_VETO_FG, 1./3600));
+    TGraph* g3 = hRateHistory->MakeGraph(rs);
+    rs[0].first = RATE_WB_BG;
+    rs[1].first = RATE_WB_FG;
+    TGraph* g1 = hRateHistory->MakeGraph(rs);
+    
+    g1->SetLineColor(2);
+    g0->SetLineColor(4);
+    
+    g0->SetMinimum(-0.1);
+    g0->SetTitle("Event rate");
+    g0->Draw("ALZ");
+    g0->GetXaxis()->SetTitle("run time [h]");
+    g0->GetXaxis()->SetRangeUser(0,myA->runTimes.total()/3600.);
+    g0->GetYaxis()->SetTitle("rate [Hz]");
+    g1->Draw("LZ");
+    
+    g2->SetLineColor(7);
+    g2->Draw("LZ");
+    g3->SetLineColor(6);
+    g3->Draw("LZ");
+    
     printCanvas("RateHistory");
+    delete g0;
+    delete g1;
+    delete g2;
+    delete g3;
+    /////////////////////////////////////////////////////////////////
     
     hWishboneFiducialTProj->Draw();
     printCanvas("WishboneFiducialTime");

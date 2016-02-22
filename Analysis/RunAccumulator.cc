@@ -181,7 +181,7 @@ FGBGRegionsHist::FGBGRegionsHist(RunAccumulatorPlugin* P): myP(P) {
 
 FGBGRegionsHist::~FGBGRegionsHist() {
     for(int i=0; i<2; i++) {
-        if(hRates[i]) delete hRates[i];
+        delete hRates[i];
         hRates[i] = NULL;
     }
 }

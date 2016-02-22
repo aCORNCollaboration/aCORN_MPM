@@ -34,11 +34,14 @@ public:
     
     deque<double> prevPulses;           ///< times of preceding pulses
     double T_prev_p = 0;                ///< time of preceding proton event [ns]
-    FGBGRegionsHist hPulserSignal;      ///< proton detector signal
+    double E_prev_p = 0;                ///< detector signal of preceding proton [ADC channels]
+    FGBGRegionsHist hPulserSignal;      ///< proton detector signal, cut on pulser timing
     TH1* hPulserTiming;                 ///< periodic pulser timing, broad window
     TH1* hPulserTimingPrecis;           ///< periodic pulser timing, precision window
     TH1* hPTimingGap;                   ///< time gap between subsequent proton events
     TVectorD* vGapTime;                 ///< DAQ deadtime inferred from large "gaps" [s]
+    FGBGRegionsHist hTimingHumpPrev;    ///< proton detector signal in correlated events hump versus "normal" peak
+    FGBGRegionsHist hTimingHumpPost;    ///< proton detector signal in correlated events hump versus "normal" peak
     
 protected:
     /// set up analysis cuts for data mode

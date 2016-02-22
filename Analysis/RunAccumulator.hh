@@ -124,7 +124,13 @@ public:
     void fill(double cutval, double x, double y, double w);
     /// generate rate-scaled, background-subtracted copies
     void makeRates(int axesScale = 1, double xscale = 1.0);
-
+    /// get regions list
+    const vector< pair<double,double> >& getRegions(bool fg) const { return regions[fg]; }
+    /// set non-default region normalization
+    void setNormalization(double l, bool fg) { totalLength[fg] = l; }
+    /// get normalization
+    double getNormalization(bool fg) const { return totalLength[fg]; }
+        
     TH1* hRates[2];     ///< background-subtracted, rate-scaled versions
     
 protected:

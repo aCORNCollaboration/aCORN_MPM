@@ -11,7 +11,7 @@
 
 PulserPlugin::PulserPlugin(RunAccumulator* RA, const string& nm, const string& inflname):
 RunAccumulatorPlugin(RA, nm, inflname),
-hPulserSignal(this) {
+hPulserSignal(this), hTimingHumpPrev(this), hTimingHumpPost(this) {
     
     setAnalysisCuts();
     ignoreMissingHistos = true;
@@ -27,6 +27,20 @@ hPulserSignal(this) {
     initRegions(hPulserSignal);
     hPulserSignal.setTemplate(hPulserSignalTemplate);
     
+    double T0_nrml = 1e-3;
+    double T1_nrml = 1e-2;
+    double T0_spcl = 2e-5;
+    double T1_spcl = 2e-4;
+    
+    hPulserSignalTemplate.SetName("hTimingHumpPrev");
+    hTimingHumpPrev.addRegion(T0_spcl, T1_spcl, true);
+    hTimingHumpPrev.addRegion(T0_nrml, T1_nrml, false);
+    hTimingHumpPrev.setTemplate(hPulserSignalTemplate);
+    hPulserSignalTemplate.SetName("hTimingHumpPost");
+    hTimingHumpPost.addRegion(T0_spcl, T1_spcl, true);
+    hTimingHumpPost.addRegion(T0_nrml, T1_nrml, false);
+    hTimingHumpPost.setTemplate(hPulserSignalTemplate);
+    
     TH1* hPTimingGapTemplate = logHist("hPTimingGapTemplate", "proton events timing gap", 112, 1e-6, 100);
     hPTimingGap = registerSavedHist("hPTimingGap", *hPTimingGapTemplate);
     hPTimingGap->GetXaxis()->SetTitle("gap between proton events [s]");
@@ -41,6 +55,7 @@ void PulserPlugin::setAnalysisCuts() {
         E_puls_lo = 3000;
         E_puls_hi = 6500;
         T_pulser = 0.99580e9;
+        tau_long = 0.1;
     } else if(dm == NG6) {
         E_puls_lo = 8000;
         E_puls_hi = 12000;
@@ -78,11 +93,14 @@ void PulserPlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
     // record candidate pulse to previous pulses list
     if(isPulserEnergy) prevPulses.push_back(PDS.T_p);
     
-    // proton timing gap
+    // proton timing gap [s]
     double dgap = (PDS.T_p - T_prev_p)*1e-9;
     if(dgap > 0) hPTimingGap->Fill(dgap, weight);
     if(dgap > tau_long) (*vGapTime)[0] += dgap;
+    hTimingHumpPrev.fill(dgap, E_prev_p/1000., weight);
+    hTimingHumpPost.fill(dgap, PDS.E_p/1000., weight);
     T_prev_p = PDS.T_p;
+    E_prev_p = PDS.E_p;
 }
 
 void PulserPlugin::calculateResults() {
@@ -152,12 +170,11 @@ void PulserPlugin::makeAnaResults() {
     printf("Initial guess: tau0 = %g, h = %g\n", tau0, h);
     hPTimingGap->Fit(pdtfit, "R");
     
-    h = pdtfit->GetParameter(0);
-    
     baseResult.value = tau0 = pdtfit->GetParameter(1);
     baseResult.err = pdtfit->GetParError(1);
     AcornDB::ADB().uploadAnaResult("proton_random_dt", "uncorrelated proton delta time [s]", baseResult);
     
+    h = pdtfit->GetParameter(0);
     double fitcounts = h * tau0 / log_binsize(*hPTimingGap);
     double expcounts = myA->runTimes.total()/tau0;
     baseResult.value = fitcounts/expcounts;
@@ -169,9 +186,21 @@ void PulserPlugin::makeAnaResults() {
     baseResult.err = 0;
     AcornDB::ADB().uploadAnaResult("proton_gap_loss", "DAQ dead fraction from proton gaps", baseResult);
     // number of gap events, less expected
-    baseResult.value = hPTimingGap->Integral(hPTimingGap->FindBin(tau_long), hPTimingGap->GetNbinsX()+1) - fitcounts*exp(-tau_long/tau0);
-    baseResult.err = sqrt(baseResult.value);
+    double nhiexp = fitcounts*exp(-tau_long/tau0);
+    baseResult.value = integralAndErrorInterp(hPTimingGap, tau_long, 50, baseResult.err, false) - nhiexp;
+    baseResult.err = 0;
     AcornDB::ADB().uploadAnaResult("n_gaps", "number of gaps in proton data", baseResult);
+    
+    // normalization for correlated hump analysis
+    for(int i=0; i<=1; i++) {
+        double l = 0;
+        auto rl = hTimingHumpPrev.getRegions(i);
+        for(auto r: rl) l += tau0*(exp(-r.first/tau0) - exp(-r.second/tau0));
+        hTimingHumpPrev.setNormalization(l, i);
+        hTimingHumpPost.setNormalization(l, i);
+    }
+    hTimingHumpPrev.makeRates(1);
+    hTimingHumpPost.makeRates(1);
 }
 
 void PulserPlugin::makePlots() {
@@ -187,6 +216,7 @@ void PulserPlugin::makePlots() {
     addDeletable(drawVLine(E_puls_hi/1000., defaultCanvas, 1));
     printCanvas("PulserSignal");
   
+    
     hPulserTiming->Draw();
     addDeletable(drawVLine((T_pulser-1e9)*1e-6, defaultCanvas, 2));
     printCanvas("PulserTiming");
@@ -196,8 +226,19 @@ void PulserPlugin::makePlots() {
     defaultCanvas->SetLogx(true);
     hPTimingGap->GetXaxis()->SetRangeUser(1e-6,1);
     hPTimingGap->Draw();
+    addDeletable(drawVLine(tau_long, defaultCanvas, 1, 2));
     printCanvas("ProtonTimingGap");
     
     defaultCanvas->SetLogx(false);
     defaultCanvas->SetLogy(false);
+    
+    hTimingHumpPrev.hRates[true]->SetMinimum(-1);
+    hTimingHumpPrev.hRates[true]->SetMaximum(10);
+    hTimingHumpPrev.hRates[true]->SetLineColor(4);
+    hTimingHumpPrev.hRates[false]->SetLineColor(3);
+    hTimingHumpPrev.hRates[true]->Draw("Hist");
+    hTimingHumpPrev.hRates[false]->Draw("Hist Same");
+    hTimingHumpPost.hRates[true]->Draw("Hist Same");
+    //hTimingHumpPost.hRates[false]->Draw("Hist Same");
+    printCanvas("HumpSignal");
 }

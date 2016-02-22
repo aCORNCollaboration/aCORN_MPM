@@ -155,6 +155,7 @@ if __name__ == "__main__":
         print "Found",rt
         rtpdat[rt[1]] = SeriesPlotSetup(rt)
         rtpdat[rt[1]].make_gdat(curs)
+        rtpdat[rt[1]].gdat = [g for g in rtpdat[rt[1]].gdat if g[0] > 3000]
         
     rtpdat["fid_rate"],rtpdat["fid_asym"] = makeAsymmetrySeries(rtpdat["wb_fast_fiducial"], rtpdat["wb_slow_fiducial"])
     
