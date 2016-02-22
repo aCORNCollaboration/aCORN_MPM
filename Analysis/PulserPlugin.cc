@@ -14,6 +14,12 @@ RunAccumulatorPlugin(RA, nm, inflname),
 hPulserSignal(this), hTimingHumpPrev(this), hTimingHumpPost(this) {
     
     setAnalysisCuts();
+
+    psignalRegions.appendRange(-2e6, -1e6);
+    psignalRegions.newRegion();
+    psignalRegions.appendRange(-1e5, +1e5);
+    psignalRegions.scaleNormsTo(1);
+    
     ignoreMissingHistos = true;
     
     hPulserTiming = registerSavedHist("hPulserTiming", "proton pulser timing correlation", 400, -10, 10);
@@ -24,22 +30,16 @@ hPulserSignal(this), hTimingHumpPrev(this), hTimingHumpPost(this) {
     
     TH1F hPulserSignalTemplate("hPulserSignal", "proton pulser signals", 200, 0, 20);
     hPulserSignalTemplate.GetXaxis()->SetTitle("proton detector ADC channels (#times 10^{3})");
-    initRegions(hPulserSignal);
-    hPulserSignal.setTemplate(hPulserSignalTemplate);
-    
-    double T0_nrml = 1e-3;
-    double T1_nrml = 1e-2;
-    double T0_spcl = 2e-5;
-    double T1_spcl = 2e-4;
+    hPulserSignal.setTemplate(hPulserSignalTemplate, psignalRegions);
+        
+    dtpRegions.appendRange(1e-3, 1e-2);         /// "normal" region
+    dtpRegions.newRegion();
+    dtpRegions.appendRange(2e-5, 2e-4);         /// "hump" region
     
     hPulserSignalTemplate.SetName("hTimingHumpPrev");
-    hTimingHumpPrev.addRegion(T0_spcl, T1_spcl, true);
-    hTimingHumpPrev.addRegion(T0_nrml, T1_nrml, false);
-    hTimingHumpPrev.setTemplate(hPulserSignalTemplate);
+    hTimingHumpPrev.setTemplate(hPulserSignalTemplate, dtpRegions);
     hPulserSignalTemplate.SetName("hTimingHumpPost");
-    hTimingHumpPost.addRegion(T0_spcl, T1_spcl, true);
-    hTimingHumpPost.addRegion(T0_nrml, T1_nrml, false);
-    hTimingHumpPost.setTemplate(hPulserSignalTemplate);
+    hTimingHumpPost.setTemplate(hPulserSignalTemplate, dtpRegions);
     
     TH1* hPTimingGapTemplate = logHist("hPTimingGapTemplate", "proton events timing gap", 112, 1e-6, 100);
     hPTimingGap = registerSavedHist("hPTimingGap", *hPTimingGapTemplate);
@@ -61,11 +61,6 @@ void PulserPlugin::setAnalysisCuts() {
         E_puls_hi = 12000;
         T_pulser = 0.99585e9;
     }
-}
-   
-void PulserPlugin::initRegions(FGBGRegionsHist& h) {
-    h.addRegion(-1e5, +1e5, true);
-    h.addRegion(-2e6, -1e6, false);
 }
 
 void PulserPlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
@@ -192,12 +187,11 @@ void PulserPlugin::makeAnaResults() {
     AcornDB::ADB().uploadAnaResult("n_gaps", "number of gaps in proton data", baseResult);
     
     // normalization for correlated hump analysis
-    for(int i=0; i<=1; i++) {
+    for(size_t i=0; i<dtpRegions.regions.size(); i++) {
         double l = 0;
-        auto rl = hTimingHumpPrev.getRegions(i);
-        for(auto r: rl) l += tau0*(exp(-r.first/tau0) - exp(-r.second/tau0));
-        hTimingHumpPrev.setNormalization(l, i);
-        hTimingHumpPost.setNormalization(l, i);
+        for(auto r: dtpRegions.regions[i]) l += tau0*(exp(-r.first/tau0) - exp(-r.second/tau0));
+        hTimingHumpPrev.getRegions().norms[i] = l;
+        hTimingHumpPost.getRegions().norms[i] = l;
     }
     hTimingHumpPrev.makeRates(1);
     hTimingHumpPost.makeRates(1);

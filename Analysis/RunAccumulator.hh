@@ -107,37 +107,57 @@ public:
 //////////////////////////////
 //////////////////////////////
 
+/// Helper class for range-based cuts
+class RangeCutSet {
+public:
+    /// Constructor
+    RangeCutSet() { }
+    /// Start new region definition
+    void newRegion() { regions.push_back(vector< pair<double,double> >()); norms.push_back(0); }
+    /// Append range to newest region
+    void appendRange(double x0, double x1) { 
+        if(!regions.size()) newRegion();
+        regions.back().push_back(pair<double,double>(x0,x1));
+        norms.back() += x1-x0;
+    }
+    /// Scale all normalizations by given factor
+    void scaleNorms(double s) { for(auto& n: norms) n *= s; }
+    /// Scale all normalizations to specified
+    void scaleNormsTo(size_t i) { scaleNorms(1./norms[i]); }
+    
+    vector< vector< pair<double,double> > > regions;    ///< the regions
+    vector<double> norms;                               ///< normalization for each region
+};
+
 /// Helper class for background-region-subtracted histograms
 class FGBGRegionsHist {
 public:
     /// Constructor
-    FGBGRegionsHist(RunAccumulatorPlugin* P);
+    FGBGRegionsHist(RunAccumulatorPlugin* P): myP(P) { }
     /// Destructor
-    ~FGBGRegionsHist();
-    /// Setup using template histogram
-    void setTemplate(const TH1& hTemplate);    
-    /// add region to count as FG/BG
-    void addRegion(double x0, double x1, bool fg);
+    ~FGBGRegionsHist() { for(auto h: hRates) delete h; }
+    
+    /// Setup using template histogram and regions
+    void setTemplate(const TH1& hTemplate, const RangeCutSet& rs);    
+   
     /// fill appropriate histogram
     void fill(double cutval, double x, double w);
     /// fill appropriate histogram, TH2 version
     void fill(double cutval, double x, double y, double w);
+    
     /// generate rate-scaled, background-subtracted copies
-    void makeRates(int axesScale = 1, double xscale = 1.0);
+    void makeRates(int axesScale = 1, double xscale = 1.0, bool bgsub = true);
     /// get regions list
-    const vector< pair<double,double> >& getRegions(bool fg) const { return regions[fg]; }
-    /// set non-default region normalization
-    void setNormalization(double l, bool fg) { totalLength[fg] = l; }
-    /// get normalization
-    double getNormalization(bool fg) const { return totalLength[fg]; }
-        
-    TH1* hRates[2];     ///< background-subtracted, rate-scaled versions
+    const RangeCutSet& getRegions() const { return myRegions; }
+    /// mutable regions list access
+    RangeCutSet& getRegions() { return myRegions; }
+    
+    vector<TH1*> hRates;        ///< background-subtracted, rate-scaled versions
     
 protected:
-    RunAccumulatorPlugin* myP;                  ///< plugin to which this pair belongs
-    TH1* h[2];                                  ///< background, foreground region histograms
-    vector< pair<double,double> > regions[2];   ///< regions defined for FG/BG
-    double totalLength[2];                      ///< total length of FG/BG regions
+    RunAccumulatorPlugin* myP;  ///< plugin to which this pair belongs
+    vector<TH1*> hs;            ///< rate histograms for each region
+    RangeCutSet myRegions;      ///< fill region definitions
 };
 
 #endif

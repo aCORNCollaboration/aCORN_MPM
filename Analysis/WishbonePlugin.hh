@@ -86,8 +86,8 @@ public:
 protected:
     /// set up analysis cuts for data mode
     void setAnalysisCuts();
-    /// initialize foreground/background regions
-    void initRegions(FGBGRegionsHist& h);
+    
+    RangeCutSet wbTimingRegions;
 };
 
 /// Builder for RunAccumulatorPlugins

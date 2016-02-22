@@ -172,57 +172,37 @@ TH1* RunAccumulator::hToRate(TH1* h, int scaleAxes) {
 
 /* --------------------------------------------------- */
 
-FGBGRegionsHist::FGBGRegionsHist(RunAccumulatorPlugin* P): myP(P) {
-    for(int i=0; i<2; i++) {
-        h[i] = hRates[i] = NULL;
-        totalLength[i] = 0;
-    }
-}
 
-FGBGRegionsHist::~FGBGRegionsHist() {
-    for(int i=0; i<2; i++) {
-        delete hRates[i];
-        hRates[i] = NULL;
-    }
-}
-
-void FGBGRegionsHist::setTemplate(const TH1& hTemplate) {
-    string hname = hTemplate.GetName();
-    h[false] = myP->registerSavedHist(hname+"_bg",hTemplate);
-    h[true]  = myP->registerSavedHist(hname+"_fg",hTemplate);
-}
-
-void FGBGRegionsHist::addRegion(double x0, double x1, bool fg) {
-    regions[fg].push_back(pair<double,double>(x0,x1));
-    totalLength[fg] += x1-x0;
+void FGBGRegionsHist::setTemplate(const TH1& hTemplate, const RangeCutSet& rs) {
+    myRegions = rs;
+    for(size_t i=0; i<myRegions.regions.size(); i++)
+        hs.push_back(myP->registerSavedHist(string(hTemplate.GetName())+"_"+to_str(i),hTemplate));
 }
 
 void FGBGRegionsHist::fill(double cutval, double x, double w) {
-    for(int i=0; i<2; i++) {
-        if(!h[i]) continue;
-        for(auto const& cut: regions[i])
+    for(size_t i=0; i<myRegions.regions.size(); i++) {
+        for(auto const& cut: myRegions.regions[i])
             if(cut.first < cutval && cutval <= cut.second)
-                h[i]->Fill(x,w);
+                hs[i]->Fill(x,w);
     }
 }
 
 void FGBGRegionsHist::fill(double cutval, double x, double y, double w) {
-    for(int i=0; i<2; i++) {
-        if(!h[i]) continue;
-        for(auto const& cut: regions[i])
+    for(size_t i=0; i<myRegions.regions.size(); i++) {
+        for(auto const& cut: myRegions.regions[i])
             if(cut.first < cutval && cutval <= cut.second)
-                dynamic_cast<TH2*>(h[i])->Fill(x,y,w);
+                dynamic_cast<TH2*>(hs[i])->Fill(x,y,w);
     }
 }
 
-void FGBGRegionsHist::makeRates(int axesScale, double xscale) {
-    for(int i=0; i<2; i++) {
-        if(hRates[i]) delete hRates[i];
-        hRates[i] = myP->hToRate(h[i],axesScale);
-        hRates[i]->SetLineColor(4-2*i);
+void FGBGRegionsHist::makeRates(int axesScale, double xscale, bool bgsub) {
+    hRates.resize(hs.size());
+    for(size_t i=0; i<hs.size(); i++) {
+        delete hRates[i];
+        hRates[i] = myP->hToRate(hs[i],axesScale);
+        hRates[i]->SetLineColor(hs.size()==2? 4-2*i : 1+i);
+        hRates[i]->Scale(xscale/myRegions.norms[i]);
+        if(bgsub && i) hRates[i]->Add(hRates[0],-1.);
     }
-    hRates[false]->Scale(xscale*totalLength[true]/totalLength[false]);
-    hRates[true]->Scale(xscale);
-    hRates[true]->Add(hRates[false],-1.);
 }
 

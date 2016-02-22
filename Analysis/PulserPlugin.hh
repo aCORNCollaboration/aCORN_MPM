@@ -46,8 +46,8 @@ public:
 protected:
     /// set up analysis cuts for data mode
     void setAnalysisCuts();
-    /// initialize foreground/background regions for pulser timing
-    void initRegions(FGBGRegionsHist& h);
+    RangeCutSet psignalRegions;         ///< proton signal energy regions
+    RangeCutSet dtpRegions;             ///< proton delta time regions
 };
 
 /// Builder for PulserPlugins

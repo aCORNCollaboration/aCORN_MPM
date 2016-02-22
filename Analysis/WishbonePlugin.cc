@@ -58,20 +58,24 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     
     setAnalysisCuts();
     
+    wbTimingRegions.newRegion();
+    wbTimingRegions.appendRange(T_p_min, T_p_lo);
+    wbTimingRegions.appendRange(T_p_hi, T_p_max);
+    wbTimingRegions.newRegion();
+    wbTimingRegions.appendRange(T_p_lo, T_p_hi);
+    wbTimingRegions.scaleNormsTo(1);
+    
     TH1F hProtonTemplate("hProtonSignal", "Proton detector signal", 200,0,20);
     hProtonTemplate.GetXaxis()->SetTitle("proton detector ADC channels (#times 10^{3})");
-    initRegions(hProtonSignal);
-    hProtonSignal.setTemplate(hProtonTemplate);
+    hProtonSignal.setTemplate(hProtonTemplate, wbTimingRegions);
   
     TH1F hNVetoTemplate("hNVeto","Veto panels count",9,-0.5,8.5);
     hNVetoTemplate.GetXaxis()->SetTitle("Number of veto panels");
-    initRegions(hNVeto);
-    hNVeto.setTemplate(hNVetoTemplate);
+    hNVeto.setTemplate(hNVetoTemplate, wbTimingRegions);
     
     TH1F hVetoSumTemplate("hVetoSum","Veto PMTs signal sum",100,0,20);
     hVetoSumTemplate.GetXaxis()->SetTitle("raw signal sum (#times 10^{3})");
-    initRegions(hVetoSum);
-    hVetoSum.setTemplate(hVetoSumTemplate);
+    hVetoSum.setTemplate(hVetoSumTemplate, wbTimingRegions);
     
     unsigned int nEnBins = 400;
     double E0 = 0;
@@ -90,39 +94,33 @@ hChanSpec(this), hModuleMult(this), hPos(this), hPosSigma(this), hEnergyRadius(t
     TH2F hNETemplate("hNE","PMT trigger counts", 100, 0, 1000, 20, -0.5, 19.5);
     hNETemplate.GetYaxis()->SetTitle("Number of PMTs triggered");
     hNETemplate.GetXaxis()->SetTitle("Electron energy [keV]");
-    initRegions(hNE);
-    hNE.setTemplate(hNETemplate);
+    hNE.setTemplate(hNETemplate, wbTimingRegions);
     
     TH2F hPSTemplate("hChanSpec","PMT Spectra", 200, 0, (1<<15)/1000., NCH_MAX, -0.5, NCH_MAX-0.5);
     hPSTemplate.GetXaxis()->SetTitle("raw signal (#times 10^{3})");
     hPSTemplate.GetYaxis()->SetTitle("detector channel number");
-    initRegions(hChanSpec);
-    hChanSpec.setTemplate(hPSTemplate);
+    hChanSpec.setTemplate(hPSTemplate, wbTimingRegions);
     
     TH2F hMultTemplate("hModuleMult","Module Multiplicity", CHAN_PER_MOD+1, -0.5, CHAN_PER_MOD+0.5, CHAN_PER_MOD+1, -0.5, CHAN_PER_MOD+0.5);
     hMultTemplate.GetXaxis()->SetTitle("Module 1 Triggers");
     hMultTemplate.GetYaxis()->SetTitle("Module 2 Triggers");
-    initRegions(hModuleMult);
-    hModuleMult.setTemplate(hMultTemplate);
+    hModuleMult.setTemplate(hMultTemplate, wbTimingRegions);
     
     TH2F hPosTemplate("hPos","Beta hit positions", 100, -3, 3, 100, -3, 3);
     hPosTemplate.GetXaxis()->SetTitle("x [PMT spacings]");
     hPosTemplate.GetYaxis()->SetTitle("y [PMT spacings]");
-    initRegions(hPos);
-    hPos.setTemplate(hPosTemplate);
+    hPos.setTemplate(hPosTemplate, wbTimingRegions);
     
     TH2F hPosSigmaTemplate("hPosSigma","Beta hit position spread", 100, 0, 2, 100, 0, 2);
     hPosSigmaTemplate.GetXaxis()->SetTitle("#sigma_{x} [PMT spacings]");
     hPosSigmaTemplate.GetYaxis()->SetTitle("#sigma_{y} [PMT spacings]");
-    initRegions(hPosSigma);
-    hPosSigma.setTemplate(hPosSigmaTemplate);
+    hPosSigma.setTemplate(hPosSigmaTemplate, wbTimingRegions);
     
     
     TH2F hEnergyRadiusTemplate("hEnergyRadius","Beta hit positions", 100, 0, 4, 100, 0, 800);
     hEnergyRadiusTemplate.GetXaxis()->SetTitle("radius^{2} [(PMT spacings)^{2}]");
     hEnergyRadiusTemplate.GetYaxis()->SetTitle("Energy [keV]");
-    initRegions(hEnergyRadius);
-    hEnergyRadius.setTemplate(hEnergyRadiusTemplate);
+    hEnergyRadius.setTemplate(hEnergyRadiusTemplate, wbTimingRegions);
     
     ignoreMissingHistos = true;
     TRateCategories hRateHistoryTemplate("hRateHistory","Event rate",1./6.);
@@ -146,12 +144,6 @@ void WishbonePlugin::setAnalysisCuts() {
         T_p_hi = 4500;
         T_p_max = 9500;
     }
-}
-   
-void WishbonePlugin::initRegions(FGBGRegionsHist& h) {
-    h.addRegion(T_p_min, T_p_lo, false);
-    h.addRegion(T_p_lo, T_p_hi, true);
-    h.addRegion(T_p_hi, T_p_max, false);
 }
 
 void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
@@ -196,7 +188,7 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
         
         if(200 < PDS.E_recon && PDS.E_recon < 600) {
             for(int fg = 0; fg < 2; fg ++) {
-                for(auto cut: hNE.getRegions(fg)) { 
+                for(auto cut: wbTimingRegions.regions[fg]) { 
                     if(cut.first < PDS.T_e2p && PDS.T_e2p <= cut.second) {
                         hRateHistory->AddPoint(fg? RATE_WB_FG : RATE_WB_BG, t_proton_h, weight);
                         if(PDS.nV) hRateHistory->AddPoint(fg? RATE_VETO_FG : RATE_VETO_BG, t_proton_h, weight);
@@ -258,7 +250,6 @@ void WishbonePlugin::calculateResults() {
     
     hProtonSignal.makeRates(1);
     hProtonSignal.hRates[false]->GetYaxis()->SetTitle("rate [Hz/kchannel]");
-    normalize_to_bin_width(hWishboneTProj, 1./myA->runTimes.total());
 
     hVetoSum.makeRates(1,1000.);
     hVetoSum.hRates[false]->GetYaxis()->SetTitle("rate [#muHz/channel]");
@@ -439,7 +430,7 @@ void WishbonePlugin::makePlots() {
     
     // scaled background and background-subtracted rate history plots
     vector< pair<Int_t, Double_t> > rs;
-    rs.push_back(pair<Int_t, Double_t>(RATE_WB_BG, 1./3600*hChanSpec.getNormalization(true)/hChanSpec.getNormalization(false)));
+    rs.push_back(pair<Int_t, Double_t>(RATE_WB_BG, 1./3600*wbTimingRegions.norms[1]));
     TGraph* g0 = hRateHistory->MakeGraph(rs);
     rs[0].first = RATE_VETO_BG;
     TGraph* g2 = hRateHistory->MakeGraph(rs);
@@ -458,7 +449,8 @@ void WishbonePlugin::makePlots() {
     g0->SetTitle("Event rate");
     g0->Draw("ALZ");
     g0->GetXaxis()->SetTitle("run time [h]");
-    g0->GetXaxis()->SetRangeUser(0,myA->runTimes.total()/3600.);
+    double x0 = g0->GetX()[0];
+    g0->GetXaxis()->SetRangeUser(x0 > 1? x0 : 0, g0->GetX()[g0->GetN()-1]);
     g0->GetYaxis()->SetTitle("rate [Hz]");
     g1->Draw("LZ");
     
