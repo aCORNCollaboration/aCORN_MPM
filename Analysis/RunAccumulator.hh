@@ -32,7 +32,7 @@ public:
     RunAccumulator(OutputManager* pnt, const std::string& nm = "RunAccumulator", const std::string& inflName = "");
         
     /// add histograms from another RunAccumulator of the same type
-    virtual void addSegment(const SegmentSaver& S) override;
+    virtual void addSegment(const SegmentSaver& S, double sc = 1.) override;
     /// zero out run times
     void zeroCounters();
     /// scale all saved histograms by a factor

@@ -38,7 +38,10 @@ void BaseDataScanner::makeFlags() {
 }
 
 void BaseDataScanner::loadNewRun(RunID rn) {
-    T_0 += runTimes[evtRun] * 1e9;
+    if(evtRun < rn) {
+        T_0 += runTimes[evtRun] * 1e9;
+        std::cout  << " Run time " << T_0 << " ns" << "\n";
+    }
     auto it = cals.find(rn);
     if(it == cals.end()) {
         currentCal = cals[rn] = new AcornCalibrator(rn);

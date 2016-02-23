@@ -121,9 +121,12 @@ void PulserPlugin::makeAnaResults() {
     if(fabs(offset_from_expected) < 0.1) {
         TF1* gbgfit = new TF1("gbgfit", "[0]*exp(-(x-[1])*(x-[1])/(2*[2]*[2])) + [3]", -100, 100);
         addDeletable(gbgfit);
-        gbgfit->SetParameter(0, hPulserTimingPrecis->GetMaximum());
-        gbgfit->SetParameter(1, hPulserTimingPrecis->GetBinCenter(hPulserTimingPrecis->GetMaximumBin()));
-        gbgfit->SetParameter(2, 20.);
+        double p0,p1,p2,p3;
+        gbgfit->SetParameter(0, p0 = hPulserTimingPrecis->GetMaximum());
+        gbgfit->SetParameter(1, p1 = hPulserTimingPrecis->GetBinCenter(hPulserTimingPrecis->GetMaximumBin()));
+        gbgfit->SetParameter(2, p2 = 10.);
+        gbgfit->SetParameter(3, p3 = hPulserTimingPrecis->GetMinimum());
+        printf("Precision timing fit initial guess: %g %g %g %g\n", p0, p1, p2, p3);
         hPulserTimingPrecis->Fit(gbgfit,"R");
         
         baseResult.value = gbgfit->GetParameter(2)/1000.;

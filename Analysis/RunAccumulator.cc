@@ -74,9 +74,9 @@ void RunAccumulator::zeroCounters() {
     runTimes = TagCounter<RunID>();
 }
 
-void RunAccumulator::addSegment(const SegmentSaver& S) {
+void RunAccumulator::addSegment(const SegmentSaver& S, double sc) {
     // histograms add
-    PluginSaver::addSegment(S);
+    PluginSaver::addSegment(S, sc);
     
     // recast
     const RunAccumulator& RA = dynamic_cast<const RunAccumulator&>(S);

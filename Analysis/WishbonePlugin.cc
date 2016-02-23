@@ -288,7 +288,6 @@ void WishbonePlugin::makeAnaResults() {
     
     // Energy projection endpoint fit and rescaled energy range rate integrals
     IterRangeErfc EF(650,75);
-    EF.myF->SetParameter(0,1.5);
     EF.nsigmalo = 3;
     EF.doFit(hWishboneEProj[true]);
     baseResult.value = EF.myF->GetParameter(1);
@@ -306,7 +305,23 @@ void WishbonePlugin::makeAnaResults() {
     baseResult.value = integralAndErrorInterp(hWishboneEProj[false], rE0, rE1, baseResult.err, true) / 1000.;
     baseResult.err /= 1000;
     AcornDB::ADB().uploadAnaResult("bg_erange_rate", "background rate in ~100--900keV [Hz]", baseResult);
-        
+    
+    // raw proton signal peak
+    TF1* fPPkFit = new TF1("fPPkFit", "[0]*exp(-(x-[1])*(x-[1])/(2*[2]*[2])) + (1+[3]*x)/([6] + [4]*x + [5]*x*x+[7]*x*x*x)", E_p_lo/1000,  0.5+E_p_hi/1000);
+    double c0 = 0.959; //0.5*(E_p_lo + E_p_hi)/1000.;
+    TH1* hPPk = hProtonSignal.hRates[false];
+    double ph = hPPk->GetBinContent(hPPk->FindBin(c0));
+    fPPkFit->SetParameter(0,ph);
+    fPPkFit->FixParameter(1,c0);
+    fPPkFit->FixParameter(2,0.123);
+    for(int i=3; i<=6; i++) fPPkFit->SetParameter(i,0);
+    fPPkFit->SetParameter(6,3/ph);
+
+    hPPk->Fit(fPPkFit,"R");
+    ph = fPPkFit->GetParameter(0);
+    double ps = fPPkFit->GetParameter(2);
+    printf("Proton peak rate: %g Hz\n", ph*ps*sqrt(2*M_PI));
+    
     ManualWishboneSeparator MWS("WBFit", myA);
     MWS.setWishbone(hWishboneBGSub);
     MWS.extractAsymmetry();
@@ -323,8 +338,8 @@ void WishbonePlugin::makePlots() {
         hWishboneBGSub->Rebin2D(2,2);
         hWishboneBGSub->Scale(1./4.);
     }
-    hWishboneBGSub->SetMinimum(-2.);
-    hWishboneBGSub->SetMaximum(2.);
+    hWishboneBGSub->SetMinimum(-10);
+    hWishboneBGSub->SetMaximum(10);
     hWishboneBGSub->GetXaxis()->SetRangeUser(0,1000);
     hWishboneBGSub->GetYaxis()->SetRangeUser(2,5);
     makeRBpalette();
@@ -409,7 +424,7 @@ void WishbonePlugin::makePlots() {
     hVetoSum.hRates[true]->Draw("Same");
     printCanvas("VetoSum");
     
-    hWishboneEProj[true]->SetMinimum(-0.2);
+    hWishboneEProj[true]->SetMinimum(myA->dataMode == NG6? -0.2 : -1);
     hWishboneEProj[true]->SetMaximum(myA->dataMode == NG6? 3 : 15);
     hWishboneEProj[true]->GetXaxis()->SetRangeUser(0,1000);
     hWishboneEProj[true]->Draw();
@@ -430,7 +445,7 @@ void WishbonePlugin::makePlots() {
     
     // scaled background and background-subtracted rate history plots
     vector< pair<Int_t, Double_t> > rs;
-    rs.push_back(pair<Int_t, Double_t>(RATE_WB_BG, 1./3600*wbTimingRegions.norms[1]));
+    rs.push_back(pair<Int_t, Double_t>(RATE_WB_BG, 1./3600/wbTimingRegions.norms[0]));
     TGraph* g0 = hRateHistory->MakeGraph(rs);
     rs[0].first = RATE_VETO_BG;
     TGraph* g2 = hRateHistory->MakeGraph(rs);
