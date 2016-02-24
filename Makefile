@@ -45,7 +45,7 @@ Physics = PolarizedBetaAsym.o ElectronBindingEnergy.o NuclEvtGen.o \
 
 ROOTUtils = SQLite_Helper.o
 
-Analysis = AcornCalibrator.o AcornDB.o BaseDataScanner.o Positioner.o PMTsPlugin.o PluginInterpolator.o \
+Analysis = AcornCalibrator.o AcornDB.o BaseDataScanner.o CircleMin.o Positioner.o PMTsPlugin.o PluginInterpolator.o \
 	PulserPlugin.o ReducedDataScanner.o ResponseMatrix.o RunAccumulator.o RunSetScanner.o SimWishboneSmearer.o \
 	SourceCalPlugin.o WishboneFit.o WishbonePlugin.o
 
