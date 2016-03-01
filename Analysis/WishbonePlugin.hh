@@ -96,7 +96,7 @@ public:
     /// Constructor
     WishbonePluginBuilder() { }
     /// instantiate plugin SegmentSaver
-    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) override { return new WishbonePlugin(RA, "WishbonePlugin", inflName); }
+    SegmentSaver* _makePlugin(RunAccumulator* RA) override { return new WishbonePlugin(RA, "WishbonePlugin"); }
 };
 
 #include "PulserPlugin.hh"

@@ -20,6 +20,7 @@
 #include <TH2F.h>
 #include <TPad.h>
 #include <cassert>
+#include <TFile.h>
 #include <TF1.h>
 
 #include <gsl/gsl_qrng.h>

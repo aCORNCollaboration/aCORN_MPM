@@ -35,7 +35,7 @@ public:
     /// Constructor
     SourceCalPluginBuilder() { }
     /// instantiate plugin SegmentSaver
-    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) { return new SourceCalPlugin(RA, "SourceCal", inflName); }
+    SegmentSaver* _makePlugin(RunAccumulator* RA) override { return new SourceCalPlugin(RA, "SourceCal"); }
 };
 
 #endif

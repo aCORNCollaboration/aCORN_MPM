@@ -56,7 +56,7 @@ public:
     /// Constructor
     PulserPluginBuilder() { }
     /// instantiate plugin SegmentSaver
-    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) override { return new PulserPlugin(RA, "PulserPlugin", inflName); }
+    SegmentSaver* _makePlugin(RunAccumulator* RA) override { return new PulserPlugin(RA, "PulserPlugin"); }
 };
 
 #endif

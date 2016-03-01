@@ -40,7 +40,7 @@ public:
     /// Constructor
     PMTsPluginBuilder() { }
     /// instantiate plugin SegmentSaver
-    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) { return new PMTsPlugin(RA, "PMTs", inflName); }
+    SegmentSaver* _makePlugin(RunAccumulator* RA) override { return new PMTsPlugin(RA, "PMTs"); }
 };
 
 #endif

@@ -95,13 +95,13 @@ public:
     /// Constructor
     RunAccumulatorPluginBuilder() { }
     
-    virtual void makePlugin(OutputManager* pnt, const string& inflName = "") {
+    void makePlugin(SegmentSaver* pnt) override {
         RunAccumulator* RA = dynamic_cast<RunAccumulator*>(pnt);
         assert(RA);
-        thePlugin = _makePlugin(RA,inflName);
+        thePlugin = _makePlugin(RA);
     }
     
-    virtual SegmentSaver* _makePlugin(RunAccumulator* RA, const string& inflName) = 0;
+    virtual SegmentSaver* _makePlugin(RunAccumulator* RA) = 0;
 };
 
 //////////////////////////////
