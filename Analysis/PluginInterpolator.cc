@@ -13,9 +13,9 @@ intervalList PluginInterpolator::getRunIntervals(const RunAccumulator* RA) {
     intervalList L;
     if(!RA) return L;
     //double t0 = 0;
-    for(auto it = RA->runTimes.counts.begin(); it != RA->runTimes.counts.end(); it++) {
-        L.push_back(pair<double,double>(t0, t0 + it->second));
-        t0 += it->second;
+    for(auto const& kv: RA->runTimes->GetData()) {
+        L.push_back(pair<double,double>(t0, t0 + kv.second));
+        t0 += kv.second;
     }
     return L;
 }

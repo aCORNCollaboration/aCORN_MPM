@@ -8,6 +8,7 @@
 #include "SourceCalPlugin.hh"
 #include "AcornDB.hh"
 #include "PathUtils.hh"
+#include "StringManip.hh"
 #include <TMath.h>
 #include <TF1.h>
 #include <TLatex.h>

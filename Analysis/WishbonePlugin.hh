@@ -112,7 +112,7 @@ public:
     }
     
     /// create a new instance of this object (cloning self settings) for given directory
-    virtual SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) override { return new WishboneAnalyzer(this,nm,inflname); }
+    SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) override { return new WishboneAnalyzer(this,nm,inflname); }
     
     WishbonePluginBuilder myWishbonePluginBuilder;
     PulserPluginBuilder myPulserPluginBuilder;

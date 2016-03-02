@@ -1,4 +1,4 @@
-/// \file ReducedDataScanner.hh
+/// \file ReducedDataScanner.hh Assembles and scans a TChain of "Reduced" data
 // This file was produced under the employ of the United States Government,
 // and is consequently in the PUBLIC DOMAIN, free from all provisions of
 // US Copyright Law (per USC Title 17, Section 105).
@@ -10,17 +10,17 @@
 
 #include "BaseDataScanner.hh"
 
-/// class for assembling and scanning TChain of "Reduced" data
+/// Assembles and scans a TChain of "Reduced" data
 class ReducedDataScanner: public BaseDataScanner {
 public:
     /// constructor
     ReducedDataScanner(bool fp): BaseDataScanner("RedEvt",fp) {}
     
     /// return path to run .root file
-    virtual string locateRun(RunID r) const;
+    string locateRun(RunID r) const override;
     
     /// set TChain branch data readpoints
-    virtual void setReadpoints(TTree* T);
+    void setReadpoints(TTree* T) override;
     
     /// set TTree write points
     void setWritepoints(TTree* T);

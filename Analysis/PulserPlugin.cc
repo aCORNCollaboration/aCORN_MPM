@@ -174,13 +174,13 @@ void PulserPlugin::makeAnaResults() {
     
     h = pdtfit->GetParameter(0);
     double fitcounts = h * tau0 / log_binsize(*hPTimingGap);
-    double expcounts = myA->runTimes.total()/tau0;
+    double expcounts = myA->runTimes->GetTotal()/tau0;
     baseResult.value = fitcounts/expcounts;
     baseResult.err = 0;
     AcornDB::ADB().uploadAnaResult("proton_random_effic", "uncorrelated proton DAQ efficiency", baseResult);
     
     // dead fraction from summing proton gaps >= 50ms, less distribution-expected value
-    baseResult.value = ((*vGapTime)[0] - fitcounts*(tau_long+tau0)*exp(-tau_long/tau0)) / myA->runTimes.total();
+    baseResult.value = ((*vGapTime)[0] - fitcounts*(tau_long+tau0)*exp(-tau_long/tau0)) / myA->runTimes->GetTotal();
     baseResult.err = 0;
     AcornDB::ADB().uploadAnaResult("proton_gap_loss", "DAQ dead fraction from proton gaps", baseResult);
     // number of gap events, less expected

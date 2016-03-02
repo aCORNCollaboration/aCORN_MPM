@@ -8,6 +8,7 @@
 #include "RunAccumulator.hh"
 #include "GraphUtils.hh"
 #include "SMExcept.hh"
+#include "StringManip.hh"
 #include "PathUtils.hh"
 #include <time.h>
 #include <TH1.h>
@@ -21,17 +22,10 @@ PluginSaver(pnt,nm,inflName), isSimulated(false) {
     assert(dataMode != BAD);
     
     TH1::SetDefaultSumw2(true); // all histograms default to having errorbars
-    
-    // initialize blind time to 0
-    zeroCounters();
-    
-    // load existing data (if any)
-    if(fIn) {
-        SMFile qOld(dropLast(inflname,".")+".txt");
-        // fetch run counts, run times
-        runCounts += TagCounter<RunID>(qOld.getFirst("runCounts"));
-        runTimes += TagCounter<RunID>(qOld.getFirst("runTimes"));
-    }
+        
+    TCumulativeMap<RunNum,Double_t> TCMTemplate("TCMTemplate");
+    runCounts = (TCumulativeMap<RunNum,Double_t>*)registerCumulative("runCounts", TCMTemplate);
+    runTimes = (TCumulativeMap<RunNum,Double_t>*)registerCumulative("runTimes", TCMTemplate);
 }
 
 void RunAccumulator::buildPlugins() {
@@ -49,9 +43,9 @@ void RunAccumulator::fillCoreHists(BaseDataScanner& PDS, double weight) {
 
 AnaResult RunAccumulator::makeBaseResult() const {
     AnaResult baseResult;
-    if(runCounts.counts.size()) {
-        baseResult.start = runCounts.counts.begin()->first;
-        baseResult.end = runCounts.counts.rbegin()->first;
+    if(runCounts->Size()) {
+        baseResult.start = toRunID(runCounts->GetData().begin()->first);
+        baseResult.end = toRunID(runCounts->GetData().rbegin()->first);
     }
     return baseResult;
 }
@@ -61,49 +55,12 @@ void RunAccumulator::makeAnaResults() {
     AcornDB::ADB().beginTransaction();
     
     AnaResult baseResult = makeBaseResult();
-    baseResult.value = runCounts.total();
+    baseResult.value = runCounts->GetTotal();
     AcornDB::ADB().uploadAnaResult("total_counts", "Total analyzed counts", baseResult);
-    baseResult.value = runTimes.total();
+    baseResult.value = runTimes->GetTotal();
     AcornDB::ADB().uploadAnaResult("total_time", "Total analyzed time [s]", baseResult);
     for(auto RAP: myRAPs) RAP->makeAnaResults();
     AcornDB::ADB().endTransaction();
-}
-
-void RunAccumulator::zeroCounters() {
-    runCounts = TagCounter<RunID>();
-    runTimes = TagCounter<RunID>();
-}
-
-void RunAccumulator::addSegment(const SegmentSaver& S, double sc) {
-    // histograms add
-    PluginSaver::addSegment(S, sc);
-    
-    // recast
-    const RunAccumulator& RA = dynamic_cast<const RunAccumulator&>(S);
-    if(RA.isSimulated) isSimulated = true;
-    // add run counts, times
-    runCounts += RA.runCounts;
-    runTimes += RA.runTimes;
-}
-
-void RunAccumulator::scaleData(double s) {
-    PluginSaver::scaleData(s);
-    runCounts.scale(s);
-}
-
-void RunAccumulator::write(string outName) {
-    printf("Writing data to file '%s'...\n",outName.c_str());
-    
-    // clear previous tallies
-    qOut.erase("runCounts");
-    qOut.erase("runTimes");
-    
-    // record run counts, times
-    qOut.insert("runCounts",runCounts.toStringmap());
-    qOut.insert("runTimes",runTimes.toStringmap());
-    
-    if(!outName.size()) outName = basePath+"/"+name+".txt";
-    qOut.commit(outName);
 }
 
 void RunAccumulator::loadProcessedData(BaseDataScanner& PDS) {
@@ -125,18 +82,17 @@ void RunAccumulator::loadProcessedData(BaseDataScanner& PDS) {
         fillCoreHists(PDS,PDS.physicsWeight);
     }
     
-    runTimes += PDS.runTimes;
-    runCounts += PDS.runCounts;
+    *runTimes += PDS.runTimes;
+    *runCounts += PDS.runCounts;
     printf("\tscanned %i points\n",nScanned);
 }
 
 void RunAccumulator::makeOutput(bool doPlots) {
-    printf("Generating output from %.0f counts over %.2f hours.\n", runCounts.total(), runTimes.total()/3600.);
+    printf("Generating output from %.0f counts over %.2f hours.\n", runCounts->GetTotal(), runTimes->GetTotal()/3600.);
     calculateResults();
     makeAnaResults();
     if(doPlots)
         makePlots();
-    write();
     writeROOT();
 }
 
@@ -150,7 +106,7 @@ unsigned int RunAccumulator::mergeDir(const string& d) {
 
 TH1* RunAccumulator::hToRate(TH1* h, int scaleAxes) {
     TH1* hc = (TH1*)h->Clone((h->GetName()+string("_Rate")).c_str());
-    hc->Scale(1./runTimes.total());
+    hc->Scale(1./runTimes->GetTotal());
     if(scaleAxes>=1) {
         for(int ix=1; ix<hc->GetNbinsX(); ix++) {
             double bx = hc->GetXaxis()->GetBinWidth(ix);

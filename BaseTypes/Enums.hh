@@ -14,9 +14,13 @@
 
 #include "AxisEnum.hh"
 
-typedef unsigned int RunNum;
+typedef Int_t RunNum;
 /// wishbone series and run number
 typedef std::pair<RunNum, RunNum> RunID;
+/// RunID to RunNum
+inline RunNum toRunNum(RunID r) { return 10000*r.first + r.second; }
+/// RunID from RunNum
+inline RunID toRunID(RunNum i) { return RunID(i/10000, i%10000); }
 
 /// utility for printing std::pair
 template<typename T, typename U>

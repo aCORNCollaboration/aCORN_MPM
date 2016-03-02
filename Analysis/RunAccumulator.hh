@@ -9,11 +9,10 @@
 #define RUNACCUMULATOR_HH
 
 #include "PluginSaver.hh"
+#include "TCumulativeMap.hh"
 #include "Enums.hh"
-#include "TagCounter.hh"
 #include "BaseDataScanner.hh"
 #include "AcornDB.hh"
-#include "SMFile.hh"
 
 using std::vector;
 using std::pair;
@@ -30,24 +29,13 @@ class RunAccumulator: public PluginSaver {
 public:
     /// constructor
     RunAccumulator(OutputManager* pnt, const std::string& nm = "RunAccumulator", const std::string& inflName = "");
-        
-    /// add histograms from another RunAccumulator of the same type
-    virtual void addSegment(const SegmentSaver& S, double sc = 1.) override;
-    /// zero out run times
-    void zeroCounters();
-    /// scale all saved histograms by a factor
-    virtual void scaleData(double s) override;
-        
-    /// write to SMFile
-    virtual void write(string outName = "");
-        
+    
     /// fill data from a BaseDataScanner
     virtual void loadProcessedData(BaseDataScanner& BDS);
        
     bool isSimulated;               ///< flag for whether this is based on simulated data
-    TagCounter<RunID> runCounts;    ///< event counts by run
-    TagCounter<RunID> runTimes;     ///< time spent on each run
-    SMFile qOut;
+    TCumulativeMap<RunNum,Double_t>* runCounts; ///< event counts by run
+    TCumulativeMap<RunNum,Double_t>* runTimes;  ///< run lengths [s] by run
     
     /// fill core histograms in plugins from data point
     virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
@@ -68,7 +56,7 @@ public:
     
 protected:
     /// build plugins appropriate for input file; call in subclass after setting up myBuilders
-    virtual void buildPlugins() override;
+    void buildPlugins() override;
     vector<RunAccumulatorPlugin*> myRAPs;       ///< properly typecast active plugins
 };
 

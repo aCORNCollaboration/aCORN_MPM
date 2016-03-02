@@ -208,7 +208,7 @@ void WishbonePlugin::calculateResults() {
     
     hWishboneBGSub = wbs.subtractProfile(hWishboneEProj[false],1./tbg);
     
-    double s0 = 1000./myA->runTimes.total()/hWishboneEProj[true]->GetBinWidth(1);
+    double s0 = 1000./myA->runTimes->GetTotal()/hWishboneEProj[true]->GetBinWidth(1);
     hWishboneEProj[true]->Scale(s0);
     hWishboneEProj[false]->Scale(s0*tfg/tbg);
     hWishboneEProj[true]->Add(hWishboneEProj[false],-1.0);
@@ -221,7 +221,7 @@ void WishbonePlugin::calculateResults() {
     
     hWishboneTProj = hWishbone->ProjectionY("_tproj", 0, -1, "e");
     hWishboneTProj->SetTitle("Wishbone time of flight projection");
-    normalize_to_bin_width(hWishboneTProj, 1./myA->runTimes.total());
+    normalize_to_bin_width(hWishboneTProj, 1./myA->runTimes->GetTotal());
     hWishboneTProj->GetYaxis()->SetTitle("event rate [Hz/#mus]");
     
     hWishboneBGSub->Scale(s0/hWishboneTProj->GetBinWidth(1));
@@ -234,7 +234,7 @@ void WishbonePlugin::calculateResults() {
     hWishboneFiducialTProj->GetYaxis()->SetTitle("event rate [Hz/#mus]");
 
     hWBRate = (TH2F*)hWishbone->Clone("hWBRate");
-    normalize_to_bin_area(hWBRate, 1000./myA->runTimes.total());
+    normalize_to_bin_area(hWBRate, 1000./myA->runTimes->GetTotal());
     hWBRate->GetZaxis()->SetTitle("rate [Hz/MeV/#mus]");
     
     //-------------------
@@ -333,7 +333,7 @@ void WishbonePlugin::makePlots() {
     assert(isCalculated);
     defaultCanvas->SetRightMargin(0.20);
 
-    bool isCombined = myA->runTimes.nTags() > 1000;
+    bool isCombined = myA->runTimes->Size() > 1000;
     if(true || !isCombined) {
         hWishboneBGSub->Rebin2D(2,2);
         hWishboneBGSub->Scale(1./4.);

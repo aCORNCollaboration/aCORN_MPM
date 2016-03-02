@@ -8,6 +8,7 @@
 #include "AcornDB.hh"
 #include "PathUtils.hh"
 #include "SMExcept.hh"
+#include "StringManip.hh"
 #include "BaseDataScanner.hh"
 #include <string.h>
 #include <stdio.h>

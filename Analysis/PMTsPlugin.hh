@@ -17,12 +17,12 @@ public:
     PMTsPlugin(RunAccumulator* RA, const string& nm, const string& inflname = "");
     
     /// Fill core histograms from data point
-    virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
+    void fillCoreHists(BaseDataScanner& PDS, double weight) override;
     
     /// generate calculated hists
-    //virtual void calculateResults();
+    //void calculateResults() override;
     /// Generate output plots
-    virtual void makePlots();
+    void makePlots() override;
    
     TH1* hEnergy;               ///< event energy spectrum
     TH2* hChanSpec;             ///< individual PMTs spectrum distribution

@@ -17,7 +17,7 @@ public:
     SourceCalPlugin(RunAccumulator* RA, const string& nm, const string& inflname = "");
     
     /// Fill core histograms from data point
-    virtual void fillCoreHists(BaseDataScanner& PDS, double weight);
+    void fillCoreHists(BaseDataScanner& PDS, double weight) override;
     
     /// Generate background-subtracted output
     void bgSubtrPlots(SourceCalPlugin& bg);
