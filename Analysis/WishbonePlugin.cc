@@ -442,8 +442,9 @@ void WishbonePlugin::makePlots() {
     addDeletable(drawVLine(T_p_min/1000., defaultCanvas, 4));
     addDeletable(drawVLine(T_p_max/1000., defaultCanvas, 4));
     printCanvas("WishboneTime");
-    
+   
     // scaled background and background-subtracted rate history plots
+    assert(hRateHistory);
     vector< pair<Int_t, Double_t> > rs;
     rs.push_back(pair<Int_t, Double_t>(RATE_WB_BG, 1./3600/wbTimingRegions.norms[0]));
     TGraph* g0 = hRateHistory->MakeGraph(rs);
@@ -464,9 +465,11 @@ void WishbonePlugin::makePlots() {
     g0->SetTitle("Event rate");
     g0->Draw("ALZ");
     g0->GetXaxis()->SetTitle("run time [h]");
-    double x0 = g0->GetX()[0];
-    g0->GetXaxis()->SetRangeUser(x0 > 1? x0 : 0, g0->GetX()[g0->GetN()-1]);
     g0->GetYaxis()->SetTitle("rate [Hz]");
+    if(g0->GetN()) {
+        double x0 = g0->GetX()[0];
+        g0->GetXaxis()->SetRangeUser(x0 > 1? x0 : 0, g0->GetX()[g0->GetN()-1]);
+    }
     g1->Draw("LZ");
     
     g2->SetLineColor(7);
@@ -479,6 +482,7 @@ void WishbonePlugin::makePlots() {
     delete g1;
     delete g2;
     delete g3;
+    
     /////////////////////////////////////////////////////////////////
     
     hWishboneFiducialTProj->Draw();

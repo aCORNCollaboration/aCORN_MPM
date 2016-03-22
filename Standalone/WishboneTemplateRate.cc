@@ -38,26 +38,26 @@ double TH2_dot(const TH2& h0, const TH2& h1, double x0, double x1, double y0, do
     return s;
 }
 
-int main(int, char**) {
+int main(int argc, char** argv) {
+    
+    if(argc != 3) return EXIT_FAILURE;
+    string s0 = argv[1];
+    string s1 = argv[2];
     
     OutputManager OM("NameUnused", "/home/mpmendenhall/Desktop/foo");
     string bpath = getEnvSafe("ACORN_WISHBONE")+"/Series_";
-    WishboneAnalyzer WA0(&OM, "NameUnused", bpath+"3532/Series_3532.root");
-    WishboneAnalyzer WA1(&OM, "NameUnused", bpath+"3540/Series_3540.root");
-    WishboneAnalyzer WA2(&OM, "NameUnused", bpath+"3541/Series_3541.root");
+    WishboneAnalyzer WA0(&OM, "NameUnused", bpath+s0+"/Series_"+s0+".root");     // template wishbone run
+    WishboneAnalyzer WA1(&OM, "NameUnused", bpath+s1+"/Series_"+s1+".root");     // comparison run
     WA0.calculateResults();
     WA1.calculateResults();
-    WA2.calculateResults();
     
     TH2& h0 = *((WishbonePlugin*)WA0.getPlugin("WishbonePlugin"))->hWishboneBGSub;
     TH2& h1 = *((WishbonePlugin*)WA1.getPlugin("WishbonePlugin"))->hWishboneBGSub;
-    TH2& h2 = *((WishbonePlugin*)WA2.getPlugin("WishbonePlugin"))->hWishboneBGSub;
-    double ds0, ds1, ds2;
+    double ds0, ds1;
     double t0 = 3.0, t1 = 4.5;
-    double d0 = TH2_dot(h0,h0, 50, 600, t0, t1, ds0);
-    double d1 = TH2_dot(h0,h1, 50, 600, t0, t1, ds1);
-    double d2 = TH2_dot(h0,h2, 50, 600, t0, t1, ds2);
-    printf("d0 = %g; d1 = %g; d1/d0 = %g (%g);  d2/d0 = %g (%g)\n", d0, d1, d1/d0, ds1/d0, d2/d0, ds2/d0);
+    double d0 = TH2_dot(h0,h0, 80, 600, t0, t1, ds0);
+    double d1 = TH2_dot(h0,h1, 80, 600, t0, t1, ds1);
+    printf("%s = %g; %s = %g; d1/d0 = %g (%g)\n", s0.c_str(), d0, s1.c_str(), d1, d1/d0, ds1/d0);
     
     AcornDB::closeDB();
     return EXIT_SUCCESS;

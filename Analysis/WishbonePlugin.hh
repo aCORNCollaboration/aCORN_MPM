@@ -32,7 +32,7 @@ protected:
 class WishbonePlugin: public RunAccumulatorPlugin {
 public:
     /// Constructor
-    WishbonePlugin(RunAccumulator* RA, const string& nm, const string& inflname = "");
+    WishbonePlugin(RunAccumulator* RA, const string& nm = "WishbonePlugin", const string& inflname = "");
     
     /// Fill core histograms from data point
     void fillCoreHists(BaseDataScanner& PDS, double weight) override;
@@ -90,15 +90,6 @@ protected:
     RangeCutSet wbTimingRegions;
 };
 
-/// Builder for RunAccumulatorPlugins
-class WishbonePluginBuilder: public RunAccumulatorPluginBuilder {
-public:
-    /// Constructor
-    WishbonePluginBuilder() { }
-    /// instantiate plugin SegmentSaver
-    SegmentSaver* _makePlugin(RunAccumulator* RA) override { return new WishbonePlugin(RA, "WishbonePlugin"); }
-};
-
 #include "PulserPlugin.hh"
 
 /// Analyzer class using WishbonePlugin
@@ -114,8 +105,8 @@ public:
     /// create a new instance of this object (cloning self settings) for given directory
     SegmentSaver* makeAnalyzer(const std::string& nm, const std::string& inflname) override { return new WishboneAnalyzer(this,nm,inflname); }
     
-    WishbonePluginBuilder myWishbonePluginBuilder;
-    PulserPluginBuilder myPulserPluginBuilder;
+    RunAccumulatorPluginBuilder<WishbonePlugin> myWishbonePluginBuilder;
+    RunAccumulatorPluginBuilder<PulserPlugin> myPulserPluginBuilder;
 };
 
 #endif

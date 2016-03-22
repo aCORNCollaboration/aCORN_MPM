@@ -77,20 +77,9 @@ public:
     TH1* hToRate(TH1* h, int scaleAxes) { return myA->hToRate(h, scaleAxes); }
 };
 
-/// Builder for RunAccumulatorPlugins
-class RunAccumulatorPluginBuilder: public PluginBuilder {
-public:
-    /// Constructor
-    RunAccumulatorPluginBuilder() { }
-    
-    void makePlugin(SegmentSaver* pnt) override {
-        RunAccumulator* RA = dynamic_cast<RunAccumulator*>(pnt);
-        assert(RA);
-        thePlugin = _makePlugin(RA);
-    }
-    
-    virtual SegmentSaver* _makePlugin(RunAccumulator* RA) = 0;
-};
+/// Builder template for RunAccumulatorPlugins
+template<class PPlug>
+class RunAccumulatorPluginBuilder: public RecastPluginBuilder<RunAccumulator, PPlug> { };
 
 //////////////////////////////
 //////////////////////////////

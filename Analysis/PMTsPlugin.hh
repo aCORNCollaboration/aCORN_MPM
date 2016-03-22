@@ -14,7 +14,7 @@
 class PMTsPlugin: public RunAccumulatorPlugin {
 public:
     /// Constructor
-    PMTsPlugin(RunAccumulator* RA, const string& nm, const string& inflname = "");
+    PMTsPlugin(RunAccumulator* RA, const string& nm = "PMTsPlugin", const string& inflname = "");
     
     /// Fill core histograms from data point
     void fillCoreHists(BaseDataScanner& PDS, double weight) override;
@@ -32,15 +32,6 @@ public:
 protected:
     
     double prev_e_time;         ///< time of previous electron event
-};
-
-/// Builder for RunAccumulatorPlugins
-class PMTsPluginBuilder: public RunAccumulatorPluginBuilder {
-public:
-    /// Constructor
-    PMTsPluginBuilder() { }
-    /// instantiate plugin SegmentSaver
-    SegmentSaver* _makePlugin(RunAccumulator* RA) override { return new PMTsPlugin(RA, "PMTs"); }
 };
 
 #endif

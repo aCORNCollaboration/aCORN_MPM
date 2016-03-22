@@ -23,7 +23,7 @@ public:
         buildPlugins();
     }
     
-    PMTsPluginBuilder myPMTsPluginBuilder;
+    RunAccumulatorPluginBuilder<PMTsPlugin> myPMTsPluginBuilder;
 };
 
 int main(int argc, char** argv) {

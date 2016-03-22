@@ -40,8 +40,9 @@ VPATH = ./:IOUtils/:Physics/:Standalone/:BaseTypes/:Analysis/:${MPMUTILS}/Genera
 
 IOUtils = sqlite3.o TextTableReader.o
 
-Physics = PolarizedBetaAsym.o ElectronBindingEnergy.o NuclEvtGen.o \
+Physics = PolarizedBetaAsym.o ElectronBindingEnergy.o \
 	UnpolarizedBeta.o UnpolarizedNeutronDecay.o Collimator.o
+#  NuclEvtGen.o
 
 ROOTUtils = SQLite_Helper.o
 

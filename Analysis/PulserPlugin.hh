@@ -16,7 +16,7 @@ using std::deque;
 class PulserPlugin: public RunAccumulatorPlugin {
 public:
     /// Constructor
-    PulserPlugin(RunAccumulator* RA, const string& nm, const string& inflname = "");
+    PulserPlugin(RunAccumulator* RA, const string& nm = "PulserPlugin", const string& inflname = "");
     
     /// Fill core histograms from data point
     void fillCoreHists(BaseDataScanner& PDS, double weight) override;
@@ -48,15 +48,6 @@ protected:
     void setAnalysisCuts();
     RangeCutSet psignalRegions;         ///< proton signal energy regions
     RangeCutSet dtpRegions;             ///< proton delta time regions
-};
-
-/// Builder for PulserPlugins
-class PulserPluginBuilder: public RunAccumulatorPluginBuilder {
-public:
-    /// Constructor
-    PulserPluginBuilder() { }
-    /// instantiate plugin SegmentSaver
-    SegmentSaver* _makePlugin(RunAccumulator* RA) override { return new PulserPlugin(RA, "PulserPlugin"); }
 };
 
 #endif

@@ -53,8 +53,9 @@ void DetectorCircles(const string& datfname) {
     double x0 = xs0[0];
     double y0 = xs0[1];
     auto M = circles[0]->iSigma;
-    M(0,0) = 0.75*sqrt(M(0,0));
-    M(1,1) = 0.75*sqrt(M(1,1));
+    double r0 = 4.5/2.;
+    M(0,0) = r0*sqrt(M(0,0));
+    M(1,1) = r0*sqrt(M(1,1));
     M(0,1) = M(1,0) = 0;
     
     for(auto C: circles) {
@@ -66,12 +67,12 @@ void DetectorCircles(const string& datfname) {
         TGraph* g = C->ptsGraph();
         g->SetMarkerStyle(7);
         g->Draw(C==circles[0]? "AP" : "P");
-        g->SetTitle("detector mask centering");
-        g->GetXaxis()->SetTitle("horizontal [inch]");
-        g->GetYaxis()->SetTitle("vertical [inch]");
+        g->SetTitle("image circle fits");
+        g->GetXaxis()->SetTitle("horizontal [a.u.]");
+        g->GetYaxis()->SetTitle("vertical [a.u.]");
         g->GetYaxis()->SetTitleOffset(1.5);
-        g->GetXaxis()->SetLimits(-1,1);
-        g->GetYaxis()->SetRangeUser(-1,1);
+        g->GetXaxis()->SetLimits(-3,3);
+        g->GetYaxis()->SetRangeUser(-3,3);
         
         TPolyLine* LE = makeEllipse(xs[0], xs[1], &C->iSigma[0]);
         LE->SetLineColor(linecolor);
@@ -79,11 +80,22 @@ void DetectorCircles(const string& datfname) {
         
         if(C != circles[0]) {
             char lbl[1024];
-            sprintf(lbl,"%+.1f, %+.1f", 1000*xs[0], 1000*xs[1]);
+            //sprintf(lbl,"%+.1f, %+.1f", 1000*xs[0], 1000*xs[1]); // centers, in mils
+            double r_m = pow(xs[2]*xs[4],0.25);
+            sprintf(lbl,"%.3f", r_m); // radii
+            
             TLatex* L = new TLatex(xs[0]+0.05,xs[1]+0.05,lbl);
             L->SetTextColor(linecolor);
             L->SetTextSize(0.025);
             L->Draw();
+            
+            printf("r1 = %g, r2 = %g, xy = %g\n", sqrt(xs[2]), sqrt(xs[4]), sqrt(xs[3]));
+            double d = 4.5;
+            double r_b = 1.725;
+            double r_t = 2.25;
+            double u = 1 - r_b/r_t;            
+            double r_s = d*(u-1 + sqrt((1-u)*(1-u) + 4*u*r_m/d))/(2*u);
+            printf("u = %g, r_m = %g: r_s = %g\n", u, r_m, r_s);
         }
         
         // center markers

@@ -22,7 +22,7 @@ public:
         buildPlugins();
     }
     
-    SourceCalPluginBuilder mySourceCalPluginBuilder;
+    RunAccumulatorPluginBuilder<SourceCalPlugin> mySourceCalPluginBuilder;
 };
 
 class SourceRunSubtracter: public OutputManager, public PluginInterpolator {

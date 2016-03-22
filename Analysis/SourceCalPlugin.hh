@@ -14,7 +14,7 @@
 class SourceCalPlugin: public RunAccumulatorPlugin {
 public:
     /// Constructor
-    SourceCalPlugin(RunAccumulator* RA, const string& nm, const string& inflname = "");
+    SourceCalPlugin(RunAccumulator* RA, const string& nm = "SourceCalPlugin", const string& inflname = "");
     
     /// Fill core histograms from data point
     void fillCoreHists(BaseDataScanner& PDS, double weight) override;
@@ -27,15 +27,6 @@ public:
     TH1* hPMTSig[N_E_PMT];      ///< raw PMT signal spectra
     
     string srcName;             ///< type of source being analyzed
-};
-
-/// Builder for RunAccumulatorPlugins
-class SourceCalPluginBuilder: public RunAccumulatorPluginBuilder {
-public:
-    /// Constructor
-    SourceCalPluginBuilder() { }
-    /// instantiate plugin SegmentSaver
-    SegmentSaver* _makePlugin(RunAccumulator* RA) override { return new SourceCalPlugin(RA, "SourceCal"); }
 };
 
 #endif
