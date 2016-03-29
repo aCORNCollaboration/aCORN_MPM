@@ -29,8 +29,8 @@ class SourceRunSubtracter: public OutputManager, public PluginInterpolator {
 public:
     SourceRunSubtracter(): OutputManager("Source_Calibrations",getEnvSafe("ACORN_SUMMARY")) {
         gStyle->SetOptStat("");
-        defaultCanvas->SetLogy(true);
-        defaultCanvas->SetLeftMargin(0.14);
+        defaultCanvas.SetLogy(true);
+        defaultCanvas.SetLeftMargin(0.14);
     }
     
     void addBackgroundSegment(const vector<RunID>& rns) {

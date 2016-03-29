@@ -202,32 +202,32 @@ void PulserPlugin::makeAnaResults() {
 
 void PulserPlugin::makePlots() {
     assert(isCalculated);
-    defaultCanvas->SetRightMargin(0.04);
-    defaultCanvas->SetLogy(true);
+    defaultCanvas.SetRightMargin(0.04);
+    defaultCanvas.SetLogy(true);
 
     hPulserSignal.hRates[false]->SetMinimum(1e-3);
     hPulserSignal.hRates[false]->SetMaximum(2);
     hPulserSignal.hRates[false]->Draw();
     hPulserSignal.hRates[true]->Draw("Same");
-    addDeletable(drawVLine(E_puls_lo/1000., defaultCanvas, 1));
-    addDeletable(drawVLine(E_puls_hi/1000., defaultCanvas, 1));
+    addDeletable(drawVLine(E_puls_lo/1000., &defaultCanvas, 1));
+    addDeletable(drawVLine(E_puls_hi/1000., &defaultCanvas, 1));
     printCanvas("PulserSignal");
   
     
     hPulserTiming->Draw();
-    addDeletable(drawVLine((T_pulser-1e9)*1e-6, defaultCanvas, 2));
+    addDeletable(drawVLine((T_pulser-1e9)*1e-6, &defaultCanvas, 2));
     printCanvas("PulserTiming");
     hPulserTimingPrecis->Draw();
     printCanvas("PulserTimingPrecision");
     
-    defaultCanvas->SetLogx(true);
+    defaultCanvas.SetLogx(true);
     hPTimingGap->GetXaxis()->SetRangeUser(1e-6,1);
     hPTimingGap->Draw();
-    addDeletable(drawVLine(tau_long, defaultCanvas, 1, 2));
+    addDeletable(drawVLine(tau_long, &defaultCanvas, 1, 2));
     printCanvas("ProtonTimingGap");
     
-    defaultCanvas->SetLogx(false);
-    defaultCanvas->SetLogy(false);
+    defaultCanvas.SetLogx(false);
+    defaultCanvas.SetLogy(false);
     
     hTimingHumpPrev.hRates[true]->SetMinimum(-1);
     hTimingHumpPrev.hRates[true]->SetMaximum(10);

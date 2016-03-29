@@ -264,9 +264,9 @@ double Nab_slice_fit(TGraph* g, double Ee) {
 }
 
 void setShortPlot(OutputManager& OM) {
-    OM.defaultCanvas->SetCanvasSize(200, 100);
-    OM.defaultCanvas->SetBottomMargin(0.22);
-    OM.defaultCanvas->SetTopMargin(0.03);
+    OM.defaultCanvas.SetCanvasSize(200, 100);
+    OM.defaultCanvas.SetBottomMargin(0.22);
+    OM.defaultCanvas.SetTopMargin(0.03);
     gStyle->SetLabelSize(0.1, "XYZ");
     gStyle->SetTitleSize(0.1,"xyz");
     gStyle->SetTitleOffset(0.7,"y");
@@ -294,7 +294,7 @@ void Nab_cxn_curve(OutputManager& OM, bool radiative = false) {
     if(radiative) { 
         g->SetMaximum(1.5);
         g->SetMinimum(-1.5);
-        //OM.defaultCanvas->SetLeftMargin(0.19);
+        //OM.defaultCanvas.SetLeftMargin(0.19);
     } else g->SetMaximum(0);
     g->Draw("AL");
     g->SetTitle("");
@@ -467,8 +467,8 @@ int main(int, char**) {
     
     fill_NabSimple(hDalitz[0]);
     
-    OM.defaultCanvas->SetRightMargin(0.14);
-    OM.defaultCanvas->SetLeftMargin(0.13);
+    OM.defaultCanvas.SetRightMargin(0.14);
+    OM.defaultCanvas.SetLeftMargin(0.13);
     hDalitz[0]->Scale(1./hDalitz[0]->GetMaximum());
     hDalitz[0]->Draw("Col Z");
     OM.printCanvas("hDalitz");

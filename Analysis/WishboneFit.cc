@@ -207,7 +207,7 @@ void WishboneFit::fitModel() {
     int b1 = hWishbone->GetXaxis()->FindBin(750);
     TF1* cf = comboFitter.getFitter();
     cf->SetNpx(300);
-    defaultCanvas->SetRightMargin(0.04);
+    defaultCanvas.SetRightMargin(0.04);
     
     vector<string> hnames;
     for(int b=b0; b<=b1; b++) {
@@ -219,7 +219,7 @@ void WishboneFit::fitModel() {
         hSlices[b]->SetMinimum(-0.2);
         if(hSlices[b]->GetMaximum() < 1.2) hSlices[b]->SetMaximum(1.2);
         hSlices[b]->Draw();
-        addDeletable(drawVLine(cx,defaultCanvas,6));
+        addDeletable(drawVLine(cx, &defaultCanvas,6));
         cf->Draw("Same");
         string hname = "Slice_"+to_str(b);
         printCanvas(hname);
@@ -321,7 +321,7 @@ void WishboneFit::extractAsymmetry() {
     modelA.SetMarkerColor(4);
     modelA.SetLineColor(4);
     
-    defaultCanvas->SetRightMargin(0.04);
+    defaultCanvas.SetRightMargin(0.04);
     
     modelN[0].Draw("AP");
     modelN[0].SetTitle("aCORN wishbone counts");
@@ -387,11 +387,11 @@ void WishboneFit::calcGapFill() {
     wby.intoHist(filly);
     
     fillx->Draw();
-    addDeletable(drawHLine(0, defaultCanvas, 1, 2));
+    addDeletable(drawHLine(0, &defaultCanvas, 1, 2));
     printCanvas("hWishboneFill_E");
     
     filly->Draw();
-    addDeletable(drawHLine(0, defaultCanvas, 1, 2));
+    addDeletable(drawHLine(0, &defaultCanvas, 1, 2));
     printCanvas("hWishboneFill_t");
     
     delete fillx;
@@ -467,7 +467,7 @@ void GausWishboneFit::fitModel() {
     WishboneFit::fitModel();
     
     // plot setup
-    defaultCanvas->SetRightMargin(0.04);
+    defaultCanvas.SetRightMargin(0.04);
     for(int i=0; i<2; i++) {
         taufine[i].SetTitle("Wishbone timing");
         taufine[i].SetLineColor(4-2*i);
@@ -477,7 +477,7 @@ void GausWishboneFit::fitModel() {
         sigmafine[i].SetMinimum(0);
         sigmafine[i].SetMaximum(0.2);
     }
-    defaultCanvas->SetRightMargin(0.15);
+    defaultCanvas.SetRightMargin(0.15);
     makeRBpalette();
     hWishbone->Draw("Col Z");
     taufine[1].Draw("P");

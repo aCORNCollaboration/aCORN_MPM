@@ -230,14 +230,14 @@ void load_calib_spectra(const string& sname, TH1*& hInitEnergy, TH1*& hEnergy, O
     TH1* hEnergyG = (TH1*)fgamma.Get("hEnergy1");       // counts / 1e6 decays
     if(hInitEnergyG && hEnergyG) {
         if(OM) {
-            OM->defaultCanvas->SetLogy(true);
+            OM->defaultCanvas.SetLogy(true);
             hEnergyG->GetXaxis()->SetTitle("scintillator energy [keV]");
             hEnergyG->SetTitle("Simulated calibration spectrum");
             hEnergyG->SetLineColor(4);
             hEnergyG->Draw("HIST");
             hEnergy->Draw("HIST SAME");
             OM->printCanvas("InputEnergy");
-            OM->defaultCanvas->SetLogy(false);
+            OM->defaultCanvas.SetLogy(false);
         }
         double gammaScale = 1.0;
         hInitEnergy->Add(hInitEnergyG, gammaScale);

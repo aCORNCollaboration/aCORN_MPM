@@ -128,9 +128,9 @@ public:
 };
 
 void setShortPlot(OutputManager& OM) {
-    OM.defaultCanvas->SetCanvasSize(200, 100);
-    OM.defaultCanvas->SetBottomMargin(0.22);
-    OM.defaultCanvas->SetTopMargin(0.03);
+    OM.defaultCanvas.SetCanvasSize(200, 100);
+    OM.defaultCanvas.SetBottomMargin(0.22);
+    OM.defaultCanvas.SetTopMargin(0.03);
     gStyle->SetLabelSize(0.1, "XYZ");
     gStyle->SetTitleSize(0.1,"xyz");
     gStyle->SetTitleOffset(0.7,"y");
@@ -435,8 +435,8 @@ int main(int, char**) {
     }
     delete PB;
     
-    //OM.defaultCanvas->SetLeftMargin(0.17);
-    //OM.defaultCanvas->SetRightMargin(0.04);
+    //OM.defaultCanvas.SetLeftMargin(0.17);
+    //OM.defaultCanvas.SetRightMargin(0.04);
     
     hSpec->Draw();
     double acs = 0.8*hSpec->GetMaximum()/haCorn[0][true]->GetMaximum();

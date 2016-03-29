@@ -331,7 +331,7 @@ void WishbonePlugin::makeAnaResults() {
 
 void WishbonePlugin::makePlots() {
     assert(isCalculated);
-    defaultCanvas->SetRightMargin(0.20);
+    defaultCanvas.SetRightMargin(0.20);
 
     bool isCombined = myA->runTimes->Size() > 1000;
     if(true || !isCombined) {
@@ -344,13 +344,13 @@ void WishbonePlugin::makePlots() {
     hWishboneBGSub->GetYaxis()->SetRangeUser(2,5);
     makeRBpalette();
     hWishboneBGSub->Draw("Col Z");
-    addDeletable(drawHLine(T_p_lo/1000., defaultCanvas, 2));
-    addDeletable(drawHLine(T_p_hi/1000., defaultCanvas, 2));
-    addDeletable(drawHLine(T_p_min/1000., defaultCanvas, 4));
-    addDeletable(drawHLine(T_p_max/1000., defaultCanvas, 4));
+    addDeletable(drawHLine(T_p_lo/1000., &defaultCanvas, 2));
+    addDeletable(drawHLine(T_p_hi/1000., &defaultCanvas, 2));
+    addDeletable(drawHLine(T_p_min/1000., &defaultCanvas, 4));
+    addDeletable(drawHLine(T_p_max/1000., &defaultCanvas, 4));
     printCanvas("Wishbone");
     
-    defaultCanvas->SetRightMargin(0.15);
+    defaultCanvas.SetRightMargin(0.15);
     
     makeGrayscalepalette(false);
     hWBRate->SetMaximum(10);
@@ -379,7 +379,7 @@ void WishbonePlugin::makePlots() {
     hEnergyRadius.hRates[true]->Draw("Col Z");
     printCanvas("EnergyRadius");
     
-    defaultCanvas->SetLogz(true);
+    defaultCanvas.SetLogz(true);
     
     //hChanSpec.hRates[true]->SetMaximum(0.4);
     hChanSpec.hRates[true]->GetXaxis()->SetRangeUser(0,16);
@@ -395,11 +395,11 @@ void WishbonePlugin::makePlots() {
     hModuleMult.hRates[true]->Draw("Col Z");
     printCanvas("ModMult");
     
-    defaultCanvas->SetLogz(false);
+    defaultCanvas.SetLogz(false);
     
-    defaultCanvas->SetRightMargin(0.04);
+    defaultCanvas.SetRightMargin(0.04);
     
-    defaultCanvas->SetLogy(true);
+    defaultCanvas.SetLogy(true);
 
     hNVeto.hRates[true]->SetMinimum(1e-7);
     hNVeto.hRates[true]->SetMaximum(10);
@@ -411,16 +411,16 @@ void WishbonePlugin::makePlots() {
     hProtonSignal.hRates[false]->SetMaximum(50);
     hProtonSignal.hRates[false]->Draw();
     hProtonSignal.hRates[true]->Draw("Same");
-    addDeletable(drawVLine(E_p_lo/1000., defaultCanvas, 2));
-    addDeletable(drawVLine(E_p_hi/1000., defaultCanvas, 2));
+    addDeletable(drawVLine(E_p_lo/1000., &defaultCanvas, 2));
+    addDeletable(drawVLine(E_p_hi/1000., &defaultCanvas, 2));
     printCanvas("ProtonSignal");
       
-    defaultCanvas->SetLogy(false);
+    defaultCanvas.SetLogy(false);
     
     hVetoSum.hRates[false]->SetMinimum(-20);
     hVetoSum.hRates[false]->SetMaximum(200);
     hVetoSum.hRates[false]->Draw();
-    addDeletable(drawHLine(0, defaultCanvas, 1));
+    addDeletable(drawHLine(0, &defaultCanvas, 1));
     hVetoSum.hRates[true]->Draw("Same");
     printCanvas("VetoSum");
     
@@ -429,18 +429,18 @@ void WishbonePlugin::makePlots() {
     hWishboneEProj[true]->GetXaxis()->SetRangeUser(0,1000);
     hWishboneEProj[true]->Draw();
     hWishboneEProj[false]->Draw("Same");
-    addDeletable(drawVLine(100/Escale, defaultCanvas, 1, 2));
-    addDeletable(drawVLine(900/Escale, defaultCanvas, 1, 2));
-    addDeletable(drawHLine(0., defaultCanvas, 1));
+    addDeletable(drawVLine(100/Escale, &defaultCanvas, 1, 2));
+    addDeletable(drawVLine(900/Escale, &defaultCanvas, 1, 2));
+    addDeletable(drawHLine(0., &defaultCanvas, 1));
     printCanvas("WishboneEnergy");
     
     hWishboneTProj->SetMinimum(0);
     hWishboneTProj->SetMaximum(20);
     hWishboneTProj->Draw("E0");
-    addDeletable(drawVLine(T_p_lo/1000., defaultCanvas, 2));
-    addDeletable(drawVLine(T_p_hi/1000., defaultCanvas, 2));
-    addDeletable(drawVLine(T_p_min/1000., defaultCanvas, 4));
-    addDeletable(drawVLine(T_p_max/1000., defaultCanvas, 4));
+    addDeletable(drawVLine(T_p_lo/1000., &defaultCanvas, 2));
+    addDeletable(drawVLine(T_p_hi/1000., &defaultCanvas, 2));
+    addDeletable(drawVLine(T_p_min/1000., &defaultCanvas, 4));
+    addDeletable(drawVLine(T_p_max/1000., &defaultCanvas, 4));
     printCanvas("WishboneTime");
    
     // scaled background and background-subtracted rate history plots

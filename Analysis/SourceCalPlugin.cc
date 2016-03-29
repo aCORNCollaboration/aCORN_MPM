@@ -81,13 +81,13 @@ void SourceCalPlugin::bgSubtrPlots(SourceCalPlugin& bg) {
     TH1* hEnergyRateBG = bg.hToRate(bg.hEnergy,1);
     hEnergyRateBG->SetLineColor(4);
     
-    defaultCanvas->SetLogy(true);
+    defaultCanvas.SetLogy(true);
     hEnergyRate->GetXaxis()->SetRangeUser(0,eMax);
     hEnergyRate->Draw();
     hEnergyRateBG->Draw("Same");
     printCanvas("Energy_BG_"+srcName);
     
-    defaultCanvas->SetLogy(false);
+    defaultCanvas.SetLogy(false);
     hEnergyRate->Add(hEnergyRateBG,-1.0);
     hEnergyRate->SetMaximum(rateMax);
     
