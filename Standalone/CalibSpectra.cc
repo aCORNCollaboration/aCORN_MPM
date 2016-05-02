@@ -29,7 +29,7 @@ using std::map;
 
 /// fitter appropriate for source type
 MultiGaus* getFitter(const std::string& sname) {
-    MultiGaus* m = NULL;
+    MultiGaus* m = nullptr;
     if(sname == "Bi207") {
         m = new MultiGaus(2,sname,1.5);
         m->setCenterSigma(0, 500, 75);
@@ -162,7 +162,7 @@ void fill_e_combos(double E0, double p0, pair<double,double>* ee, size_t n, TH1*
 
 
 /// Poisson-ize energy histogram; preserving total counts
-void poisson_smear(const TH1& hIn, TH1& hOut, double PEperKeV, QuenchCalculator* QC = NULL) {
+void poisson_smear(const TH1& hIn, TH1& hOut, double PEperKeV, QuenchCalculator* QC = nullptr) {
     for(int i=1; i<=hIn.GetNbinsX(); i++) {
         double c0 = hIn.GetBinContent(i);
         if(!c0) continue;
@@ -216,7 +216,7 @@ void gen_calib_spectra(const std::string& sname, TH1*& hInitEnergy, TH1*& hEnerg
 }
 
 // load calibration spectra from file
-void load_calib_spectra(const string& sname, TH1*& hInitEnergy, TH1*& hEnergy, OutputManager* OM = NULL) {
+void load_calib_spectra(const string& sname, TH1*& hInitEnergy, TH1*& hEnergy, OutputManager* OM = nullptr) {
     
     //TFile felectron((getEnvSafe("ACORN_MCOUT") + "/aCORN_" + sname + "_e_EM/Plots/aCORN_Scatter.root").c_str(),"READ");
     TFile felectron((getEnvSafe("PG4_OUTDIR") + "/aCORN_" + sname + "_e/Plots/aCORN_Scatter.root").c_str(),"READ");

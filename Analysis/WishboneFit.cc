@@ -144,7 +144,7 @@ WishboneMidcentroid::WishboneMidcentroid(const string& n, OutputManager* pnt): W
 /////////////////////
 
 WishboneFit::WishboneFit(const string& n, OutputManager* pnt): WishboneSeparator(n,pnt) {
-    sliceArms[0] = sliceArms[1] = NULL;
+    sliceArms[0] = sliceArms[1] = nullptr;
 }
 
 void WishboneFit::setWishbone(TH2* h) {

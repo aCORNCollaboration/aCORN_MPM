@@ -200,7 +200,7 @@ void WishbonePlugin::fillCoreHists(BaseDataScanner& PDS, double weight) {
 }
 
 void WishbonePlugin::calculateResults() {
-    hWishboneEProj[false] = hWishboneEProj[true] = NULL;
+    hWishboneEProj[false] = hWishboneEProj[true] = nullptr;
     TH2Slicer wbs(hWishbone);
     double tfg = wbs.projSlice(T_p_lo/1000., T_p_hi/1000., hWishboneEProj[true]);
     double tbg = wbs.projSlice(T_p_min/1000., T_p_lo/1000., hWishboneEProj[false]);

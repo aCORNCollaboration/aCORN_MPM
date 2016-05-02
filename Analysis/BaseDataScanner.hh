@@ -80,7 +80,7 @@ protected:
     size_t module_map[NCH_MAX];         ///< which channels go in which modules
     
     map<RunID, AcornCalibrator*> cals;  ///< calibrators for each run
-    AcornCalibrator* currentCal = NULL; ///< calibrator for current run
+    AcornCalibrator* currentCal = nullptr; ///< calibrator for current run
                              
     /// at run load time, figure out run total time
     double _getRunTime(RunID) override;

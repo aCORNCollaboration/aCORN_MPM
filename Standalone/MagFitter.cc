@@ -323,7 +323,7 @@ public:
     }
         
     vector<FieldDat*> profiles;         ///< profiles for each coil
-    FieldDat* EdProf = NULL;            ///< reference "Ed" profile
+    FieldDat* EdProf = nullptr;            ///< reference "Ed" profile
     vector<fitTarget> target;           ///< target field profile
     vector< vector<int> > series;       ///< in-series current groups
     vector< vector<int> > moveable;     ///< movable coils list, grouped by those moving together

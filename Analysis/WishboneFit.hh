@@ -57,7 +57,7 @@ protected:
     /// energy for wishbone bin
     double binE(int b) const { return hWishbone->GetXaxis()->GetBinCenter(b); }
  
-    TH2* hWishbone = NULL;              ///< wishbone being analyzed
+    TH2* hWishbone = nullptr;              ///< wishbone being analyzed
     vector<TH1F*> hSlices;              ///< wishbone slices for each energy bin
     TGraph gt0;                         ///< optimal t0 cut point
     TGraphErrors dataN[2];              ///< integrated count rage in each wishbone branch

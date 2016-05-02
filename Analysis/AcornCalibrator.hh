@@ -56,7 +56,7 @@ protected:
     
     double slope;               ///< simple calibration slope
     double intercept;           ///< simple calibration intercept
-    TGraph* gRecal = NULL;      ///< final energy recalibration curve for wishbone
+    TGraph* gRecal = nullptr;      ///< final energy recalibration curve for wishbone
     
     vector<double> sigPerPE;    ///< energy resolution data
     vector<double> sigPerMeV;   ///< gain calibration data

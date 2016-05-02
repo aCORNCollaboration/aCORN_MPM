@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <time.h>
 
-AcornDB* AcornDB::myDB = NULL;
+AcornDB* AcornDB::myDB = nullptr;
 
 AcornDB& AcornDB::ADB() {
     if(!myDB) myDB = new AcornDB();
@@ -24,7 +24,7 @@ AcornDB& AcornDB::ADB() {
 void AcornDB::closeDB() {
     if(myDB) {
         delete myDB;
-        myDB = NULL;
+        myDB = nullptr;
     }
 }
 
@@ -125,7 +125,7 @@ TGraphErrors* AcornDB::getRecal(RunID rn) {
     if(sqlite3_step(stmt) == SQLITE_ROW) gid = sqlite3_column_int64(stmt, 0);
     sqlite3_reset(stmt);
     
-    if(!gid) return NULL;
+    if(!gid) return nullptr;
     return getGraph(gid);
 }
 
@@ -243,7 +243,7 @@ void AcornDB::uploadAnaResult(sqlite3_int64 type_id, AnaResult R) {
     sqlite3_bind_int64(stmt, 1, type_id);
     sqlite3_bind_int(stmt, 2, combo_runid(R.start));
     sqlite3_bind_int(stmt, 3, combo_runid(R.end));
-    sqlite3_bind_int64(stmt, 4, R.time? R.time : time(NULL));
+    sqlite3_bind_int64(stmt, 4, R.time? R.time : time(nullptr));
     sqlite3_bind_double(stmt, 5, R.value);
     sqlite3_bind_double(stmt, 6, R.err);
     sqlite3_step(stmt);
