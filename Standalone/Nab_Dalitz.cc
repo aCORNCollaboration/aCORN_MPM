@@ -318,7 +318,8 @@ void Nab_Corrected_Slice(OutputManager& OM, Gluck_beta_MC& G, double KEe, TH1*& 
     vector<TH1*> hs = { h0, hRecoil, hRad };
     for(auto h: hs) {
         h->GetYaxis()->SetTitle("event rate [arb.]");
-        h->GetXaxis()->SetTitle("proton momentum^{2} [MeV^{2}/c^{2}]");
+        h->GetXaxis()->SetTitle("proton momentum p_{p}^{2} [MeV^{2}/c^{2}]");
+        h->GetXaxis()->SetTitleOffset(1.1);
     }
     
     G.set_KEe(KEe);
@@ -344,8 +345,9 @@ void Nab_Corrected_Slice(OutputManager& OM, Gluck_beta_MC& G, double KEe, TH1*& 
 /// Correction cross-check using simulations
 void GluckSimCxn(OutputManager& OM) {
     
-    //vector<double> KEes = { 100, 300, 500, 600 };
-    vector<double> KEes = { 20, 50, 100, 200, 300, 400, 500, 600, 650, 700, 715, 730, 740, 750, 755, 760 };
+    vector<double> KEes = { 100, 300, 500, 600 }; // for "Nab_radiative.pdf" individual curves plot
+    //vector<double> KEes = { 20, 50, 100, 200, 300, 400, 500, 600, 650, 700, 715, 730, 740, 750, 755, 760 };
+    
     vector<TH1*> h0(KEes.size());
     vector<TH1*> hRecoil(KEes.size());
     vector<TH1*> hRad(KEes.size());
@@ -410,7 +412,7 @@ void GluckSimCxn(OutputManager& OM) {
 }
 
 int main(int, char**) {
-    Gluck_renu(); return 0;
+    //Gluck_renu(); return 0;
     
     setupSlideStyle();
     gStyle->SetNumberContours(99);
@@ -438,8 +440,8 @@ int main(int, char**) {
     hDalitz[0] = OM.registeredTH2F("hDalitz_0","uncorrected decay distribution", 200, 0, 0.8, 200, 0, 1.5);
     hDalitz[1] = OM.registeredTH2F("hDalitz_1","corrected decay distribution", 200, 0, 0.8, 200, 0, 1.5);
     for(int i=0; i<2; i++) {
-        hDalitz[i]->GetXaxis()->SetTitle("Electron energy [MeV]");
-        hDalitz[i]->GetYaxis()->SetTitle("proton momentum^{2} [MeV^{2}/c^{2}]");
+        hDalitz[i]->GetXaxis()->SetTitle("electron kinetic energy [MeV]");
+        hDalitz[i]->GetYaxis()->SetTitle("proton momentum p_{p}^{2} [MeV^{2}/c^{2}]");
     }
     
     size_t npts = 1e6;

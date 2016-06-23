@@ -340,14 +340,31 @@ void WishbonePlugin::makePlots() {
     }
     hWishboneBGSub->SetMinimum(-10);
     hWishboneBGSub->SetMaximum(10);
-    hWishboneBGSub->GetXaxis()->SetRangeUser(0,1000);
+    hWishboneBGSub->GetXaxis()->SetRangeUser(0,800);
     hWishboneBGSub->GetYaxis()->SetRangeUser(2,5);
-    makeRBpalette();
-    hWishboneBGSub->Draw("Col Z");
-    addDeletable(drawHLine(T_p_lo/1000., &defaultCanvas, 2));
-    addDeletable(drawHLine(T_p_hi/1000., &defaultCanvas, 2));
-    addDeletable(drawHLine(T_p_min/1000., &defaultCanvas, 4));
-    addDeletable(drawHLine(T_p_max/1000., &defaultCanvas, 4));
+    if(true) {
+        makeRBpalette();
+        hWishboneBGSub->Draw("Col Z");
+        addDeletable(drawHLine(T_p_lo/1000., &defaultCanvas, 2));
+        addDeletable(drawHLine(T_p_hi/1000., &defaultCanvas, 2));
+        addDeletable(drawHLine(T_p_min/1000., &defaultCanvas, 4));
+        addDeletable(drawHLine(T_p_max/1000., &defaultCanvas, 4));
+    } else { // black-and-white paper figure version
+        const int nbins = hWishboneBGSub->GetXaxis()->GetNbins();
+        vector<Double_t> new_bins(nbins+1);
+        for(int i=0; i < nbins; i++) new_bins[i] = hWishboneBGSub->GetXaxis()->GetBinLowEdge(i+1)/1000.;
+        hWishboneBGSub->GetXaxis()->Set(nbins, new_bins.data());
+
+        hWishboneBGSub->GetXaxis()->SetTitle("electron kinetic energy [MeV]");
+        hWishboneBGSub->GetYaxis()->SetTitle("proton time-of-flight [#mus]");
+        hWishboneBGSub->GetYaxis()->SetRangeUser(2.5,5);
+        hWishboneBGSub->SetMinimum(0);
+        hWishboneBGSub->SetMaximum(10);
+        defaultCanvas.SetTopMargin(0.04);
+        defaultCanvas.SetRightMargin(0.04);
+        hWishboneBGSub->SetTitle("");
+        hWishboneBGSub->Draw("scat=3");
+    }
     printCanvas("Wishbone");
     
     defaultCanvas.SetRightMargin(0.15);
