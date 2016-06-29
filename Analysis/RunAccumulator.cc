@@ -32,7 +32,7 @@ void RunAccumulator::buildPlugins() {
     PluginSaver::buildPlugins();
     /// identify RunAccumulatorPlugins
     for(auto& kv: myBuilders) {
-        auto P = dynamic_cast<RunAccumulatorPlugin*>(kv.second->thePlugin);
+        auto P = dynamic_cast<RunAccumulatorPlugin*>(kv.second->thePlugin.get());
         if(P) myRAPs.push_back(P);
     }
 }

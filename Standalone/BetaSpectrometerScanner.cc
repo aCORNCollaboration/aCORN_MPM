@@ -19,11 +19,9 @@ class PMTsAnalyzer: public RunAccumulator {
 public:
     PMTsAnalyzer(OutputManager* pnt, const std::string& nm = "PMTs", const std::string& inflname = ""):
     RunAccumulator(pnt, nm, inflname) {
-        myBuilders["PMTsPlugin"] = &myPMTsPluginBuilder;
+        myBuilders["PMTsPlugin"] = make_shared<RunAccumulatorPluginBuilder<PMTsPlugin>>();
         buildPlugins();
     }
-    
-    RunAccumulatorPluginBuilder<PMTsPlugin> myPMTsPluginBuilder;
 };
 
 int main(int argc, char** argv) {

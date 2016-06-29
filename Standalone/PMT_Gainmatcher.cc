@@ -18,11 +18,9 @@ class SourceCalAnalyzer: public RunAccumulator {
 public:
     SourceCalAnalyzer(OutputManager* pnt, const std::string& nm = "SourceCal", const std::string& inflname = ""):
     RunAccumulator(pnt, nm, inflname) {
-        myBuilders["SourceCalPlugin"] = &mySourceCalPluginBuilder;
+        myBuilders["SourceCalPlugin"] = make_shared<RunAccumulatorPluginBuilder<SourceCalPlugin>>();
         buildPlugins();
     }
-    
-    RunAccumulatorPluginBuilder<SourceCalPlugin> mySourceCalPluginBuilder;
 };
 
 class SourceRunSubtracter: public OutputManager, public PluginInterpolator {
@@ -48,7 +46,7 @@ public:
         SourceCalAnalyzer SCAfg(this);
         SCAfg.loadProcessedData(Rf);
         SCAfg.name += "_"+snm;
-        dynamic_cast<SourceCalPlugin*>(SCAfg.mySourceCalPluginBuilder.thePlugin)->srcName = snm;
+        dynamic_cast<SourceCalPlugin*>(SCAfg.getPlugin("SourceCalPlugin").get())->srcName = snm;
         
         printf("Interpolating background region...\n");
         SourceCalAnalyzer* SCAInterp = dynamic_cast<SourceCalAnalyzer*>(SCAfg.makeAnalyzer("interp_bg_"+snm, ""));
